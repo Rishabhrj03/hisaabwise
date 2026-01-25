@@ -181,6 +181,67 @@ export function ImportButton() {
                             date: isoDate
                         });
                         count++;
+                        continue;
+                    }
+
+                    // STRATEGY 3: Generic Fallback
+                    // Look for any date and any amount in the line
+                    const genericDateMatch = lineText.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})|([A-Z][a-z]{2}\s\d{1,2},?\s\d{4})/);
+                    const genericAmountMatch = lineText.match(/[\d,]+\.\d{2}/);
+
+                    if (genericDateMatch && genericAmountMatch) {
+                        // Skip lines that look like headers/footers
+                        if (/opening balance|brought forward|total|carried forward/i.test(lineText)) continue;
+
+                        const rawDate = genericDateMatch[0];
+                        const rawAmountStr = genericAmountMatch[0];
+                        const rawAmount = parseFloat(rawAmountStr.replace(/,/g, ''));
+
+                        if (isNaN(rawAmount) || rawAmount === 0) continue;
+
+                        let description = lineText
+                            .replace(rawDate, '')
+                            .replace(rawAmountStr, '')
+                            .replace(/Cr|Dr/gi, '')
+                            .trim();
+
+                        // Clean up description symbols
+                        description = description.replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+                        if (description.length < 3) continue; // Too short, probably noise
+
+                        // Guess type based on keywords
+                        let type: 'income' | 'expense' = 'expense';
+                        if (/credit|deposit|salary|refund/i.test(lineText)) type = 'income';
+
+                        let isoDate = new Date().toISOString();
+                        try {
+                            if (rawDate.match(/^\d/)) {
+                                // Assume DD/MM/YYYY or similar
+                                const parts = rawDate.split(/[\/\-\.]/);
+                                if (parts.length === 3) {
+                                    const day = parseInt(parts[0]);
+                                    const month = parseInt(parts[1]) - 1;
+                                    const year = parseInt(parts[2].length === 2 ? '20' + parts[2] : parts[2]);
+                                    isoDate = new Date(year, month, day).toISOString();
+                                }
+                            } else {
+                                // Assume text date like Matches 'Jan 01, 2024'
+                                isoDate = new Date(rawDate).toISOString();
+                            }
+                        } catch (e) {
+                            // Fallback to today if date parse fails
+                        }
+
+                        if (isDuplicate(isoDate, description, rawAmount)) continue;
+
+                        addExpense({
+                            description,
+                            amount: rawAmount,
+                            type,
+                            category: determineCategory(description),
+                            date: isoDate
+                        });
+                        count++;
                     }
                 }
             }

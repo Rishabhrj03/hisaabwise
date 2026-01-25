@@ -11,6 +11,7 @@ import { ImportButton } from '@/components/dashboard/ImportButton';
 import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
 import { WeeklyBarChart } from '@/components/dashboard/WeeklyBarChart';
 import { Button } from '@/components/ui/Button';
+import { VoiceInput } from '@/components/dashboard/VoiceInput';
 import { useExpenses } from '@/context/ExpenseContext';
 
 import { Expense } from '@/types';
@@ -104,12 +105,15 @@ export default function Home() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '1.25rem' }}>Transactions</h2>
-          <Button onClick={() => {
-            setEditingExpense(null);
-            setShowAddForm(!showAddForm);
-          }}>
-            {showAddForm ? 'Close Form' : 'Add New'}
-          </Button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <VoiceInput />
+            <Button onClick={() => {
+              setEditingExpense(null);
+              setShowAddForm(!showAddForm);
+            }}>
+              {showAddForm ? 'Close Form' : 'Add New'}
+            </Button>
+          </div>
         </div>
 
         {showAddForm && (
