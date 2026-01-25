@@ -5,13 +5,14 @@ interface SummaryCardsProps {
     totalBalance: number;
     totalIncome: number;
     totalExpense: number;
+    currency?: string;
 }
 
-export function SummaryCards({ totalBalance, totalIncome, totalExpense }: SummaryCardsProps) {
+export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency = 'USD' }: SummaryCardsProps) {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: currency,
         }).format(amount);
     };
 

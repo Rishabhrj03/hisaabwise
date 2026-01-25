@@ -7,9 +7,10 @@ interface TransactionListProps {
     expenses: Expense[];
     onDelete: (id: string) => void;
     onEdit: (expense: Expense) => void;
+    currency?: string;
 }
 
-export function TransactionList({ expenses, onDelete, onEdit }: TransactionListProps) {
+export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }: TransactionListProps) {
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('en-US', {
             month: 'short',
@@ -21,7 +22,7 @@ export function TransactionList({ expenses, onDelete, onEdit }: TransactionListP
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: currency,
         }).format(amount);
     };
 
@@ -48,16 +49,25 @@ export function TransactionList({ expenses, onDelete, onEdit }: TransactionListP
                         borderLeft: `4px solid ${expense.type === 'income' ? 'hsl(var(--color-income))' : 'hsl(var(--color-expense))'}`
                     }}
                 >
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontWeight: 600 }}>{expense.description}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, marginRight: '1rem' }}>
+                        <span style={{
+                            fontWeight: 600,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: 'block'
+                        }}>
+                            {expense.description}
+                        </span>
                         <span style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))' }}>
                             {formatDate(expense.date)} • {expense.category}
                         </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
                         <span style={{
                             fontWeight: 600,
+                            whiteSpace: 'nowrap',
                             color: expense.type === 'income' ? 'hsl(var(--color-income))' : 'hsl(var(--color-expense))'
                         }}>
                             {expense.type === 'income' ? '+' : '-'}{formatCurrency(expense.amount)}

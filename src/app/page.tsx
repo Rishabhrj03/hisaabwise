@@ -26,6 +26,7 @@ export default function Home() {
 
   // New state for toggling graphs
   const [showStats, setShowStats] = useState(false);
+  const [currency, setCurrency] = useState('USD');
 
   // Filter Logic
   const filteredExpenses = expenses
@@ -87,15 +88,38 @@ export default function Home() {
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
           />
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
             <ImportButton />
             <ExportButton
               expenses={filteredExpenses}
               currentMonthName={currentMonthName}
             />
+
             <Button variant="secondary" size="sm" onClick={() => setShowStats(!showStats)}>
               {showStats ? 'Hide Stats' : 'Show Stats'}
             </Button>
+
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              style={{
+                height: '32px',
+                padding: '0 0.75rem',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid hsl(var(--color-border))',
+                background: 'hsl(var(--color-surface))',
+                color: 'hsl(var(--color-text-main))',
+                fontSize: '0.875rem',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="USD">USD ($)</option>
+              <option value="INR">INR (₹)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="JPY">JPY (¥)</option>
+            </select>
           </div>
         </div>
 
@@ -103,6 +127,7 @@ export default function Home() {
           totalBalance={balance}
           totalIncome={income}
           totalExpense={expense}
+          currency={currency}
         />
 
         {/* Visual Analytics - Collapsible */}
@@ -142,6 +167,7 @@ export default function Home() {
           expenses={filteredExpenses}
           onDelete={deleteExpense}
           onEdit={handleEdit}
+          currency={currency}
         />
       </main>
 
