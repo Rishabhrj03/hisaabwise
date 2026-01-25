@@ -16,11 +16,16 @@ import { useExpenses } from '@/context/ExpenseContext';
 
 import { Expense } from '@/types';
 
+import { Modal } from '@/components/ui/Modal';
+
 export default function Home() {
   const { expenses, deleteExpense } = useExpenses();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  // New state for toggling graphs
+  const [showStats, setShowStats] = useState(false);
 
   // Filter Logic
   const filteredExpenses = expenses
@@ -61,7 +66,7 @@ export default function Home() {
 
   const handleCloseForm = () => {
     setShowAddForm(false);
-    setEditingExpense(null);
+    setTimeout(() => setEditingExpense(null), 300); // Small delay to prevent clearing while closing animation
   };
 
   return (
@@ -82,12 +87,15 @@ export default function Home() {
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
           />
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <ImportButton />
             <ExportButton
               expenses={filteredExpenses}
               currentMonthName={currentMonthName}
             />
+            <Button variant="secondary" size="sm" onClick={() => setShowStats(!showStats)}>
+              {showStats ? 'Hide Stats' : 'Show Stats'}
+            </Button>
           </div>
         </div>
 
@@ -97,11 +105,13 @@ export default function Home() {
           totalExpense={expense}
         />
 
-        {/* Visual Analytics */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          <CategoryPieChart expenses={filteredExpenses} />
-          <WeeklyBarChart expenses={filteredExpenses} />
-        </div>
+        {/* Visual Analytics - Collapsible */}
+        {showStats && (
+          <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            <CategoryPieChart expenses={filteredExpenses} />
+            <WeeklyBarChart expenses={filteredExpenses} />
+          </div>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '1.25rem' }}>Transactions</h2>
@@ -109,21 +119,24 @@ export default function Home() {
             <VoiceInput />
             <Button onClick={() => {
               setEditingExpense(null);
-              setShowAddForm(!showAddForm);
+              setShowAddForm(true);
             }}>
-              {showAddForm ? 'Close Form' : 'Add New'}
+              Add New
             </Button>
           </div>
         </div>
 
-        {showAddForm && (
-          <div className="animate-fade-in">
-            <AddExpenseForm
-              onClose={handleCloseForm}
-              initialData={editingExpense || undefined}
-            />
-          </div>
-        )}
+        {/* Modal for Add/Edit Form */}
+        <Modal
+          isOpen={showAddForm}
+          onClose={handleCloseForm}
+          title={editingExpense ? "Edit Transaction" : "Add New Transaction"}
+        >
+          <AddExpenseForm
+            onClose={handleCloseForm}
+            initialData={editingExpense || undefined}
+          />
+        </Modal>
 
         <TransactionList
           expenses={filteredExpenses}

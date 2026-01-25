@@ -234,141 +234,171 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                 )}
             </Button>
 
-            {/* Listening State */}
+            {/* Listening State - Modal Overlay */}
             {isListening && (
                 <div style={{
-                    position: 'absolute',
-                    top: '120%',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
                     right: 0,
-                    background: 'hsl(var(--color-surface))',
-                    border: '1px solid hsl(var(--color-border))',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '1rem',
-                    width: '300px',
-                    zIndex: 50,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                }}>
-                    <div style={{ fontWeight: 600, color: 'hsl(var(--color-primary))', marginBottom: '0.5rem' }}>
-                        Listening...
-                    </div>
-                    <div style={{ fontStyle: 'italic', color: 'hsl(var(--color-text-muted))' }}>
-                        "{transcript}"
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    zIndex: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1rem'
+                }} onClick={toggleListening}>
+                    <div style={{
+                        background: 'hsl(var(--color-surface))',
+                        border: '1px solid hsl(var(--color-border))',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '1.5rem',
+                        width: '100%',
+                        maxWidth: '320px',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '1rem'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div className="animate-pulse" style={{ fontSize: '2rem' }}>🎤</div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontWeight: 600, color: 'hsl(var(--color-primary))', marginBottom: '0.5rem' }}>
+                                Listening...
+                            </div>
+                            <div style={{ fontStyle: 'italic', color: 'hsl(var(--color-text-muted))' }}>
+                                "{transcript || "Speak now..."}"
+                            </div>
+                        </div>
+                        <Button variant="danger" size="sm" onClick={toggleListening} style={{ width: '100%' }}>
+                            Stop
+                        </Button>
                     </div>
                 </div>
             )}
 
-            {/* Review State - Editable */}
+            {/* Review State - Modal Overlay */}
             {!isListening && parsedData && (
                 <div style={{
-                    position: 'absolute',
-                    top: '120%',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
                     right: 0,
-                    background: 'hsl(var(--color-surface))',
-                    border: '1px solid hsl(var(--color-border))',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '1rem',
-                    width: '320px',
-                    zIndex: 50,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    zIndex: 100,
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.75rem'
-                }}>
-                    <div style={{ fontWeight: 600, fontSize: '1rem' }}>Review Transaction</div>
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1rem'
+                }} onClick={handleDiscard}>
+                    <div style={{
+                        background: 'hsl(var(--color-surface))',
+                        border: '1px solid hsl(var(--color-border))',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '1.5rem',
+                        width: '100%',
+                        maxWidth: '350px',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem'
+                    }} onClick={e => e.stopPropagation()}>
+                        <h3 style={{ margin: 0, fontSize: '1.125rem', textAlign: 'center' }}>Review Transaction</h3>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <div>
-                            <label style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>Description</label>
-                            <Input
-                                value={parsedData.description}
-                                onChange={(e) => setParsedData({ ...parsedData, description: e.target.value })}
-                                style={{ height: '32px', padding: '0 0.5rem' }}
-                            />
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>Amount</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', marginBottom: '0.25rem', display: 'block' }}>Description</label>
                                 <Input
-                                    type="number"
-                                    value={parsedData.amount}
-                                    onChange={(e) => setParsedData({ ...parsedData, amount: e.target.value })}
-                                    style={{ height: '32px', padding: '0 0.5rem' }}
-                                    placeholder="0.00"
+                                    value={parsedData.description}
+                                    onChange={(e) => setParsedData({ ...parsedData, description: e.target.value })}
                                 />
                             </div>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>Category</label>
-                                <select
-                                    value={parsedData.category}
-                                    onChange={(e) => setParsedData({ ...parsedData, category: e.target.value })}
+
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', marginBottom: '0.25rem', display: 'block' }}>Amount</label>
+                                    <Input
+                                        type="number"
+                                        value={parsedData.amount}
+                                        onChange={(e) => setParsedData({ ...parsedData, amount: e.target.value })}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', marginBottom: '0.25rem', display: 'block' }}>Category</label>
+                                    <select
+                                        value={parsedData.category}
+                                        onChange={(e) => setParsedData({ ...parsedData, category: e.target.value })}
+                                        style={{
+                                            width: '100%',
+                                            height: '42px', // Match generic Input height
+                                            borderRadius: 'var(--radius-md)',
+                                            border: '1px solid hsl(var(--color-border))',
+                                            background: 'hsl(var(--color-surface))',
+                                            padding: '0 0.75rem',
+                                            fontSize: '0.875rem',
+                                            outline: 'none'
+                                        }}
+                                    >
+                                        <option value="Food">Food & Dining</option>
+                                        <option value="Transport">Transportation</option>
+                                        <option value="Shopping">Shopping</option>
+                                        <option value="Entertainment">Entertainment</option>
+                                        <option value="Bills">Bills & Utilities</option>
+                                        <option value="Health">Health & Fitness</option>
+                                        <option value="Salary">Salary</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <Button
+                                    type="button"
+                                    variant={parsedData.type === 'expense' ? 'danger' : 'secondary'}
+                                    size="sm"
+                                    onClick={() => setParsedData({ ...parsedData, type: 'expense' })}
+                                    style={{ flex: 1 }}
+                                >
+                                    Expense
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={parsedData.type === 'income' ? 'primary' : 'secondary'}
+                                    size="sm"
+                                    onClick={() => setParsedData({ ...parsedData, type: 'income' })}
                                     style={{
-                                        width: '100%',
-                                        height: '32px',
-                                        borderRadius: 'var(--radius-sm)',
-                                        border: '1px solid hsl(var(--color-border))',
-                                        background: 'hsl(var(--color-surface))',
-                                        padding: '0 0.5rem',
-                                        fontSize: '0.875rem'
+                                        flex: 1,
+                                        backgroundColor: parsedData.type === 'income' ? 'hsl(var(--color-income))' : undefined,
+                                        borderColor: parsedData.type === 'income' ? 'transparent' : undefined,
+                                        color: parsedData.type === 'income' ? 'white' : undefined
                                     }}
                                 >
-                                    <option value="Food">Food & Dining</option>
-                                    <option value="Transport">Transportation</option>
-                                    <option value="Shopping">Shopping</option>
-                                    <option value="Entertainment">Entertainment</option>
-                                    <option value="Bills">Bills & Utilities</option>
-                                    <option value="Health">Health & Fitness</option>
-                                    <option value="Salary">Salary</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                                    Income
+                                </Button>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                             <Button
-                                type="button"
-                                variant={parsedData.type === 'expense' ? 'danger' : 'secondary'}
-                                size="sm"
-                                onClick={() => setParsedData({ ...parsedData, type: 'expense' })}
-                                style={{ flex: 1, fontSize: '0.75rem' }}
+                                variant="primary"
+                                size="lg"
+                                onClick={handleConfirm}
+                                style={{ flex: 1 }}
                             >
-                                Expense
+                                Confirm
                             </Button>
                             <Button
-                                type="button"
-                                variant={parsedData.type === 'income' ? 'primary' : 'secondary'}
-                                size="sm"
-                                onClick={() => setParsedData({ ...parsedData, type: 'income' })}
-                                style={{
-                                    flex: 1,
-                                    fontSize: '0.75rem',
-                                    backgroundColor: parsedData.type === 'income' ? 'hsl(var(--color-income))' : undefined,
-                                    borderColor: parsedData.type === 'income' ? 'transparent' : undefined,
-                                    color: parsedData.type === 'income' ? 'white' : undefined
-                                }}
+                                variant="ghost"
+                                size="lg"
+                                onClick={handleDiscard}
+                                style={{ flex: 1 }}
                             >
-                                Income
+                                Discard
                             </Button>
                         </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={handleConfirm}
-                            style={{ flex: 1 }}
-                        >
-                            Confirm
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleDiscard}
-                            style={{ flex: 1 }}
-                        >
-                            Discard
-                        </Button>
                     </div>
                 </div>
             )}
