@@ -1,8 +1,9 @@
-import React from 'react';
+import { Tooltip } from './Tooltip';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
     size?: 'sm' | 'md' | 'lg';
+    tooltip?: string;
 }
 
 export function Button({
@@ -11,6 +12,7 @@ export function Button({
     size = 'md',
     className = '',
     style,
+    tooltip,
     ...props
 }: ButtonProps) {
 
@@ -51,7 +53,7 @@ export function Button({
         }
     };
 
-    return (
+    const buttonElement = (
         <button
             className={`btn ${className}`}
             style={{
@@ -83,4 +85,14 @@ export function Button({
             {children}
         </button>
     );
+
+    if (tooltip) {
+        return (
+            <Tooltip text={tooltip}>
+                {buttonElement}
+            </Tooltip>
+        );
+    }
+
+    return buttonElement;
 }

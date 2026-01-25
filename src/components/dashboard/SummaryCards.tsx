@@ -19,12 +19,12 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency
     return (
         <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '1.5rem',
-            marginBottom: '2rem'
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '1rem',
+            marginBottom: '0'
         }}>
-            {/* Total Balance */}
-            <Card variant="glass" className="summary-card">
+            {/* Total Balance - Full Width */}
+            <Card variant="glass" className="summary-card" style={{ gridColumn: 'span 2' }}>
                 <h3 style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
                     Total Balance
                 </h3>
@@ -38,7 +38,7 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency
                 <h3 style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
                     Total Income
                 </h3>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: 'hsl(var(--color-income))' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'hsl(var(--color-income))' }}>
                     {formatCurrency(totalIncome)}
                 </div>
             </Card>
@@ -48,7 +48,7 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency
                 <h3 style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
                     Total Expense
                 </h3>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: 'hsl(var(--color-expense))' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'hsl(var(--color-expense))' }}>
                     {formatCurrency(totalExpense)}
                 </div>
             </Card>

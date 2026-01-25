@@ -1,4 +1,5 @@
 import React from 'react';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { Expense } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -50,15 +51,20 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                     }}
                 >
                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, marginRight: '1rem' }}>
-                        <span style={{
-                            fontWeight: 600,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: 'block'
-                        }}>
-                            {expense.description}
-                        </span>
+                        <Tooltip text={expense.description} position="top">
+                            <span
+                                style={{
+                                    fontWeight: 600,
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: 'block',
+                                    cursor: 'help'
+                                }}
+                            >
+                                {expense.description}
+                            </span>
+                        </Tooltip>
                         <span style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))' }}>
                             {formatDate(expense.date)} • {expense.category}
                         </span>

@@ -74,14 +74,14 @@ export default function Home() {
     <div style={{
       maxWidth: '800px',
       margin: '0 auto',
-      padding: '0 1.5rem',
+      padding: '0 1rem',
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column'
     }}>
       <Header />
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
           <MonthSelector
             currentDate={currentDate}
@@ -95,7 +95,7 @@ export default function Home() {
               currentMonthName={currentMonthName}
             />
 
-            <Button variant="secondary" size="sm" onClick={() => setShowStats(!showStats)}>
+            <Button variant="secondary" size="sm" onClick={() => setShowStats(!showStats)} tooltip={showStats ? "Hide visual analytics" : "Show visual analytics"}>
               {showStats ? 'Hide Stats' : 'Show Stats'}
             </Button>
 
@@ -145,10 +145,40 @@ export default function Home() {
             <Button onClick={() => {
               setEditingExpense(null);
               setShowAddForm(true);
-            }}>
+            }} tooltip="Add a new transaction">
               Add New
             </Button>
           </div>
+        </div>
+
+        {/* Floating Action Button for Mobile */}
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          zIndex: 100
+        }}>
+          <Button
+            variant="primary"
+            style={{
+              borderRadius: '50%',
+              width: '56px',
+              height: '56px',
+              padding: 0,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.5rem'
+            }}
+            onClick={() => {
+              setEditingExpense(null);
+              setShowAddForm(true);
+            }}
+            tooltip="Add New Transaction"
+          >
+            +
+          </Button>
         </div>
 
         {/* Modal for Add/Edit Form */}
