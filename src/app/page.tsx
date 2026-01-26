@@ -28,7 +28,7 @@ export default function Home() {
 
   // New state for toggling graphs
   const [showStats, setShowStats] = useState(false);
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState('INR');
   const [showFriendManager, setShowFriendManager] = useState(false);
 
   // Filter Logic
@@ -128,8 +128,8 @@ export default function Home() {
                 cursor: 'pointer'
               }}
             >
-              <option value="USD">USD ($)</option>
               <option value="INR">INR (₹)</option>
+              <option value="USD">USD ($)</option>
               <option value="EUR">EUR (€)</option>
               <option value="GBP">GBP (£)</option>
               <option value="JPY">JPY (¥)</option>

@@ -1,3 +1,5 @@
+import { useFriends } from '@/context/FriendContext';
+import { parseVoiceInput } from '@/utils/voiceParser';
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input'; // Import Input
@@ -13,6 +15,11 @@ interface ParsedData {
     category: string;
     type: 'income' | 'expense';
     originalDate: string;
+    splitDetails?: {
+        paidBy: string;
+        splitWith: string[];
+        splitRatios?: number[];
+    };
 }
 
 export function VoiceInput({ onTranscript }: VoiceInputProps) {
@@ -39,145 +46,19 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
         }
     }, []);
 
-    const parseNumberWords = (text: string): string => {
-        let cleanText = text.toLowerCase();
-
-        // Fix common mishearings & Hinglish support
-        const mishearings: Record<string, string> = {
-            'spain': 'spend',
-            'pane': 'spend',
-            'spent': 'spend',
-            'got': 'income',
-            'bill': 'bill',
-            // Hinglish / Hindi Numbers
-            'ek': '1',
-            'do': '2',
-            'teen': '3',
-            'chaar': '4',
-            'char': '4',
-            'paanch': '5',
-            'panch': '5',
-            'che': '6',
-            'saat': '7',
-            'aath': '8',
-            'nau': '9',
-            'das': '10',
-            'dus': '10',
-            'gyara': '11',
-            'barah': '12',
-            'bees': '20',
-            'tis': '30',
-            'tice': '30',
-            'pachaas': '50',
-            'pachas': '50',
-            'sau': 'hundred',
-            'hajar': 'thousand',
-            'hazzar': 'thousand',
-            'hazaar': 'thousand',
-            'azar': 'thousand', // "Das Azar" -> "10 thousand"
-            'lakh': 'lakh',
-            'lac': 'lakh',
-            'crore': 'crore',
-            'kharcha': 'expense',
-            'aaya': 'income', // Payment aaya
-            'mila': 'income', // Payment mila
-            'diya': 'spend',  // Payment diya
-            'gaya': 'spend'   // Payment gaya
-        };
-
-        Object.keys(mishearings).forEach(key => {
-            const regex = new RegExp(`\\b${key}\\b`, 'gi');
-            cleanText = cleanText.replace(regex, mishearings[key]);
-        });
-
-        // Simple word-to-number replacement for common magnitudes
-        const multiplierMap: Record<string, number> = {
-            'k': 1000,
-            'thousand': 1000,
-            'lakh': 100000,
-            'crore': 10000000,
-            'hundred': 100
-        };
-
-        // Replace "5 thousand" -> "5000", "1.5 lakh" -> "150000"
-        cleanText = cleanText.replace(/(\d+(?:\.\d+)?)\s*(k|thousand|lakh|crore|hundred)/gi, (match, number, unit) => {
-            const num = parseFloat(number);
-            const mult = multiplierMap[unit.toLowerCase()];
-            return (num * mult).toString();
-        });
-
-        // Handle standalone "thousand" -> "1000" (e.g., "spend thousand")
-        cleanText = cleanText.replace(/\b(a\s)?thousand\b/gi, '1000');
-        cleanText = cleanText.replace(/\b(a\s)?hundred\b/gi, '100');
-        cleanText = cleanText.replace(/\b(a\s)?lakh\b/gi, '100000');
-
-        return cleanText;
-    };
+    const { friends } = useFriends();
 
     const processTranscript = (text: string) => {
-        const lowerText = parseNumberWords(text);
-
-        // 1. Extract Amount
-        let amount = 0;
-        const amountMatch = lowerText.match(/(\d+(?:,\d{3})*(?:\.\d{1,2})?)/);
-        if (amountMatch) {
-            amount = parseFloat(amountMatch[0].replace(/,/g, ''));
-        }
-
-        // 2. Determine Type
-        let type: 'income' | 'expense' = 'expense';
-        if (
-            lowerText.includes('received') ||
-            lowerText.includes('got') ||
-            lowerText.includes('income') ||
-            lowerText.includes('deposit') ||
-            lowerText.includes('credit') ||
-            lowerText.includes('salary') ||
-            lowerText.includes('aaya') || // Redundant matched by substitute but safe
-            lowerText.includes('mila')
-        ) {
-            type = 'income';
-        }
-
-        // 3. Determine Category
-        let category = 'Other';
-        if (type === 'income') {
-            if (lowerText.includes('salary')) category = 'Salary';
-            else if (lowerText.includes('freelance')) category = 'Freelance';
-            else if (lowerText.includes('gift')) category = 'Gift';
-        } else {
-            if (/(coffee|burger|pizza|food|lunch|dinner|restaurant|swiggy|zomato|tea|snack)/.test(lowerText)) category = 'Food';
-            else if (/(taxi|uber|bus|train|flight|gas|fuel|petrol|metro|cab|auto)/.test(lowerText)) category = 'Transport';
-            else if (/(clothes|shoes|amazon|buy|bought|shopping|zara|h&m|jeans|shirt)/.test(lowerText)) category = 'Shopping';
-            else if (/(movie|netflix|game|cinema|fun|party)/.test(lowerText)) category = 'Entertainment';
-            else if (/(electricity|water|internet|bill|rent|recharge|wifi|mobile)/.test(lowerText)) category = 'Bills';
-            else if (/(medicine|doctor|hospital|gym|health|yoga)/.test(lowerText)) category = 'Health';
-        }
-
-        // 4. Clean Description
-        let description = text;
-        if (amountMatch) {
-            description = description.replace(amountMatch[0], '');
-        }
-
-        description = description
-            .replace(/dollars?|rupees?|bucks?|inr/gi, '')
-            .replace(/spent|paid|bought|received|got|spain/gi, '') // Remove keywords
-            .replace(/thousand|lakh/gi, '') // Remove used units
-            .replace(/ on /gi, ' ')
-            .replace(/ for /gi, ' ')
-            .trim();
-
-        description = description.replace(/[^\w\s]/gi, '').trim(); // Remove symbols
-        description = description.charAt(0).toUpperCase() + description.slice(1);
-        if (description.length === 0) description = "Voice Entry";
+        const friendNames = friends.map(f => f.name);
+        const result = parseVoiceInput(text, friendNames);
 
         setParsedData({
-            amount: amount === 0 ? '' : amount.toString(),
-            description,
-            category,
-            type,
-            originalDate: new Date().toISOString()
+            amount: result.amount,
+            description: result.description,
+            category: result.category,
+            type: result.type,
+            originalDate: result.originalDate,
+            splitDetails: result.splitDetails
         });
     };
 
@@ -189,13 +70,101 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                 return;
             }
 
-            addExpense({
+            let expenseData: any = {
                 description: parsedData.description,
                 amount: finalAmount,
                 type: parsedData.type,
                 category: parsedData.category,
-                date: parsedData.originalDate
-            });
+                date: parsedData.originalDate,
+                relatedTo: []
+            };
+
+            // Handle Split Logic
+            if (parsedData.splitDetails && (parsedData.splitDetails.splitWith.length > 0 || parsedData.splitDetails.paidBy !== 'me')) {
+                const { paidBy: payerName, splitWith: splitNames } = parsedData.splitDetails;
+
+                // 1. Resolve Payer ID
+                let payerId = 'me';
+                if (payerName && payerName.toLowerCase() !== 'me') {
+                    const payer = friends.find(f => f.name.toLowerCase() === payerName.toLowerCase());
+                    if (payer) payerId = payer.id;
+                }
+
+                // 2. Resolve Split IDs
+                const involvedIds = new Set<string>();
+                if (splitNames.length > 0) {
+                    involvedIds.add('me');
+                    splitNames.forEach(name => {
+                        const friend = friends.find(f => f.name.toLowerCase() === name.toLowerCase());
+                        if (friend) involvedIds.add(friend.id);
+                    });
+                }
+
+                involvedIds.add(payerId);
+                const involvedArray = Array.from(involvedIds);
+
+                if (involvedArray.length > 1) {
+                    let shares;
+
+                    // Check if we have ratios
+                    if (parsedData.splitDetails && parsedData.splitDetails.splitRatios && parsedData.splitDetails.splitRatios.length > 0) {
+                        const ratios = parsedData.splitDetails.splitRatios;
+
+                        // Case 1: Ratios match number of people (e.g. "Split 70 30" -> Me, Friend)
+                        if (ratios.length === involvedArray.length) {
+                            shares = involvedArray.map((uid, index) => ({
+                                userId: uid,
+                                amount: parseFloat((finalAmount * (ratios[index] / 100)).toFixed(2))
+                            }));
+                        }
+                        // Case 2: Single percentage ("I paid 70%") -> First person gets X%, implicit remainder
+                        else if (ratios.length === 1 && involvedArray.length === 2) {
+                            const percent = ratios[0];
+                            const firstAmount = parseFloat((finalAmount * (percent / 100)).toFixed(2));
+                            const remainder = finalAmount - firstAmount;
+
+                            shares = [
+                                { userId: involvedArray[0], amount: firstAmount },
+                                { userId: involvedArray[1], amount: remainder }
+                            ];
+                        } else {
+                            // Fallback to equal
+                            const shareAmount = parseFloat((finalAmount / involvedArray.length).toFixed(2));
+                            shares = involvedArray.map(uid => ({
+                                userId: uid,
+                                amount: shareAmount
+                            }));
+                        }
+                    } else {
+                        // Default Equal Split
+                        const shareAmount = parseFloat((finalAmount / involvedArray.length).toFixed(2));
+                        shares = involvedArray.map(uid => ({
+                            userId: uid,
+                            amount: shareAmount
+                        }));
+                    }
+
+                    const totalCalc = shares.reduce((sum, s) => sum + s.amount, 0);
+                    // Fix rounding difference
+                    if (Math.abs(totalCalc - finalAmount) > 0.01) {
+                        shares[0].amount = parseFloat((shares[0].amount + (finalAmount - totalCalc)).toFixed(2));
+                    }
+
+                    expenseData.splitDetails = {
+                        paidBy: payerId,
+                        shares
+                    };
+                    expenseData.relatedTo = involvedArray.filter(id => id !== 'me');
+                } else if (payerId !== 'me') {
+                    expenseData.splitDetails = {
+                        paidBy: payerId,
+                        shares: [{ userId: 'me', amount: finalAmount }]
+                    };
+                    expenseData.relatedTo = [payerId];
+                }
+            }
+
+            addExpense(expenseData);
             setParsedData(null);
             setTranscript('');
         }
