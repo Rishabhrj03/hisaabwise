@@ -21,52 +21,59 @@ export function PhoneNumberPrompt() {
 
     const hasPhone = user?.phone || user?.user_metadata?.phone;
 
-    if (hasPhone) return null;
+    // Local Storage Check for "Soft" persistence if Auth update fails
+    const [isSavedLocally, setIsSavedLocally] = useState(false);
+
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = window.localStorage.getItem('expense_tracker_phone_saved');
+            if (saved) setIsSavedLocally(true);
+        }
+    }, []);
+
+
+
+    if (!user || hasPhone || isSavedLocally) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            // Update Auth User Metadata
-            const { error } = await supabase.auth.updateUser({
+            // 1. Update Auth User Metadata (Optional - Best Effort)
+            const { error: updateError } = await supabase.auth.updateUser({
                 data: { phone: phone }
             });
 
-            if (error) throw error;
+            if (updateError) {
+                console.warn("Auth update warning (continuing...):", updateError);
+                // We don't throw here. We proceed to map the user anyway.
+            }
 
-            // Also try to update the actual auth phone column if possible, but that usually requires verification.
-            // For our 'mapping' logic, we are relying on:
-            // 1. Where does the 'handle_new_user_mapping' trigger look?
-            //    It looks at `new.phone`. This comes from the auth.users table phone column.
-
-            // CRITICAL: Just updating metadata won't fire the trigger on the auth.users table for the `phone` column 
-            // if the trigger is watching that specific column.
-            // However, our trigger is `after insert on auth.users`.
-            // If the user already exists, the INSERT trigger has already fired (without phone).
-            // We need a way to re-run the mapping logic.
-
-            // Solution: We should probably run the mapping LOGIC manually here via an RPC call 
-            // OR update the trigger to also fire on UPDATE of phone.
-
-            // Let's call a custom Postgres function to do the mapping now.
-
+            // 2. Run Mapping Logic (RPC)
+            // This allows us to link previously invited friends to this new user
             const { error: rpcError } = await supabase.rpc('manual_map_user_by_phone', {
                 target_phone: phone
             });
 
             if (rpcError) {
-                // Fallback: If function doesn't exist, we might be stuck.
-                // But we can just rely on the user metadata update for UI purposes.
-                console.error("Mapping trigger failed", rpcError);
+                console.error("RPC Error:", rpcError);
+                alert(`RPC Function Error: ${rpcError.message} \n\nHint: Did you run 'supabase_schema_map_phone.sql'?`);
+                throw new Error(`Database Error: ${rpcError.message}`);
+            }
+
+            // RELOAD Logic
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('expense_tracker_phone_saved', 'true');
             }
 
             // Reload to reflect changes
             window.location.reload();
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating phone:", error);
-            alert("Failed to save phone number.");
+            // Debugging: Show full error details
+            alert(`Debug Error: ${JSON.stringify(error, null, 2)} \n\nMessage: ${error.message}`);
         } finally {
             setLoading(false);
         }
