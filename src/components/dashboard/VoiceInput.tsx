@@ -19,6 +19,7 @@ interface ParsedData {
         paidBy: string;
         splitWith: string[];
         splitRatios?: number[];
+        unknownFriends?: string[];
     };
 }
 
@@ -46,7 +47,7 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
         }
     }, []);
 
-    const { friends } = useFriends();
+    const { friends, addFriend } = useFriends();
 
     const processTranscript = (text: string) => {
         const friendNames = friends.map(f => f.name);
@@ -98,6 +99,40 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                         const friend = friends.find(f => f.name.toLowerCase() === name.toLowerCase());
                         if (friend) involvedIds.add(friend.id);
                     });
+                }
+
+                // Handle Unknown Friends - Temporary: Just add them as description note or alert?
+                // Better: Create temp ID if we could, but that messes up state.
+                // For now, let's just Log them or maybe assume they are valid for Split calculation purposes 
+                // if we were to support "Guest" users. 
+                // BUT, user asked to "Add into the split". 
+                // Limitation: We can't add non-existent friend IDs.
+                // Solution: We will ALERT the user in the Review Modal if there are unknown friends.
+
+                // Exclude 'me' if explicitly excluded? 
+                // The parser might have filtered "me" from splitWith, but we forcefully added 'me' above.
+                // We don't have the 'excludedPeople' list here easily without passing it. 
+                // But parsedData.splitDetails.splitWith shouldn't contain 'me'.
+                // If the user says "Don't include me", we should remove 'me' from involvedIds.
+                // BUT we don't know if 'me' was excluded explicitly vs just not mentioned.
+                // Re-parsing logic: VoiceParser should handle the 'me' exclusion logic and maybe return a flag?
+                // Or we trust that if splitWith is present, we start with involvedIds = ['me']...
+                // Wait, if I say "Split with Rahul", it usually means Me + Rahul.
+                // If I say "Split with Rahul, don't include me", then it's JUST Rahul (which is weird for an expense I paid).
+                // If "Rahul paid, don't include me", then it's Rahul paid for Rahul? (Expense logic irrelevant to me).
+
+                // Let's assume for now "Don't include me" means removed from shares.
+                // We'll add logic: If description implies exclusion (cleaned) or separate flag...
+                // Actually, let's rely on involvedIds.
+                // If "unknownFriends" are present, we can't do much without creating them.
+                // We'll skip adding them to involvedIds but maybe append to description?
+                if (parsedData.splitDetails.unknownFriends) {
+                    // Add unknown friends as guests (temporary IDs)
+                    parsedData.splitDetails.unknownFriends.forEach(name => {
+                        const guestId = `guest_${name}`;
+                        involvedIds.add(guestId);
+                    });
+                    alert(`Included temporary guest(s): ${parsedData.splitDetails.unknownFriends.join(', ')}`);
                 }
 
                 involvedIds.add(payerId);
@@ -188,7 +223,12 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
             setParsedData(null); // Clear previous review
             setTranscript('');
             setIsListening(true);
-            recognition.start();
+            try {
+                recognition.start();
+            } catch (error) {
+                console.warn("Speech recognition already started:", error);
+                // If it's already started, we assume it's working.
+            }
 
             recognition.onresult = (event: any) => {
                 const results = event.results;

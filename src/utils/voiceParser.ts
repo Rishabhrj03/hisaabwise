@@ -8,6 +8,7 @@ interface ParsedData {
         paidBy: string;
         splitWith: string[];
         splitRatios?: number[];
+        unknownFriends?: string[];
     };
     originalDate: string;
 }
@@ -26,8 +27,6 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         if (cleanText.includes(friend)) {
             // Check context. If it's "Das hazaar" (10,000), it's a number.
             // If it's "Das paid", it's a person.
-
-            // Simple approach: If followed by specific number words, it's a number.
             const numberFollowers = ['hazaar', 'azar', 'sau', 'hundred', 'thousand', 'lakh', 'crore', 'rupees', 'rupaye'];
             const words = cleanText.split(' ');
             const friendIndex = words.indexOf(friend);
@@ -40,13 +39,6 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
                     // Protect it
                     const placeholder = `__FRIEND_${index}__`;
                     friendPlaceholders[placeholder] = friend;
-                    // Replace all occurrences that are NOT followed by number words?
-                    // For now, let's just replace the string if it's not part of a number phrase
-                    // Ideally we use regex with lookahead?
-
-                    // Let's rely on the specific mishearing map.
-                    // The mishearing map converts 'das' -> '10'.
-                    // We should only convert 'das' -> '10' if appropriate.
                 }
             }
         }
@@ -54,27 +46,15 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
 
     // Fix common mishearings & Hinglish support
     const mishearings: Record<string, string> = {
-        'spain': 'spend',
-        'pane': 'spend',
-        'spent': 'spend',
-        'got': 'income',
-        'bill': 'bill',
-        // Hinglish / Hindi Numbers
+        'spain': 'spend', 'pane': 'spend', 'spent': 'spend', 'got': 'income', 'bill': 'bill',
         'ek': '1', 'do': '2', 'teen': '3', 'chaar': '4', 'char': '4',
-        'paanch': '5', 'panch': '5', 'che': '6', 'saat': '7', 'aath': '8',
-        'nau': '9',
-        // 'das': '10', // HANDLED SEPARATELY BELOW
-        'dus': '10',
-        'gyara': '11', 'barah': '12',
+        'paanch': '5', 'panch': '5', 'che': '6', 'saat': '7', 'aath': '8', 'nau': '9',
+        'dus': '10', 'gyara': '11', 'barah': '12',
         'bees': '20', 'tis': '30', 'tice': '30', 'pachaas': '50', 'pachas': '50',
-        'sau': 'hundred',
-        'hajar': 'thousand', 'hazzar': 'thousand', 'hazaar': 'thousand', 'azar': 'thousand',
+        'sau': 'hundred', 'hajar': 'thousand', 'hazzar': 'thousand', 'hazaar': 'thousand', 'azar': 'thousand',
         'lakh': 'lakh', 'lac': 'lakh', 'crore': 'crore',
-        'kharcha': 'expense',
-        'aaya': 'income',
-        'mila': 'income',
-        'diya': 'spend',
-        'gaya': 'spend'
+        'kharcha': 'expense', 'aaya': 'income', 'aaye': 'income', 'mila': 'income',
+        'diya': 'spend', 'gaya': 'spend'
     };
 
     // Apply standard mishearings
@@ -86,28 +66,20 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     // Special handling for "Das" (10) vs Friend Name "Das"
     if (cleanText.includes('das')) {
         let isFriend = false;
-        // Check if "Das" is a known friend
         if (lowerFriends.includes('das')) {
-            // Check context
             if (/\bdas\s+(hazaar|thousand|sau|hundred|lakh|crore)\b/.test(cleanText)) {
-                isFriend = false; // It's a number
+                isFriend = false;
             } else {
-                isFriend = true; // Assume friend default if strictly a friend name
+                isFriend = true;
             }
         }
-
         if (!isFriend) {
             cleanText = cleanText.replace(/\bdas\b/g, '10');
         }
     }
 
-    // Simple word-to-number replacement for common magnitudes
     const multiplierMap: Record<string, number> = {
-        'k': 1000,
-        'thousand': 1000,
-        'lakh': 100000,
-        'crore': 10000000,
-        'hundred': 100
+        'k': 1000, 'thousand': 1000, 'lakh': 100000, 'crore': 10000000, 'hundred': 100
     };
 
     cleanText = cleanText.replace(/(\d+(?:\.\d+)?)\s*(k|thousand|lakh|crore|hundred)/gi, (match, number, unit) => {
@@ -120,7 +92,7 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     cleanText = cleanText.replace(/\b(a\s)?hundred\b/gi, '100');
     cleanText = cleanText.replace(/\b(a\s)?lakh\b/gi, '100000');
 
-    // Classification Logic (Same as existing)
+    // Classification Logic
     let amount = 0;
     const amountMatch = cleanText.match(/(\d+(?:,\d{3})*(?:\.\d{1,2})?)/);
     if (amountMatch) {
@@ -129,14 +101,9 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
 
     let type: 'income' | 'expense' = 'expense';
     if (
-        cleanText.includes('received') ||
-        cleanText.includes('got') ||
-        cleanText.includes('income') ||
-        cleanText.includes('deposit') ||
-        cleanText.includes('credit') ||
-        cleanText.includes('salary') ||
-        cleanText.includes('aaya') ||
-        cleanText.includes('mila')
+        cleanText.includes('received') || cleanText.includes('got') || cleanText.includes('income') ||
+        cleanText.includes('deposit') || cleanText.includes('credit') || cleanText.includes('salary') ||
+        cleanText.includes('aaya') || cleanText.includes('aaye') || cleanText.includes('mila')
     ) {
         type = 'income';
     }
@@ -155,92 +122,113 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         else if (/(medicine|doctor|hospital|gym|health|yoga)/.test(cleanText)) category = 'Health';
     }
 
-    // Attempt to extract Split details
-    // "Paid by Rahul"
-    // "Split with Sneha"
+    // Split details
     let paidBy = 'me';
     let splitWith: string[] = [];
     let splitRatios: number[] | undefined;
+    let unknownFriends: string[] = [];
+    let excludedPeople: string[] = [];
 
-    // Detect Split Ratios/Percentages
-    // Pattern 1: "Split 70 30" or "Split 6040" (if joined)
-    // Pattern 2: "70 percent" or "70%"
-
-    // Check for "split X Y"
     const splitRatioMatch = cleanText.match(/split\s+(\d+)\s+(\d+)/i);
     if (splitRatioMatch) {
         const v1 = parseFloat(splitRatioMatch[1]);
         const v2 = parseFloat(splitRatioMatch[2]);
-        if (v1 + v2 === 100 || v1 + v2 <= 100) { // Tolerate if not exactly 100? Assume percentages.
+        if (v1 + v2 === 100 || v1 + v2 <= 100) {
             splitRatios = [v1, v2];
         }
     } else {
-        // Check for specific percentages mentioned
         const percentMatches = cleanText.match(/(\d+)\s*(?:percent|%)/gi);
         if (percentMatches) {
             const ratios = percentMatches.map(p => parseFloat(p));
             if (ratios.length > 0) {
-                // If only one percentage is mentioned "I paid 70%", assume the rest is remainder?
-                // Let's store what we found. Logic in VoiceInput will handle "remainder".
                 splitRatios = ratios;
             }
         }
     }
 
-    // Check "Paid by [Name]" or "[Name] paid"
     for (const friend of lowerFriends) {
-        // "Paid by Rahul"
         if (new RegExp(`paid by ${friend}`, 'i').test(cleanText)) {
-            // Map back to original casing if possible, or just return the match
-            // We need the original casing for the ID lookup ideally, but the app uses IDs.
-            // VoiceInput passes names. app logic needs to find friend by name.
             paidBy = friend;
-        }
-        // "Rahul paid"
-        else if (new RegExp(`${friend} paid`, 'i').test(cleanText)) {
+        } else if (new RegExp(`${friend} paid`, 'i').test(cleanText)) {
             paidBy = friend;
-        }
-        // Hinglish: "Rahul ne diya" -> "Rahul ne spend" (diya->spend)
-        // match "Rahul ne"
-        else if (new RegExp(`${friend} ne`, 'i').test(cleanText)) {
+        } else if (new RegExp(`${friend} ne`, 'i').test(cleanText)) {
             paidBy = friend;
         }
     }
 
-    // Check "Split with [Name]" or just "[Name]" mentioned in context
-    // Heuristic: If a friend is mentioned and is NOT the payer, they are likely involved.
     lowerFriends.forEach(friend => {
         if (friend !== paidBy && cleanText.includes(friend)) {
-            // Avoid false positives if name equals a common word?
-            // "Bill" is a name but also "bill". 
-            // "Will" is a name but also "will".
-            // We'll trust the user's friend list is unique enough or context is sufficient.
-
-            // Check specific "split" context if needed, but "Lunch with Rahul" is common.
-            // So simply `includes` is a good starting point.
             if (!splitWith.includes(friend)) {
                 splitWith.push(friend);
             }
         }
     });
 
-    // If splitWith has entries, add 'me' to it? 
-    // Usually "Split with Rahul" means "Me and Rahul". 
-    // The App logic handles "Me" usually. 
-    // But specific return type `splitDetails` expects IDs?
-    // VoiceInput returns `ParsedData` which has `splitDetails`.
-    // Let's populate `splitDetails`.
+    const withMatches = cleanText.matchAll(/(?:split\s+with|with)\s+([a-zA-Z]+)(?:\s+(?:bhai|bro|sir|maam|ji))?/gi);
+    for (const match of withMatches) {
+        const potentialName = match[1].toLowerCase();
+        const stopWords = ['me', 'us', 'him', 'her', 'them', 'all', 'everyone', 'some', 'rupees', 'bucks', 'cash', 'card', 'upi'];
 
-    // Let's refine Description clean up
+        if (!lowerFriends.includes(potentialName) && !stopWords.includes(potentialName) && potentialName.length > 2) {
+            if (!unknownFriends.includes(potentialName) && potentialName !== 'split' && potentialName !== 'friends') {
+                unknownFriends.push(potentialName);
+            }
+        }
+    }
+
+    // Check for hanging exclusion first?
+    // "but not including" at the end, or "not including" followed by nothing useful.
+    if (/(?:but\s+)?not\s+including\s*$/i.test(cleanText)) {
+        // Implicitly exclude the last added person
+        if (splitWith.length > 0) excludedPeople.push(splitWith[splitWith.length - 1]);
+        if (unknownFriends.length > 0) excludedPeople.push(unknownFriends[unknownFriends.length - 1]);
+    }
+
+    const excludeMatches = cleanText.matchAll(/(?:exclude|don't\s+include|not\s+include|not\s+including|not\s+for|except)\s+(me|myself|him|her|them|us|in\s+the\s+split|split\s+wise|splitwise|[a-zA-Z]+)(?:\s+(?:bhai|bro|sir|maam|ji))?/gi);
+    for (const match of excludeMatches) {
+        let name = match[1].toLowerCase();
+
+        if (name === 'me' || name === 'myself') {
+            excludedPeople.push('me');
+        } else if (name.includes('in') && name.includes('split')) {
+            excludedPeople.push('me');
+        } else if (['him', 'her', 'them'].includes(name)) {
+            // Heuristic: Exclude last added person
+            if (splitWith.length > 0) {
+                excludedPeople.push(splitWith[splitWith.length - 1]);
+            }
+            if (unknownFriends.length > 0) {
+                excludedPeople.push(unknownFriends[unknownFriends.length - 1]);
+            }
+        } else if (['splitwise', 'split'].includes(name)) {
+            // Noise
+        } else {
+            excludedPeople.push(name);
+        }
+    }
+
+    splitWith = splitWith.filter(p => !excludedPeople.includes(p));
+    if (unknownFriends.length > 0) {
+        unknownFriends = unknownFriends.filter(p => !excludedPeople.includes(p));
+    }
+
     let description = text;
     if (amountMatch) description = description.replace(amountMatch[0], '');
 
     description = description
-        .replace(/dollars?|rupees?|bucks?|inr/gi, '')
+        .replace(/dollars?|rupees?|bucks?|inr|rs/gi, '')
         .replace(/spent|paid|bought|received|got|spain/gi, '')
         .replace(/thousand|lakh/gi, '')
-        .replace(/ on /gi, ' ')
-        .replace(/ for /gi, ' ')
+        .replace(/split with/gi, '')
+        .replace(/don't include \w+/gi, '')
+        .replace(/not include \w+/gi, '')
+        .replace(/not including/gi, '')
+        .replace(/exclude \w+/gi, '')
+        .replace(/not for \w+/gi, '')
+        .replace(/in the split/gi, '')
+        .replace(/split\s?wise/gi, '')
+        .replace(/on /gi, ' ')
+        .replace(/for /gi, ' ')
         .trim();
 
     description = description.replace(/[^\w\s]/gi, '').trim();
@@ -255,7 +243,8 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         splitDetails: {
             paidBy,
             splitWith,
-            splitRatios
+            splitRatios,
+            unknownFriends: unknownFriends.length > 0 ? unknownFriends : undefined
         },
         originalDate: new Date().toISOString()
     };

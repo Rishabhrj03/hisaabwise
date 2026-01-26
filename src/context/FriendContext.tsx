@@ -5,7 +5,7 @@ import { Friend } from '@/types';
 
 interface FriendContextType {
     friends: Friend[];
-    addFriend: (name: string) => void;
+    addFriend: (name: string) => string;
     deleteFriend: (id: string) => void;
 }
 
@@ -32,11 +32,13 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
     }, [friends]);
 
     const addFriend = (name: string) => {
+        const id = crypto.randomUUID();
         const newFriend: Friend = {
-            id: crypto.randomUUID(),
+            id,
             name: name.trim(),
         };
         setFriends((prev) => [...prev, newFriend]);
+        return id;
     };
 
     const deleteFriend = (id: string) => {

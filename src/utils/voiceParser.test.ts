@@ -84,4 +84,46 @@ describe('Voice Parser', () => {
         expect(result.splitDetails?.splitWith).toContain('rahul');
         expect(result.splitDetails?.splitRatios).toEqual([70, 30]);
     });
+
+    test('Unknown Friend Detection', () => {
+        const result = parseVoiceInput('Dinner with Kashish', friends);
+        expect(result.splitDetails?.unknownFriends).toContain('kashish');
+    });
+
+    test('Exclusion Logic: Don\'t include me', () => {
+        // "Split with Rahul but don't include me"
+        const result = parseVoiceInput('Split with Rahul but don\'t include me', friends);
+        expect(result.splitDetails?.splitWith).toContain('rahul');
+        expect(result.description).not.toMatch(/don't include/i);
+    });
+
+    test('Exclusion Logic: Exclude specific friend', () => {
+        const result = parseVoiceInput('Split with Rahul and Sneha exclude Rahul', friends);
+        expect(result.splitDetails?.splitWith).toContain('sneha');
+        expect(result.splitDetails?.splitWith).not.toContain('rahul');
+    });
+
+    test('Hinglish Income: account me aaye', () => {
+        const result = parseVoiceInput('10000 account me aaye', friends);
+        expect(result.amount).toBe('10000');
+        expect(result.type).toBe('income');
+    });
+
+    test('Exclusion with Pronoun: Exclude him', () => {
+        const result = parseVoiceInput('Spend 1000 on dinner with Rahul Bhai and exclude him', friends);
+        expect(result.splitDetails?.splitWith).not.toContain('rahul');
+    });
+
+    test('Implicit Exclusion: but not including', () => {
+        // "Spend fun friday with Vijay Bhai but not including"
+        // Should exclude Vijay (implied).
+        const result = parseVoiceInput('Spend 1000 fun friday with Rahul Bhai but not including', friends);
+        expect(result.splitDetails?.splitWith).not.toContain('rahul');
+    });
+
+    test('Unknown Friend in simple phrase: Fun friday with Rishabh', () => {
+        // Rishabh is not in friends list
+        const result = parseVoiceInput('Fun friday with Rishabh', friends);
+        expect(result.splitDetails?.unknownFriends).toContain('rishabh');
+    });
 });
