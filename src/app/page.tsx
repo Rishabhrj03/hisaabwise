@@ -10,6 +10,8 @@ import { ExportButton } from '@/components/dashboard/ExportButton';
 import { ImportButton } from '@/components/dashboard/ImportButton';
 import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
 import { WeeklyBarChart } from '@/components/dashboard/WeeklyBarChart';
+import { FriendManager } from '@/components/dashboard/FriendManager';
+import { BalanceList } from '@/components/dashboard/BalanceList';
 import { Button } from '@/components/ui/Button';
 import { VoiceInput } from '@/components/dashboard/VoiceInput';
 import { useExpenses } from '@/context/ExpenseContext';
@@ -27,10 +29,18 @@ export default function Home() {
   // New state for toggling graphs
   const [showStats, setShowStats] = useState(false);
   const [currency, setCurrency] = useState('USD');
+  const [showFriendManager, setShowFriendManager] = useState(false);
 
   // Filter Logic
   const filteredExpenses = expenses
     .filter((expense) => {
+      // Splitwise Filter: Hide if not involved
+      if (expense.splitDetails) {
+        const isPayer = expense.splitDetails.paidBy === 'me';
+        const isInvolved = expense.splitDetails.shares.some(s => s.userId === 'me');
+        if (!isPayer && !isInvolved) return false;
+      }
+
       const expenseDate = new Date(expense.date);
       return (
         expenseDate.getMonth() === currentDate.getMonth() &&
@@ -99,6 +109,10 @@ export default function Home() {
               {showStats ? 'Hide Stats' : 'Show Stats'}
             </Button>
 
+            <Button variant="secondary" size="sm" onClick={() => setShowFriendManager(true)} tooltip="Manage friends for splitting expenses">
+              Friends
+            </Button>
+
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
@@ -137,6 +151,8 @@ export default function Home() {
             <WeeklyBarChart expenses={filteredExpenses} />
           </div>
         )}
+
+        <BalanceList />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '1.25rem' }}>Transactions</h2>
@@ -191,6 +207,15 @@ export default function Home() {
             onClose={handleCloseForm}
             initialData={editingExpense || undefined}
           />
+        </Modal>
+
+        {/* Friend Manager Modal */}
+        <Modal
+          isOpen={showFriendManager}
+          onClose={() => setShowFriendManager(false)}
+          title=""
+        >
+          <FriendManager />
         </Modal>
 
         <TransactionList

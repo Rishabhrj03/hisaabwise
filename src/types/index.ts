@@ -5,6 +5,22 @@ export interface Expense {
     date: string; // ISO string
     type: 'income' | 'expense';
     category: string;
+    // Splitwise features
+    relatedTo?: string[]; // IDs of friends involved
+    splitDetails?: {
+        paidBy: string; // 'me' or friendId
+        shares: SplitShare[];
+    };
+}
+
+export interface Friend {
+    id: string;
+    name: string;
+}
+
+export interface SplitShare {
+    userId: string; // 'me' or friendId
+    amount: number;
 }
 
 export interface ExpenseContextType {

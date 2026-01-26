@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useExpenses } from '@/context/ExpenseContext';
+import { useFriends } from '@/context/FriendContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -12,21 +13,57 @@ interface AddExpenseFormProps {
 
 export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const { addExpense, updateExpense } = useExpenses();
+    const { friends } = useFriends();
     const [description, setDescription] = useState(initialData?.description || '');
     const [amount, setAmount] = useState(initialData?.amount.toString() || '');
     const [type, setType] = useState<'income' | 'expense'>(initialData?.type || 'expense');
     const [category, setCategory] = useState(initialData?.category || '');
 
+    // Splitwise Logic
+    const [paidBy, setPaidBy] = useState(initialData?.splitDetails?.paidBy || 'me');
+    const [splitWith, setSplitWith] = useState<string[]>(
+        initialData?.splitDetails?.shares.map(s => s.userId) || ['me']
+    );
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!description || !amount) return;
 
+        const numAmount = parseFloat(amount);
+        let splitDetails = undefined;
+        let relatedTo = undefined;
+
+        // Calculate Splits if friends are involved
+        if (friends.length > 0 && type === 'expense' && splitWith.length > 0) {
+            const totalPeople = splitWith.length;
+            const shareAmount = parseFloat((numAmount / totalPeople).toFixed(2));
+
+            const shares = splitWith.map(id => ({ userId: id, amount: shareAmount }));
+
+            // Adjust for rounding errors on the first person
+            const totalCalculated = shares.reduce((acc, curr) => acc + curr.amount, 0);
+            if (totalCalculated !== numAmount) {
+                shares[0].amount += parseFloat((numAmount - totalCalculated).toFixed(2));
+            }
+
+            splitDetails = {
+                paidBy,
+                shares
+            };
+
+            const peopleInvolved = new Set([...splitWith, paidBy]);
+            peopleInvolved.delete('me');
+            relatedTo = Array.from(peopleInvolved);
+        }
+
         const expenseData = {
             description,
-            amount: parseFloat(amount),
+            amount: numAmount,
             type,
             category: category || 'General',
             date: initialData?.date || new Date().toISOString(),
+            relatedTo: relatedTo,
+            splitDetails: splitDetails
         };
 
         if (initialData) {
@@ -39,7 +76,17 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
         setDescription('');
         setAmount('');
         setCategory('');
+        setPaidBy('me');
+        setSplitWith(['me']);
         if (onClose) onClose();
+    };
+
+    const toggleSplitWith = (friendId: string) => {
+        setSplitWith(prev =>
+            prev.includes(friendId)
+                ? prev.filter(id => id !== friendId)
+                : [...prev, friendId]
+        );
     };
 
     return (
@@ -87,6 +134,101 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                 onChange={(e) => setAmount(e.target.value)}
                 required
             />
+
+            {/* Splitwise Section - Only for Expenses */}
+            {type === 'expense' && friends.length > 0 && (
+                <Card variant="glass" style={{ padding: '0.75rem', border: '1px solid hsl(var(--color-border))' }}>
+                    <div style={{ marginBottom: '0.5rem' }}>
+                        <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.5rem' }}>
+                            Paid By
+                        </label>
+                        <select
+                            value={paidBy}
+                            onChange={(e) => {
+                                const newPayer = e.target.value;
+                                setPaidBy(newPayer);
+                                // Ensure new payer is included by default if not already
+                                if (!splitWith.includes(newPayer)) {
+                                    setSplitWith(prev => [...prev, newPayer]);
+                                }
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                borderRadius: 'var(--radius-sm)',
+                                border: '1px solid hsl(var(--color-border))',
+                                background: 'hsl(var(--color-background))',
+                                color: 'hsl(var(--color-text-main))'
+                            }}
+                        >
+                            <option value="me">Me</option>
+                            {friends.map(f => (
+                                <option key={f.id} value={f.id}>{f.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.5rem' }}>
+                            Split With (Equally)
+                        </label>
+
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer', color: 'hsl(var(--color-text-main))' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={splitWith.includes(paidBy)}
+                                    onChange={() => toggleSplitWith(paidBy)}
+                                    style={{ width: '1rem', height: '1rem' }}
+                                />
+                                Include {paidBy === 'me' ? 'You' : friends.find(f => f.id === paidBy)?.name} in split
+                            </label>
+                        </div>
+
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            {/* Option for Me - Show only if I am NOT the payer */}
+                            {paidBy !== 'me' && (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant={splitWith.includes('me') ? 'primary' : 'secondary'}
+                                    onClick={() => toggleSplitWith('me')}
+                                    style={{
+                                        padding: '0.25rem 0.75rem',
+                                        borderRadius: '20px',
+                                        fontSize: '0.75rem',
+                                        background: splitWith.includes('me') ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
+                                        border: splitWith.includes('me') ? 'none' : '1px solid hsl(var(--color-border))'
+                                    }}
+                                >
+                                    You {splitWith.includes('me') ? '✓' : '+'}
+                                </Button>
+                            )}
+
+                            {friends
+                                .filter(f => f.id !== paidBy) // Hide payer from buttons
+                                .map(f => (
+                                    <Button
+                                        key={f.id}
+                                        type="button"
+                                        size="sm"
+                                        variant={splitWith.includes(f.id) ? 'primary' : 'secondary'}
+                                        onClick={() => toggleSplitWith(f.id)}
+                                        style={{
+                                            padding: '0.25rem 0.75rem',
+                                            borderRadius: '20px',
+                                            fontSize: '0.75rem',
+                                            background: splitWith.includes(f.id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
+                                            border: splitWith.includes(f.id) ? 'none' : '1px solid hsl(var(--color-border))'
+                                        }}
+                                    >
+                                        {f.name} {splitWith.includes(f.id) ? '✓' : '+'}
+                                    </Button>
+                                ))}
+                        </div>
+                    </div>
+                </Card>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
                 <label style={{

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFriends } from '@/context/FriendContext';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { Expense } from '@/types';
 import { Card } from '@/components/ui/Card';
@@ -12,6 +13,7 @@ interface TransactionListProps {
 }
 
 export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }: TransactionListProps) {
+    const { friends } = useFriends();
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('en-US', {
             month: 'short',
@@ -63,6 +65,11 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                                 }}
                             >
                                 {expense.description}
+                                {expense.splitDetails && (
+                                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--color-primary))', marginLeft: '0.5rem', fontWeight: 400 }}>
+                                        (Paid by {expense.splitDetails.paidBy === 'me' ? 'You' : friends.find(f => f.id === expense.splitDetails!.paidBy)?.name || 'Unknown'})
+                                    </span>
+                                )}
                             </span>
                         </Tooltip>
                         <span style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))' }}>
