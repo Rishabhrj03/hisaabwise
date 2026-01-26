@@ -42,13 +42,47 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
     const parseNumberWords = (text: string): string => {
         let cleanText = text.toLowerCase();
 
-        // Fix common mishearings
+        // Fix common mishearings & Hinglish support
         const mishearings: Record<string, string> = {
             'spain': 'spend',
             'pane': 'spend',
             'spent': 'spend',
             'got': 'income',
             'bill': 'bill',
+            // Hinglish / Hindi Numbers
+            'ek': '1',
+            'do': '2',
+            'teen': '3',
+            'chaar': '4',
+            'char': '4',
+            'paanch': '5',
+            'panch': '5',
+            'che': '6',
+            'saat': '7',
+            'aath': '8',
+            'nau': '9',
+            'das': '10',
+            'dus': '10',
+            'gyara': '11',
+            'barah': '12',
+            'bees': '20',
+            'tis': '30',
+            'tice': '30',
+            'pachaas': '50',
+            'pachas': '50',
+            'sau': 'hundred',
+            'hajar': 'thousand',
+            'hazzar': 'thousand',
+            'hazaar': 'thousand',
+            'azar': 'thousand', // "Das Azar" -> "10 thousand"
+            'lakh': 'lakh',
+            'lac': 'lakh',
+            'crore': 'crore',
+            'kharcha': 'expense',
+            'aaya': 'income', // Payment aaya
+            'mila': 'income', // Payment mila
+            'diya': 'spend',  // Payment diya
+            'gaya': 'spend'   // Payment gaya
         };
 
         Object.keys(mishearings).forEach(key => {
@@ -57,7 +91,6 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
         });
 
         // Simple word-to-number replacement for common magnitudes
-        // This is a heuristic, not a full parser
         const multiplierMap: Record<string, number> = {
             'k': 1000,
             'thousand': 1000,
@@ -93,7 +126,16 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
 
         // 2. Determine Type
         let type: 'income' | 'expense' = 'expense';
-        if (lowerText.includes('received') || lowerText.includes('got') || lowerText.includes('income') || lowerText.includes('deposit') || lowerText.includes('credit') || lowerText.includes('salary')) {
+        if (
+            lowerText.includes('received') ||
+            lowerText.includes('got') ||
+            lowerText.includes('income') ||
+            lowerText.includes('deposit') ||
+            lowerText.includes('credit') ||
+            lowerText.includes('salary') ||
+            lowerText.includes('aaya') || // Redundant matched by substitute but safe
+            lowerText.includes('mila')
+        ) {
             type = 'income';
         }
 
