@@ -8,10 +8,10 @@ export function FriendManager() {
     const { friends, addFriend, deleteFriend } = useFriends();
     const [newFriendName, setNewFriendName] = useState('');
 
-    const handleAdd = (e: React.FormEvent) => {
+    const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newFriendName.trim()) {
-            addFriend(newFriendName);
+            await addFriend(newFriendName);
             setNewFriendName('');
         }
     };

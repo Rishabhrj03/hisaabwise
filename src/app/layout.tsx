@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ExpenseProvider } from "@/context/ExpenseContext";
 import { FriendProvider } from "@/context/FriendContext";
+import { AuthProvider } from "@/context/AuthContext";
+import { DataMigration } from "@/components/DataMigration";
 
 /*
 import { Geist, Geist_Mono } from "next/font/google";
@@ -32,11 +34,14 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
-        <FriendProvider>
-          <ExpenseProvider>
-            {children}
-          </ExpenseProvider>
-        </FriendProvider>
+        <AuthProvider>
+          <DataMigration />
+          <FriendProvider>
+            <ExpenseProvider>
+              {children}
+            </ExpenseProvider>
+          </FriendProvider>
+        </AuthProvider>
       </body>
     </html>
   );

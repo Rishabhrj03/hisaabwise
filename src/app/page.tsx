@@ -20,7 +20,15 @@ import { Expense } from '@/types';
 
 import { Modal } from '@/components/ui/Modal';
 
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  /* Hook Calls - Must be unconditional */
   const { expenses, deleteExpense } = useExpenses();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -30,6 +38,23 @@ export default function Home() {
   const [showStats, setShowStats] = useState(false);
   const [currency, setCurrency] = useState('INR');
   const [showFriendManager, setShowFriendManager] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  /* Early Returns */
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null; // Prevent flash of content before redirect
 
   // Filter Logic
   const filteredExpenses = expenses

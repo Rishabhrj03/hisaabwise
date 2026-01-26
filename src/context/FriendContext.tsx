@@ -2,51 +2,95 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Friend } from '@/types';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/context/AuthContext';
 
 interface FriendContextType {
     friends: Friend[];
-    addFriend: (name: string) => string;
-    deleteFriend: (id: string) => void;
+    addFriend: (name: string) => Promise<string>;
+    deleteFriend: (id: string) => Promise<void>;
+    loading: boolean;
 }
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
 
 export function FriendProvider({ children }: { children: React.ReactNode }) {
+    const { user } = useAuth();
     const [friends, setFriends] = useState<Friend[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Load from LocalStorage
+    // Load from Supabase
     useEffect(() => {
-        const saved = localStorage.getItem('friends');
-        if (saved) {
-            try {
-                setFriends(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse friends", e);
-            }
+        if (!user) {
+            setFriends([]);
+            setLoading(false);
+            return;
         }
-    }, []);
 
-    // Save to LocalStorage
-    useEffect(() => {
-        localStorage.setItem('friends', JSON.stringify(friends));
-    }, [friends]);
+        const fetchFriends = async () => {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('friends')
+                .select('*')
+                .eq('user_id', user.id);
 
-    const addFriend = (name: string) => {
-        const id = crypto.randomUUID();
-        const newFriend: Friend = {
-            id,
-            name: name.trim(),
+            if (error) {
+                console.error("Error fetching friends:", error);
+            } else {
+                setFriends(data || []);
+            }
+            setLoading(false);
         };
-        setFriends((prev) => [...prev, newFriend]);
+
+        fetchFriends();
+    }, [user]);
+
+    const addFriend = async (name: string) => {
+        if (!user) throw new Error("User must be logged in to add friends");
+
+        const id = crypto.randomUUID();
+        const newFriend = {
+            id,
+            user_id: user.id,
+            name: name.trim(),
+            created_at: new Date().toISOString()
+        };
+
+        // Optimistic Update
+        const optimisticFriend: Friend = { id: newFriend.id, name: newFriend.name };
+        setFriends((prev) => [...prev, optimisticFriend]);
+
+        const { error } = await supabase.from('friends').insert(newFriend);
+
+        if (error) {
+            console.error("Error adding friend:", error);
+            // Revert on error
+            setFriends((prev) => prev.filter((f) => f.id !== id));
+            throw error;
+        }
+
         return id;
     };
 
-    const deleteFriend = (id: string) => {
+    const deleteFriend = async (id: string) => {
+        if (!user) return;
+
+        // Optimistic Update
+        const previousFriends = [...friends];
         setFriends((prev) => prev.filter((f) => f.id !== id));
+
+        const { error } = await supabase.from('friends').delete().eq('id', id);
+
+        if (error) {
+            console.error("Error deleting friend:", error);
+            // Revert
+            setFriends(previousFriends);
+            throw error;
+        }
     };
 
     return (
-        <FriendContext.Provider value={{ friends, addFriend, deleteFriend }}>
+        <FriendContext.Provider value={{ friends, addFriend, deleteFriend, loading }}>
             {children}
         </FriendContext.Provider>
     );
