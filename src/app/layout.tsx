@@ -4,6 +4,8 @@ import { ExpenseProvider } from "@/context/ExpenseContext";
 import { FriendProvider } from "@/context/FriendContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { DataMigration } from "@/components/DataMigration";
+import { GroupProvider } from "@/context/GroupContext";
+import { PhoneNumberPrompt } from "@/components/PhoneNumberPrompt";
 
 /*
 import { Geist, Geist_Mono } from "next/font/google";
@@ -35,11 +37,14 @@ export default function RootLayout({
         className={`antialiased`}
       >
         <AuthProvider>
+          <PhoneNumberPrompt />
           <DataMigration />
           <FriendProvider>
-            <ExpenseProvider>
-              {children}
-            </ExpenseProvider>
+            <GroupProvider>
+              <ExpenseProvider>
+                {children}
+              </ExpenseProvider>
+            </GroupProvider>
           </FriendProvider>
         </AuthProvider>
       </body>

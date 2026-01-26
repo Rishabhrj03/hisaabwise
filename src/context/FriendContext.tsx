@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 
 interface FriendContextType {
     friends: Friend[];
-    addFriend: (name: string) => Promise<string>;
+    addFriend: (name: string, phone?: string) => Promise<string>;
     deleteFriend: (id: string) => Promise<void>;
     loading: boolean;
 }
@@ -45,7 +45,7 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
         fetchFriends();
     }, [user]);
 
-    const addFriend = async (name: string) => {
+    const addFriend = async (name: string, phone?: string) => {
         if (!user) throw new Error("User must be logged in to add friends");
 
         const id = crypto.randomUUID();
@@ -53,11 +53,16 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
             id,
             user_id: user.id,
             name: name.trim(),
+            phone: phone ? phone.trim() : null,
             created_at: new Date().toISOString()
         };
 
         // Optimistic Update
-        const optimisticFriend: Friend = { id: newFriend.id, name: newFriend.name };
+        const optimisticFriend: Friend = {
+            id: newFriend.id,
+            name: newFriend.name,
+            phone: newFriend.phone // We need to update Friend type too!
+        };
         setFriends((prev) => [...prev, optimisticFriend]);
 
         const { error } = await supabase.from('friends').insert(newFriend);

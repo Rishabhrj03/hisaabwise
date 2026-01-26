@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useExpenses } from '@/context/ExpenseContext';
 import { useFriends } from '@/context/FriendContext';
+import { useGroups } from '@/context/GroupContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -14,16 +15,32 @@ interface AddExpenseFormProps {
 export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const { addExpense, updateExpense } = useExpenses();
     const { friends } = useFriends();
+    const { groups } = useGroups();
+
+    // Form State
     const [description, setDescription] = useState(initialData?.description || '');
     const [amount, setAmount] = useState(initialData?.amount.toString() || '');
     const [type, setType] = useState<'income' | 'expense'>(initialData?.type || 'expense');
     const [category, setCategory] = useState(initialData?.category || '');
+    const [selectedGroupId, setSelectedGroupId] = useState<string>(initialData?.group_id || '');
 
     // Splitwise Logic
     const [paidBy, setPaidBy] = useState(initialData?.splitDetails?.paidBy || 'me');
     const [splitWith, setSplitWith] = useState<string[]>(
         initialData?.splitDetails?.shares.map(s => s.userId) || ['me']
     );
+
+    const handleGroupChange = (groupId: string) => {
+        setSelectedGroupId(groupId);
+        if (groupId) {
+            // If group selected, auto-select all members in splitWith
+            const group = groups.find(g => g.id === groupId);
+            if (group) {
+                // Filter splitWith to only include group members + me
+                setSplitWith(['me', ...group.members]);
+            }
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,7 +80,8 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             category: category || 'General',
             date: initialData?.date || new Date().toISOString(),
             relatedTo: relatedTo,
-            splitDetails: splitDetails
+            splitDetails: splitDetails,
+            group_id: selectedGroupId || null
         };
 
         if (initialData) {
@@ -134,6 +152,32 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                 onChange={(e) => setAmount(e.target.value)}
                 required
             />
+
+            {/* Group Selection */}
+            {type === 'expense' && groups.length > 0 && (
+                <div style={{ marginBottom: '0.5rem' }}>
+                    <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.5rem' }}>
+                        Group (Optional)
+                    </label>
+                    <select
+                        value={selectedGroupId}
+                        onChange={(e) => handleGroupChange(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid hsl(var(--color-border))',
+                            background: 'hsl(var(--color-background))',
+                            color: 'hsl(var(--color-text-main))'
+                        }}
+                    >
+                        <option value="">No Group</option>
+                        {groups.map(g => (
+                            <option key={g.id} value={g.id}>{g.name}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
             {/* Splitwise Section - Only for Expenses */}
             {type === 'expense' && friends.length > 0 && (

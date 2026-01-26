@@ -11,6 +11,8 @@ import { ImportButton } from '@/components/dashboard/ImportButton';
 import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
 import { WeeklyBarChart } from '@/components/dashboard/WeeklyBarChart';
 import { FriendManager } from '@/components/dashboard/FriendManager';
+import { GroupManager } from '@/components/dashboard/GroupManager';
+import { DebtChart } from '@/components/dashboard/DebtChart';
 import { BalanceList } from '@/components/dashboard/BalanceList';
 import { Button } from '@/components/ui/Button';
 import { VoiceInput } from '@/components/dashboard/VoiceInput';
@@ -38,6 +40,7 @@ export default function Home() {
   const [showStats, setShowStats] = useState(false);
   const [currency, setCurrency] = useState('INR');
   const [showFriendManager, setShowFriendManager] = useState(false);
+  const [showGroupManager, setShowGroupManager] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -138,6 +141,10 @@ export default function Home() {
               Friends
             </Button>
 
+            <Button variant="secondary" size="sm" onClick={() => setShowGroupManager(true)} tooltip="Manage expense groups">
+              Groups
+            </Button>
+
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
@@ -174,6 +181,7 @@ export default function Home() {
           <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
             <CategoryPieChart expenses={filteredExpenses} />
             <WeeklyBarChart expenses={filteredExpenses} />
+            <DebtChart expenses={expenses} />
           </div>
         )}
 
@@ -241,6 +249,14 @@ export default function Home() {
           title=""
         >
           <FriendManager />
+        </Modal>
+
+        <Modal
+          isOpen={showGroupManager}
+          onClose={() => setShowGroupManager(false)}
+          title=""
+        >
+          <GroupManager />
         </Modal>
 
         <TransactionList

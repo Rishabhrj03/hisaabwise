@@ -35,18 +35,58 @@ export interface Database {
                     user_id: string
                     name: string
                     created_at: string
+                    phone: string | null
+                    linked_user_id: string | null
                 }
                 Insert: {
                     id?: string
                     user_id: string
                     name: string
                     created_at?: string
+                    phone?: string | null
+                    linked_user_id?: string | null
                 }
                 Update: {
                     id?: string
                     user_id?: string
                     name?: string
                     created_at?: string
+                    phone?: string | null
+                    linked_user_id?: string | null
+                }
+            }
+            groups: {
+                Row: {
+                    id: string
+                    created_by: string
+                    name: string
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    created_by: string
+                    name: string
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    created_by?: string
+                    name?: string
+                    created_at?: string
+                }
+            }
+            group_members: {
+                Row: {
+                    group_id: string
+                    member_id: string
+                }
+                Insert: {
+                    group_id: string
+                    member_id: string
+                }
+                Update: {
+                    group_id?: string
+                    member_id?: string
                 }
             }
             expenses: {
@@ -60,6 +100,7 @@ export interface Database {
                     date: string
                     created_at: string
                     payer_id: string | null
+                    group_id: string | null
                 }
                 Insert: {
                     id?: string
@@ -71,6 +112,7 @@ export interface Database {
                     date: string
                     created_at?: string
                     payer_id?: string | null
+                    group_id?: string | null
                 }
                 Update: {
                     id?: string
@@ -82,6 +124,7 @@ export interface Database {
                     date?: string
                     created_at?: string
                     payer_id?: string | null
+                    group_id?: string | null
                 }
             }
             expense_splits: {

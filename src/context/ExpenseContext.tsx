@@ -104,7 +104,8 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
             category: data.category,
             type: data.type,
             date: data.date,
-            payer_id: payerId
+            payer_id: payerId,
+            group_id: data.group_id || null
         };
 
         // Prepare Splits payload
@@ -116,7 +117,11 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         })) || [];
 
         // Optimistic UI Update
-        const newExpense: Expense = { ...data, id: expenseId };
+        const newExpense: Expense = {
+            ...data,
+            id: expenseId,
+            relatedTo: [], // This will be properly calculated on fetch, but for optimistic, can be empty or derived
+        };
         setExpenses((prev) => [newExpense, ...prev]);
 
         // Insert Expense
