@@ -1,105 +1,230 @@
 'use client'
 
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { supabase } from '@/lib/supabaseClient'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
+import { Button } from '@/components/ui/Button'
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [session, setSession] = useState<any>(null)
+    const searchParams = useSearchParams()
+    const { login, register } = useAuth()
+
+    const [isLogin, setIsLogin] = useState(true)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [name, setName] = useState('')
+    const [phone, setPhone] = useState('')
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session)
-            if (session) {
-                router.replace('/')
+        const phoneParam = searchParams.get('phone')
+        if (phoneParam) {
+            setPhone(phoneParam)
+            setIsLogin(false) // If phone is present, likely a simplified signup flow
+        }
+    }, [searchParams])
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError('')
+        setLoading(true)
+
+        try {
+            if (isLogin) {
+                const res = await login(email, password)
+                if (res.error) {
+                    setError(res.error)
+                } else {
+                    router.push('/')
+                }
+            } else {
+                const res = await register(email, password, name, phone)
+                if (res.error) {
+                    setError(res.error)
+                } else {
+                    router.push('/')
+                }
             }
-        })
-
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session)
-            if (session) {
-                router.replace('/')
-            }
-        })
-
-        return () => subscription.unsubscribe()
-    }, [router])
-
-    if (!session) {
-        return (
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '100vh',
-                background: 'hsl(var(--color-background))', // Use theme background
-                padding: '1rem'
-            }}>
-                <div style={{
-                    width: '100%',
-                    maxWidth: '480px',
-                    background: 'hsl(var(--color-surface))', // Use theme surface (dark in dark mode)
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    padding: '2rem',
-                    border: '1px solid hsl(var(--color-border))'
-                }}>
-                    <h1 style={{
-                        fontSize: '1.5rem',
-                        fontWeight: '700',
-                        marginBottom: '1.5rem',
-                        textAlign: 'center',
-                        color: 'hsl(var(--color-text-main))'
-                    }}>Sign in to Expense Tracker</h1>
-                    <Auth
-                        supabaseClient={supabase}
-                        appearance={{
-                            theme: ThemeSupa,
-                            variables: {
-                                default: {
-                                    colors: {
-                                        brand: 'hsl(var(--color-primary))',
-                                        brandAccent: 'hsl(var(--color-primary))',
-                                        inputText: 'hsl(var(--color-text-main))',
-                                        inputBackground: 'transparent',
-                                        inputBorder: 'hsl(var(--color-border))',
-                                        inputLabelText: 'hsl(var(--color-text-muted))',
-                                        defaultButtonBackground: 'hsl(var(--color-primary))',
-                                        defaultButtonBackgroundHover: 'hsl(var(--color-primary))',
-                                        defaultButtonText: '#ffffff',
-                                    },
-                                    radii: {
-                                        borderRadiusButton: '8px',
-                                        inputBorderRadius: '8px',
-                                    }
-                                }
-                            },
-                            style: {
-                                input: {
-                                    color: 'hsl(var(--color-text-main))',
-                                    borderColor: 'hsl(var(--color-border))',
-                                },
-                                label: {
-                                    color: 'hsl(var(--color-text-muted))',
-                                }
-                            }
-                        }}
-                        providers={[]}
-                    />
-                </div>
-            </div>
-        )
+        } catch (err) {
+            setError('Something went wrong')
+        } finally {
+            setLoading(false)
+        }
     }
 
+    const inputStyle = {
+        width: '100%',
+        padding: '0.875rem 1rem',
+        borderRadius: 'var(--radius-sm)',
+        border: '1px solid var(--color-border)',
+        background: 'rgba(255, 255, 255, 0.05)',
+        color: 'hsl(var(--color-text-main))',
+        fontSize: '1rem',
+        marginBottom: '1rem',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        outline: 'none',
+    } as React.CSSProperties;
+
+    // Helper for focus state would require state or css class, strict inline is hard for :focus.
+    // Adding a simple className 'auth-input' if we could adds global css, but let's stick to simple inline for now.
+    // We can simulate focus color via border in inline style? No. 
+    // We will rely on default outline or add a small class if needed, but let's try to stick to what we have.
+    // Actually, we can add a <style> block or just rely on the 'input' styling if global. 
+    // Let's assume global input styling is minimal and provide good defaults.
+
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <p>Redirecting...</p>
+        <div className="glass-panel" style={{
+            width: '100%',
+            maxWidth: '480px',
+            padding: '3rem',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+            transition: 'all 0.3s ease'
+        }}>
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                <div style={{
+                    width: '60px',
+                    height: '60px',
+                    background: 'linear-gradient(135deg, hsl(var(--color-primary)), hsl(var(--hue-primary) 50% 40%))',
+                    borderRadius: '16px',
+                    margin: '0 auto 1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    color: 'white',
+                    boxShadow: '0 8px 16px var(--color-primary-glow)'
+                }}>
+                    🪙
+                </div>
+                <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                    {isLogin ? 'Welcome Back' : 'Create Account'}
+                </h1>
+                <p style={{ color: 'hsl(var(--color-text-muted))' }}>
+                    {isLogin ? 'Enter your details to access your expenses' : 'Start tracking your finances today'}
+                </p>
+            </div>
+
+            {error && (
+                <div style={{
+                    padding: '1rem',
+                    background: 'hsl(var(--hue-danger) 95% 90%)',
+                    color: 'hsl(var(--hue-danger) 40% 40%)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid hsl(var(--hue-danger) 90% 80%)',
+                    fontSize: '0.875rem',
+                    textAlign: 'center'
+                }}>
+                    {error}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+                {!isLogin && (
+                    <>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: 'hsl(var(--color-text-muted))' }}>
+                                Full Name
+                            </label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                style={inputStyle}
+                                placeholder="John Doe"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: 'hsl(var(--color-text-muted))' }}>
+                                Phone Number
+                            </label>
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                style={inputStyle}
+                                placeholder="1234567890"
+                            />
+                        </div>
+                    </>
+                )}
+
+                <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: 'hsl(var(--color-text-muted))' }}>
+                        Email Address
+                    </label>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        style={inputStyle}
+                        placeholder="you@example.com"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: 'hsl(var(--color-text-muted))' }}>
+                        Password
+                    </label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        style={inputStyle}
+                        placeholder="••••••••"
+                        required
+                    />
+                </div>
+
+                <Button
+                    type="submit"
+                    disabled={loading}
+                    style={{ width: '100%', marginTop: '1rem' }}
+                    size="lg"
+                >
+                    {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
+                </Button>
+            </form>
+
+            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                <button
+                    onClick={() => setIsLogin(!isLogin)}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'hsl(var(--color-primary))',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        fontSize: '0.9rem'
+                    }}
+                >
+                    {isLogin ? "New here? Create an account" : "Already have an account? Sign in"}
+                </button>
+            </div>
+        </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, hsl(var(--color-background)) 0%, hsl(var(--hue-primary) 30% 95%) 100%)',
+            padding: '1rem'
+        }}>
+            <Suspense fallback={<div>Loading...</div>}>
+                <LoginForm />
+            </Suspense>
         </div>
     )
 }

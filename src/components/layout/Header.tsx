@@ -1,17 +1,15 @@
 "use client";
 
-import React from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 
 export function Header() {
     const router = useRouter();
+    const { logout } = useAuth();
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.refresh(); // Refresh to update AuthContext state if needed
-        router.push('/login');
+        await logout();
     };
 
     return (

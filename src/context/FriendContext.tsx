@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Friend } from '@/types';
-import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 
 interface FriendContextType {
@@ -19,7 +18,14 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
     const [friends, setFriends] = useState<Friend[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Load from Supabase
+    const mapToFriend = (doc: any): Friend => ({
+        id: doc._id,
+        name: doc.name,
+        phone: doc.phone,
+        linked_user_id: doc.linked_user_id
+    });
+
+    // Load from API
     useEffect(() => {
         if (!user) {
             setFriends([]);
@@ -29,15 +35,16 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
 
         const fetchFriends = async () => {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('friends')
-                .select('*')
-                .eq('user_id', user.id);
-
-            if (error) {
+            try {
+                const res = await fetch('/api/friends');
+                if (res.ok) {
+                    const data = await res.json();
+                    setFriends(data.map(mapToFriend));
+                } else {
+                    console.error("Error fetching friends");
+                }
+            } catch (error) {
                 console.error("Error fetching friends:", error);
-            } else {
-                setFriends(data || []);
             }
             setLoading(false);
         };
@@ -48,33 +55,29 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
     const addFriend = async (name: string, phone?: string) => {
         if (!user) throw new Error("User must be logged in to add friends");
 
-        const id = crypto.randomUUID();
-        const newFriend = {
-            id,
-            user_id: user.id,
-            name: name.trim(),
-            phone: phone ? phone.trim() : null,
-            created_at: new Date().toISOString()
-        };
+        // Optimistic Update can be tricky without ID, but let's wait for server response
+        // or generate a temp ID. For now, waiting is safer or use user-provided ID? 
+        // MongoDB generates ID. Let's just call API and update.
 
-        // Optimistic Update
-        const optimisticFriend: Friend = {
-            id: newFriend.id,
-            name: newFriend.name,
-            phone: newFriend.phone // We need to update Friend type too!
-        };
-        setFriends((prev) => [...prev, optimisticFriend]);
+        try {
+            const res = await fetch('/api/friends', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone }),
+            });
 
-        const { error } = await supabase.from('friends').insert(newFriend);
-
-        if (error) {
+            if (res.ok) {
+                const newDoc = await res.json();
+                const newFriend = mapToFriend(newDoc);
+                setFriends((prev) => [...prev, newFriend]);
+                return newFriend.id;
+            } else {
+                throw new Error("Failed to add friend");
+            }
+        } catch (error) {
             console.error("Error adding friend:", error);
-            // Revert on error
-            setFriends((prev) => prev.filter((f) => f.id !== id));
             throw error;
         }
-
-        return id;
     };
 
     const deleteFriend = async (id: string) => {
@@ -84,11 +87,17 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
         const previousFriends = [...friends];
         setFriends((prev) => prev.filter((f) => f.id !== id));
 
-        const { error } = await supabase.from('friends').delete().eq('id', id);
+        try {
+            const res = await fetch(`/api/friends/${id}`, {
+                method: 'DELETE'
+            });
 
-        if (error) {
+            if (!res.ok) {
+                console.error("Error deleting friend");
+                setFriends(previousFriends);
+            }
+        } catch (error) {
             console.error("Error deleting friend:", error);
-            // Revert
             setFriends(previousFriends);
             throw error;
         }

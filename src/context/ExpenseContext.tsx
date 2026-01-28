@@ -2,14 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Expense, ExpenseContextType } from '@/types';
-import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
-import { Database } from '@/types/supabase';
-
-// Helper types for Join
-type ExpenseWithSplits = Database['public']['Tables']['expenses']['Row'] & {
-    expense_splits: Database['public']['Tables']['expense_splits']['Row'][];
-};
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
@@ -18,36 +11,17 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const mapToExpense = (row: ExpenseWithSplits): Expense => {
-        const splitDetails = row.expense_splits.length > 0 || row.payer_id ? {
-            paidBy: (!row.payer_id || row.payer_id === user?.id) ? 'me' : row.payer_id,
-            shares: row.expense_splits.map(s => ({
-                userId: s.is_user ? 'me' : (s.friend_id || ''),
-                amount: s.amount
-            }))
-        } : undefined;
-
-        // relatedTo
-        const relatedTo = row.expense_splits
-            .filter(s => !s.is_user && s.friend_id)
-            .map(s => s.friend_id as string);
-
-        if (!row.payer_id || row.payer_id === user?.id) {
-            // me is payer
-        } else {
-            relatedTo.push(row.payer_id); // Payer is technically "related"
-        }
-        const uniqueRelatedTo = Array.from(new Set(relatedTo));
-
+    const mapToExpense = (doc: any): Expense => {
         return {
-            id: row.id,
-            description: row.description,
-            amount: row.amount,
-            date: row.date,
-            type: row.type,
-            category: row.category,
-            splitDetails,
-            relatedTo: uniqueRelatedTo
+            id: String(doc._id || doc.id),
+            description: doc.description,
+            amount: doc.amount,
+            date: doc.date,
+            type: doc.type,
+            category: doc.category,
+            splitDetails: doc.splitDetails,
+            relatedTo: doc.relatedTo || [],
+            group_id: doc.group_id
         };
     };
 
@@ -60,25 +34,17 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
             }
 
             setLoading(true);
-            const { data, error } = await supabase
-                .from('expenses')
-                .select('*, expense_splits(*)')
-                .eq('created_by', user.id)
-                .order('date', { ascending: false });
-
-            if (error) {
-                console.error("Error fetching expenses:", error);
-                if (Object.keys(error).length === 0) {
-                    console.warn("Empty error object received. This often indicates a network issue or missing environment variables. Please restart your dev server.");
-                } else if (error.code === '42P01') {
-                    console.error("Table 'expenses' does not exist. Please run the SQL schema in Supabase.");
-                }
-            } else {
-                if (data) {
-                    // @ts-ignore
-                    const mapped = data.map(d => mapToExpense(d as ExpenseWithSplits));
+            try {
+                const res = await fetch('/api/expenses');
+                if (res.ok) {
+                    const data = await res.json();
+                    const mapped = data.map(mapToExpense);
                     setExpenses(mapped);
+                } else {
+                    console.error("Failed to fetch expenses");
                 }
+            } catch (error) {
+                console.error("Error fetching expenses:", error);
             }
             setLoading(false);
         };
@@ -89,59 +55,22 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     const addExpense = async (data: Omit<Expense, 'id'>) => {
         if (!user) return;
 
-        const expenseId = crypto.randomUUID();
+        try {
+            const res = await fetch('/api/expenses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
 
-        // Prepare DB payload
-        const payerId = (!data.splitDetails?.paidBy || data.splitDetails.paidBy === 'me')
-            ? user.id
-            : data.splitDetails.paidBy;
-
-        const dbExpense = {
-            id: expenseId,
-            created_by: user.id,
-            amount: data.amount,
-            description: data.description,
-            category: data.category,
-            type: data.type,
-            date: data.date,
-            payer_id: payerId,
-            group_id: data.group_id || null
-        };
-
-        // Prepare Splits payload
-        const dbSplits = data.splitDetails?.shares.map(share => ({
-            expense_id: expenseId,
-            friend_id: share.userId === 'me' ? null : share.userId,
-            is_user: share.userId === 'me',
-            amount: share.amount
-        })) || [];
-
-        // Optimistic UI Update
-        const newExpense: Expense = {
-            ...data,
-            id: expenseId,
-            relatedTo: [], // This will be properly calculated on fetch, but for optimistic, can be empty or derived
-        };
-        setExpenses((prev) => [newExpense, ...prev]);
-
-        // Insert Expense
-        const { error: expError } = await supabase.from('expenses').insert(dbExpense);
-
-        if (expError) {
-            console.error("Error adding expense:", expError);
-            setExpenses(prev => prev.filter(e => e.id !== expenseId));
-            return;
-        }
-
-        // Insert Splits
-        if (dbSplits.length > 0) {
-            const { error: splitError } = await supabase.from('expense_splits').insert(dbSplits);
-            if (splitError) {
-                console.error("Error adding splits:", splitError);
-                // Rollback expense?
-                await supabase.from('expenses').delete().eq('id', expenseId);
-                setExpenses(prev => prev.filter(e => e.id !== expenseId));
+            if (res.ok) {
+                const newDoc = await res.json();
+                const newExpense = mapToExpense(newDoc);
+                setExpenses((prev) => [newExpense, ...prev]);
+            } else {
+                console.error("Failed to add expense");
             }
+        } catch (error) {
+            console.error("Error adding expense:", error);
         }
     };
 
@@ -152,18 +81,37 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         const prevExpenses = [...expenses];
         setExpenses((prev) => prev.filter((exp) => exp.id !== id));
 
-        const { error } = await supabase.from('expenses').delete().eq('id', id);
+        try {
+            const res = await fetch(`/api/expenses/${id}`, {
+                method: 'DELETE'
+            });
 
-        if (error) {
-            console.error("Failed to delete expense:", error);
+            if (!res.ok) {
+                console.error("Failed to delete expense");
+                setExpenses(prevExpenses);
+            }
+        } catch (error) {
+            console.error("Error deleting expense:", error);
             setExpenses(prevExpenses);
         }
     };
 
     const updateExpense = async (id: string, data: Omit<Expense, 'id'>) => {
-        // Implement update similarly if needed
-        // For now, let's just log implementation pending
-        console.warn("updateExpense not fully implemented yet");
+        try {
+            const res = await fetch(`/api/expenses/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (res.ok) {
+                const updatedDoc = await res.json();
+                const updatedExpense = mapToExpense(updatedDoc);
+                setExpenses(prev => prev.map(e => e.id === id ? updatedExpense : e));
+            }
+        } catch (error) {
+            console.error("Error updating expense", error);
+        }
     }
 
     const totalIncome = expenses

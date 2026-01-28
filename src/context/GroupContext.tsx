@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Group, GroupInput } from '@/types';
-import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 
 interface GroupContextType {
@@ -19,6 +18,14 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const mapToGroup = (doc: any): Group => ({
+        id: doc._id,
+        name: doc.name,
+        created_by: doc.created_by,
+        created_at: doc.created_at,
+        members: doc.members || []
+    });
+
     const fetchGroups = async () => {
         if (!user) {
             setGroups([]);
@@ -27,31 +34,16 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
         }
 
         setLoading(true);
-        // Fetch groups and their members
-        // group_members links to friends. We want the friend IDs.
-        const { data, error } = await supabase
-            .from('groups')
-            .select(`
-                *,
-                group_members (
-                    member_id
-                )
-            `)
-            .eq('created_by', user.id)
-            .order('created_at', { ascending: false });
-
-        if (error) {
+        try {
+            const res = await fetch('/api/groups');
+            if (res.ok) {
+                const data = await res.json();
+                setGroups(data.map(mapToGroup));
+            } else {
+                console.error("Error fetching groups");
+            }
+        } catch (error) {
             console.error("Error fetching groups:", error);
-        } else {
-            const formattedGroups: Group[] = (data || []).map((g: any) => ({
-                id: g.id,
-                name: g.name,
-                created_by: g.created_by,
-                created_at: g.created_at,
-                // Extract member IDs from joined table
-                members: g.group_members.map((m: any) => m.member_id)
-            }));
-            setGroups(formattedGroups);
         }
         setLoading(false);
     };
@@ -63,53 +55,44 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     const addGroup = async (input: GroupInput) => {
         if (!user) throw new Error("User must be logged in");
 
-        const groupId = crypto.randomUUID();
+        try {
+            const res = await fetch('/api/groups', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(input),
+            });
 
-        // 1. Insert Group
-        const { error: groupError } = await supabase.from('groups').insert({
-            id: groupId,
-            created_by: user.id,
-            name: input.name,
-            created_at: new Date().toISOString()
-        });
-
-        if (groupError) throw groupError;
-
-        // 2. Insert Members
-        if (input.memberIds.length > 0) {
-            const membersPayload = input.memberIds.map(mId => ({
-                group_id: groupId,
-                member_id: mId
-            }));
-
-            const { error: memberError } = await supabase
-                .from('group_members')
-                .insert(membersPayload);
-
-            if (memberError) {
-                console.error("Error adding group members:", memberError);
-                // Rollback?
-                await supabase.from('groups').delete().eq('id', groupId);
-                throw memberError;
+            if (res.ok) {
+                const newDoc = await res.json();
+                const newGroup = mapToGroup(newDoc);
+                setGroups(prev => [newGroup, ...prev]);
+                return newGroup.id;
+            } else {
+                throw new Error("Failed to add group");
             }
+        } catch (error) {
+            console.error("Error adding group:", error);
+            throw error;
         }
-
-        // Refresh list
-        await fetchGroups();
-        return groupId;
     };
 
     const deleteGroup = async (id: string) => {
         if (!user) return;
 
-        const { error } = await supabase.from('groups').delete().eq('id', id);
+        try {
+            const res = await fetch(`/api/groups/${id}`, {
+                method: 'DELETE'
+            });
 
-        if (error) {
+            if (res.ok) {
+                setGroups(prev => prev.filter(g => g.id !== id));
+            } else {
+                console.error("Error deleting group");
+            }
+        } catch (error) {
             console.error("Error deleting group:", error);
             throw error;
         }
-
-        setGroups(prev => prev.filter(g => g.id !== id));
     };
 
     return (

@@ -60,16 +60,22 @@ export default function Home() {
   if (!user) return null; // Prevent flash of content before redirect
 
   // Filter Logic
+  console.log('DEBUG: All Expenses:', expenses.length, expenses);
+  console.log('DEBUG: Current Date:', currentDate.toISOString());
+
   const filteredExpenses = expenses
     .filter((expense) => {
       // Splitwise Filter: Hide if not involved
-      if (expense.splitDetails) {
+      if (expense.splitDetails && expense.splitDetails.shares && expense.splitDetails.shares.length > 0) {
         const isPayer = expense.splitDetails.paidBy === 'me';
         const isInvolved = expense.splitDetails.shares.some(s => s.userId === 'me');
         if (!isPayer && !isInvolved) return false;
       }
 
       const expenseDate = new Date(expense.date);
+      if (isNaN(expenseDate.getTime())) return true; // Show invalid dates rather than hiding them
+
+      // Use local year/month for comparison
       return (
         expenseDate.getMonth() === currentDate.getMonth() &&
         expenseDate.getFullYear() === currentDate.getFullYear()
