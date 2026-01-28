@@ -5,7 +5,15 @@ export interface IUser extends Document {
     email: string;
     password?: string;
     image?: string;
-    phone?: string;
+    bankAccounts: {
+        _id: string;
+        name: string;
+        type: 'bank' | 'wallet' | 'card' | 'cash';
+        balance: number;
+        creditLimit?: number;
+        billingDate?: number;
+    }[];
+    user_upi_id?: string;
     created_at: Date;
     updated_at: Date;
 }
@@ -35,6 +43,18 @@ const UserSchema: Schema<IUser> = new Schema(
         image: {
             type: String,
         },
+        bankAccounts: [{
+            name: String, // e.g., 'HDFC', 'SBI'
+            type: { type: String, enum: ['bank', 'wallet', 'card', 'cash'], default: 'bank' },
+            balance: { type: Number, default: 0 },
+            creditLimit: { type: Number },
+            billingDate: { type: Number }, // Day of month (1-31)
+            _id: { type: Schema.Types.ObjectId, auto: true } // Give each account an ID
+        }],
+        user_upi_id: {
+            type: String,
+            trim: true
+        }
     },
     {
         timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
@@ -42,6 +62,12 @@ const UserSchema: Schema<IUser> = new Schema(
 );
 
 // Prevent overwrite on model compile
+if (process.env.NODE_ENV === 'development') {
+    // In development mode, we delete the model from the cache so that it can be
+    // recompiled with the new schema changes.
+    delete mongoose.models.User;
+}
+
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export default User;

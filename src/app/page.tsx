@@ -13,6 +13,12 @@ import { WeeklyBarChart } from '@/components/dashboard/WeeklyBarChart';
 import { FriendManager } from '@/components/dashboard/FriendManager';
 import { GroupManager } from '@/components/dashboard/GroupManager';
 import { DebtChart } from '@/components/dashboard/DebtChart';
+import { BudgetCard } from '@/components/dashboard/BudgetCard';
+import { GoalCard } from '@/components/dashboard/GoalCard';
+import { BankAccountCard } from '@/components/dashboard/BankAccountCard';
+import { InvestmentCard } from '@/components/dashboard/InvestmentCard';
+import { RecurringExpenseCard } from '@/components/dashboard/RecurringExpenseCard';
+import { LoanCard } from '@/components/dashboard/LoanCard';
 import { BalanceList } from '@/components/dashboard/BalanceList';
 import { Button } from '@/components/ui/Button';
 import { VoiceInput } from '@/components/dashboard/VoiceInput';
@@ -190,6 +196,15 @@ export default function Home() {
             <DebtChart expenses={expenses} />
           </div>
         )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+          <BudgetCard />
+          <GoalCard />
+          <BankAccountCard />
+          <InvestmentCard />
+          <RecurringExpenseCard />
+          <LoanCard />
+        </div>
 
         <BalanceList />
 

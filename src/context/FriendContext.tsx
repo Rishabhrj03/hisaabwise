@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 
 interface FriendContextType {
     friends: Friend[];
-    addFriend: (name: string, phone?: string) => Promise<string>;
+    addFriend: (name: string, phone?: string, upi_id?: string) => Promise<string>;
     deleteFriend: (id: string) => Promise<void>;
     loading: boolean;
 }
@@ -22,7 +22,8 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
         id: doc._id,
         name: doc.name,
         phone: doc.phone,
-        linked_user_id: doc.linked_user_id
+        linked_user_id: doc.linked_user_id,
+        upi_id: doc.upi_id
     });
 
     // Load from API
@@ -52,18 +53,14 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
         fetchFriends();
     }, [user]);
 
-    const addFriend = async (name: string, phone?: string) => {
+    const addFriend = async (name: string, phone?: string, upi_id?: string) => {
         if (!user) throw new Error("User must be logged in to add friends");
-
-        // Optimistic Update can be tricky without ID, but let's wait for server response
-        // or generate a temp ID. For now, waiting is safer or use user-provided ID? 
-        // MongoDB generates ID. Let's just call API and update.
 
         try {
             const res = await fetch('/api/friends', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, phone }),
+                body: JSON.stringify({ name, phone, upi_id }),
             });
 
             if (res.ok) {

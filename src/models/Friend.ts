@@ -5,10 +5,11 @@ export interface IFriend extends Document {
     name: string;
     phone?: string;
     linked_user_id?: mongoose.Types.ObjectId; // If this friend is linked to a real user
+    upi_id?: string;
     created_at: Date;
 }
 
-const FriendSchema: Schema<IFriend> = new Schema(
+const FriendSchema = new Schema(
     {
         user_id: {
             type: Schema.Types.ObjectId,
@@ -27,6 +28,10 @@ const FriendSchema: Schema<IFriend> = new Schema(
         linked_user_id: {
             type: Schema.Types.ObjectId,
             ref: 'User'
+        },
+        upi_id: {
+            type: String,
+            trim: true
         }
     },
     {

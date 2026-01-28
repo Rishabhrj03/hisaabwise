@@ -19,6 +19,7 @@ export interface Friend {
     name: string;
     phone?: string | null;
     linked_user_id?: string | null;
+    upi_id?: string;
 }
 
 export interface SplitShare {

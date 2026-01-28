@@ -143,9 +143,37 @@ export function DebtChart({ expenses }: DebtChartProps) {
         }
     };
 
+    const handleBarClick = (event: any, elements: any) => {
+        if (elements.length > 0) {
+            const index = elements[0].index;
+            const friendName = debtData.labels[index];
+            const amount = debtData.datasets[0].data[index];
+
+            // Find friend object
+            const friend = friends.find(f => f.name === friendName);
+
+            if (friend && amount < 0) { // I owe them
+                if (friend.upi_id) {
+                    const absAmount = Math.abs(amount).toFixed(2);
+                    const upiLink = `upi://pay?pa=${friend.upi_id}&pn=${friend.name.replace(' ', '%20')}&am=${absAmount}&cu=INR&tn=Settle%20Up`;
+
+                    // Open UPI app
+                    window.location.href = upiLink;
+                } else {
+                    alert(`You owe ${friend.name} ₹${Math.abs(amount)}. Add their UPI ID in Friends manager to pay directly.`);
+                }
+            }
+        }
+    };
+
     return (
         <Card variant="default">
-            <Bar options={options} data={debtData} />
+            <Bar options={{ ...options, onClick: handleBarClick }} data={debtData} />
+            <div style={{ marginTop: '1rem', padding: '0.5rem', background: 'rgba(255, 99, 132, 0.1)', borderRadius: '8px', border: '1px dashed rgba(255, 99, 132, 0.3)' }}>
+                <p style={{ fontSize: '0.85rem', color: 'hsl(var(--color-text-main))', textAlign: 'center' }}>
+                    💡 <strong>Tip:</strong> Click on any <span style={{ color: 'rgba(255, 99, 132, 1)' }}>Red Bar</span> to instantly <strong>Settle Up</strong> via UPI.
+                </p>
+            </div>
         </Card>
     );
 }

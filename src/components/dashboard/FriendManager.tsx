@@ -8,13 +8,15 @@ export function FriendManager() {
     const { friends, addFriend, deleteFriend } = useFriends();
     const [newFriendName, setNewFriendName] = useState('');
     const [newFriendPhone, setNewFriendPhone] = useState('');
+    const [newFriendUpi, setNewFriendUpi] = useState('');
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newFriendName.trim()) {
-            await addFriend(newFriendName, newFriendPhone);
+            await addFriend(newFriendName, newFriendPhone, newFriendUpi);
             setNewFriendName('');
             setNewFriendPhone('');
+            setNewFriendUpi('');
         }
     };
 
@@ -47,6 +49,12 @@ export function FriendManager() {
                         value={newFriendPhone}
                         onChange={(e) => setNewFriendPhone(e.target.value)}
                         type="tel"
+                        style={{ flex: 1.5 }}
+                    />
+                    <Input
+                        placeholder="UPI ID (optional)"
+                        value={newFriendUpi}
+                        onChange={(e) => setNewFriendUpi(e.target.value)}
                         style={{ flex: 1.5 }}
                     />
                     <Button type="submit" size="sm">Add</Button>

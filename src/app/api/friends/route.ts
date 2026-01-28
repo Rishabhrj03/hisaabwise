@@ -28,11 +28,14 @@ export async function POST(req: Request) {
         }
 
         await dbConnect();
-        const data = await req.json();
+        const { name, phone, upi_id } = await req.json();
 
         const friend = await Friend.create({
-            ...data,
             user_id: session.userId,
+            name,
+            phone,
+            upi_id,
+            linked_user_id: undefined // logic to link can go here
         });
 
         return NextResponse.json(friend);
