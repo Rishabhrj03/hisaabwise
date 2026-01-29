@@ -159,7 +159,7 @@ export default function Home() {
               Groups
             </Button>
 
-            <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)} tooltip="Share your dashboard">
+            <Button variant="secondary" size="sm" onClick={() => setShowShareModal(true)} tooltip="Share your dashboard">
               Share 🔗
             </Button>
 
