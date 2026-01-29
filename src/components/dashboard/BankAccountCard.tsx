@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
 interface BankAccount {
     _id: string;
@@ -21,6 +22,10 @@ export function BankAccountCard() {
     const [newLimit, setNewLimit] = useState('');
     const [newBillDate, setNewBillDate] = useState('');
 
+    // Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+
     useEffect(() => {
         fetch('/api/accounts')
             .then(res => res.json())
@@ -30,8 +35,12 @@ export function BankAccountCard() {
             .catch(err => console.error(err));
     }, []);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleAddAccount = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         try {
             const body: any = {
                 name: newName,
@@ -55,6 +64,26 @@ export function BankAccountCard() {
                 setNewName(''); setNewBalance(''); setNewLimit(''); setNewBillDate('');
             }
         } catch (err) { console.error(err); }
+        finally { setIsSubmitting(false); }
+    };
+
+    const handleDelete = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setDeleteId(id);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
+        try {
+            const res = await fetch(`/api/accounts?id=${deleteId}`, { method: 'DELETE' });
+            if (res.ok) {
+                setAccounts(prev => prev.filter(a => a._id !== deleteId));
+                setShowDeleteModal(false);
+                setDeleteId(null);
+            }
+        } catch (err) { console.error(err); }
     };
 
     const assets = accounts.filter(a => a.type !== 'card');
@@ -65,115 +94,137 @@ export function BankAccountCard() {
     const netWorth = totalAssetValue - totalLiabilities;
 
     return (
-        <Card
-            variant="glass"
-            title="Accounts & Cards 💳"
-            defaultOpen={false}
-            action={
-                <button
-                    onClick={() => setShowAdd(!showAdd)}
-                    style={{ background: 'none', border: 'none', color: 'hsl(var(--color-primary))', cursor: 'pointer', fontSize: '1.5rem' }}
-                >
-                    +
-                </button>
-            }
-        >
+        <>
+            <Card
+                variant="glass"
+                title="Accounts & Cards 💳"
+                defaultOpen={false}
+                action={
+                    <button
+                        onClick={() => setShowAdd(!showAdd)}
+                        style={{ background: 'none', border: 'none', color: 'hsl(var(--color-primary))', cursor: 'pointer', fontSize: '1.5rem' }}
+                    >
+                        +
+                    </button>
+                }
+            >
 
-            {showAdd && (
-                <form onSubmit={handleAddAccount} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
-                    <input
-                        placeholder="Name (e.g. HDFC, Amex)"
-                        value={newName}
-                        onChange={e => setNewName(e.target.value)}
-                        style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                    />
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <select
-                            value={newType}
-                            onChange={e => setNewType(e.target.value)}
-                            style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                        >
-                            <option value="bank">Bank</option>
-                            <option value="wallet">Wallet</option>
-                            <option value="card">Credit Card</option>
-                            <option value="cash">Cash</option>
-                        </select>
+                {showAdd && (
+                    <form onSubmit={handleAddAccount} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
                         <input
-                            placeholder={newType === 'card' ? "Outstanding Amt" : "Current Balance"}
-                            type="number"
-                            value={newBalance}
-                            onChange={e => setNewBalance(e.target.value)}
-                            style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                            placeholder="Name (e.g. HDFC, Amex)"
+                            value={newName}
+                            onChange={e => setNewName(e.target.value)}
+                            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
                         />
-                    </div>
-                    {newType === 'card' && (
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <select
+                                value={newType}
+                                onChange={e => setNewType(e.target.value)}
+                                style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                            >
+                                <option value="bank">Bank</option>
+                                <option value="wallet">Wallet</option>
+                                <option value="card">Credit Card</option>
+                                <option value="cash">Cash</option>
+                            </select>
                             <input
-                                placeholder="Total Limit"
+                                placeholder={newType === 'card' ? "Outstanding Amt" : "Current Balance"}
                                 type="number"
-                                value={newLimit}
-                                onChange={e => setNewLimit(e.target.value)}
+                                value={newBalance}
+                                onChange={e => setNewBalance(e.target.value)}
                                 style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
                             />
-                            <input
-                                placeholder="Bill Day (1-31)"
-                                type="number"
-                                value={newBillDate}
-                                onChange={e => setNewBillDate(e.target.value)}
-                                style={{ width: '100px', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                            />
                         </div>
-                    )}
-                    <button type="submit" style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer' }}>Add</button>
-                </form>
-            )}
-
-            {accounts.length === 0 ? (
-                <p style={{ color: 'hsl(var(--color-text-muted))' }}>No accounts linked.</p>
-            ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {/* Liquid Assets Section */}
-                    {assets.length > 0 && (
-                        <div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Liquid Assets</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {assets.map(acc => (
-                                    <AccountItem key={acc._id} account={acc} onUpdate={(updated) => setAccounts(prev => prev.map(a => a._id === updated._id ? updated : a))} />
-                                ))}
+                        {newType === 'card' && (
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <input
+                                    placeholder="Total Limit"
+                                    type="number"
+                                    value={newLimit}
+                                    onChange={e => setNewLimit(e.target.value)}
+                                    style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
+                                <input
+                                    placeholder="Bill Day (1-31)"
+                                    type="number"
+                                    value={newBillDate}
+                                    onChange={e => setNewBillDate(e.target.value)}
+                                    style={{ width: '100px', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
                             </div>
-                        </div>
-                    )}
+                        )}
+                        <button type="submit" disabled={isSubmitting} style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                            {isSubmitting ? 'Adding...' : 'Add'}
+                        </button>
+                    </form>
+                )}
 
-                    {/* Credit Cards Section */}
-                    {cards.length > 0 && (
-                        <div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Credit Cards</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {cards.map(acc => (
-                                    <AccountItem key={acc._id} account={acc} onUpdate={(updated) => setAccounts(prev => prev.map(a => a._id === updated._id ? updated : a))} />
-                                ))}
+                {accounts.length === 0 ? (
+                    <p style={{ color: 'hsl(var(--color-text-muted))' }}>No accounts linked.</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {/* Liquid Assets Section */}
+                        {assets.length > 0 && (
+                            <div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Liquid Assets</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    {assets.map(acc => (
+                                        <AccountItem
+                                            key={acc._id}
+                                            account={acc}
+                                            onUpdate={(updated) => setAccounts(prev => prev.map(a => a._id === updated._id ? updated : a))}
+                                            onDelete={(e) => handleDelete(e, acc._id)}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Net Worth Summary */}
-                    <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed hsl(var(--color-border))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <div style={{ fontWeight: 700 }}>Net Worth</div>
-                            <div style={{ fontSize: '0.7rem', color: '#888' }}>(Assets - Liabilities)</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 700, fontSize: '1.1rem', color: netWorth >= 0 ? 'var(--color-income)' : 'var(--color-expense)' }}>₹{netWorth}</div>
-                            {totalLiabilities > 0 && <div style={{ fontSize: '0.7rem', color: 'var(--color-expense)' }}>Debt: ₹{totalLiabilities}</div>}
+                        {/* Credit Cards Section */}
+                        {cards.length > 0 && (
+                            <div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Credit Cards</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    {cards.map(acc => (
+                                        <AccountItem
+                                            key={acc._id}
+                                            account={acc}
+                                            onUpdate={(updated) => setAccounts(prev => prev.map(a => a._id === updated._id ? updated : a))}
+                                            onDelete={(e) => handleDelete(e, acc._id)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Net Worth Summary */}
+                        <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed hsl(var(--color-border))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <div style={{ fontWeight: 700 }}>Net Worth</div>
+                                <div style={{ fontSize: '0.7rem', color: '#888' }}>(Assets - Liabilities)</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontWeight: 700, fontSize: '1.1rem', color: netWorth >= 0 ? 'var(--color-income)' : 'var(--color-expense)' }}>₹{netWorth}</div>
+                                {totalLiabilities > 0 && <div style={{ fontSize: '0.7rem', color: 'var(--color-expense)' }}>Debt: ₹{totalLiabilities}</div>}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </Card>
+                )}
+            </Card>
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete Account"
+                message="Are you sure you want to remove this account? This action cannot be undone."
+            />
+        </>
     );
 }
 
-function AccountItem({ account, onUpdate }: { account: BankAccount, onUpdate: (a: BankAccount) => void }) {
+function AccountItem({ account, onUpdate, onDelete }: { account: BankAccount, onUpdate: (a: BankAccount) => void, onDelete: (e: React.MouseEvent) => void }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editName, setEditName] = useState(account.name);
     const [editBalance, setEditBalance] = useState(account.balance.toString());
@@ -266,7 +317,17 @@ function AccountItem({ account, onUpdate }: { account: BankAccount, onUpdate: (a
                         </div>
                     )}
                 </div>
-                <span onClick={() => setIsEditing(true)} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>✏️</span>
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <span onClick={() => setIsEditing(true)} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>✏️</span>
+                    <button
+                        type="button"
+                        onClick={onDelete}
+                        style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', fontSize: '1rem', padding: '0' }}
+                        title="Delete Account"
+                    >
+                        &times;
+                    </button>
+                </div>
             </div>
         </div>
     );

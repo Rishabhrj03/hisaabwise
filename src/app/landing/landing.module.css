@@ -41,6 +41,7 @@
     font-weight: 800;
     line-height: 1.1;
     background: linear-gradient(135deg, hsl(var(--color-text-main)) 30%, hsl(var(--color-primary)));
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;

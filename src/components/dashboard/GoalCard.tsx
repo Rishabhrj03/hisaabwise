@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 
 interface Goal {
@@ -8,6 +8,10 @@ interface Goal {
     currentAmount: number;
     color: string;
 }
+
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+
+// ... (interface remains same if not touched, but I need to be careful with replace_file_content context)
 
 export function GoalCard() {
     const [goals, setGoals] = useState<Goal[]>([]);
@@ -30,9 +34,16 @@ export function GoalCard() {
     const [showAdd, setShowAdd] = useState(false);
     const [newName, setNewName] = useState('');
     const [newTarget, setNewTarget] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
     const handleAddGoal = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return; // Prevent double submit
+        setIsSubmitting(true);
         try {
             const res = await fetch('/api/goals', {
                 method: 'POST',
@@ -48,66 +59,108 @@ export function GoalCard() {
             }
         } catch (err) {
             console.error(err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setDeleteId(id);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
+        try {
+            const res = await fetch(`/api/goals?id=${deleteId}`, { method: 'DELETE' });
+            if (res.ok) {
+                setGoals(prev => prev.filter(g => g._id !== deleteId));
+                setShowDeleteModal(false);
+                setDeleteId(null);
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
     return (
-        <Card
-            variant="glass"
-            title="Savings Goals 🎯"
-            defaultOpen={false}
-            action={
-                <button
-                    onClick={() => setShowAdd(!showAdd)}
-                    style={{ background: 'none', border: 'none', color: 'hsl(var(--color-primary))', cursor: 'pointer', fontSize: '1.5rem' }}
-                >
-                    +
-                </button>
-            }
-        >
+        <>
+            <Card
+                variant="glass"
+                title="Savings Goals 🎯"
+                defaultOpen={false}
+                action={
+                    <button
+                        onClick={() => setShowAdd(!showAdd)}
+                        style={{ background: 'none', border: 'none', color: 'hsl(var(--color-primary))', cursor: 'pointer', fontSize: '1.5rem' }}
+                    >
+                        +
+                    </button>
+                }
+            >
 
-            {showAdd && (
-                <form onSubmit={handleAddGoal} style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
-                    <input
-                        placeholder="Goal Name"
-                        value={newName}
-                        onChange={e => setNewName(e.target.value)}
-                        style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '50%' }}
-                    />
-                    <input
-                        placeholder="Target Amount"
-                        type="number"
-                        value={newTarget}
-                        onChange={e => setNewTarget(e.target.value)}
-                        style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '30%' }}
-                    />
-                    <button type="submit" style={{ flex: 1, borderRadius: '8px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none' }}>✓</button>
-                </form>
-            )}
+                {showAdd && (
+                    <form onSubmit={handleAddGoal} style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                        <input
+                            placeholder="Goal Name"
+                            value={newName}
+                            onChange={e => setNewName(e.target.value)}
+                            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '50%' }}
+                        />
+                        <input
+                            placeholder="Target Amount"
+                            type="number"
+                            value={newTarget}
+                            onChange={e => setNewTarget(e.target.value)}
+                            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '30%' }}
+                        />
+                        <button type="submit" disabled={isSubmitting} style={{ flex: 1, borderRadius: '8px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', opacity: isSubmitting ? 0.7 : 1 }}>
+                            {isSubmitting ? '...' : '✓'}
+                        </button>
+                    </form>
+                )}
 
-            {goals.length === 0 ? (
-                <p style={{ color: 'hsl(var(--color-text-muted))' }}>No active goals.</p>
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
-                    {goals.map(goal => (
-                        <GoalItem key={goal._id} goal={goal} onUpdate={(updated) => setGoals(prev => prev.map(g => g._id === updated._id ? updated : g))} />
-                    ))}
-                </div>
-            )}
-        </Card>
+                {goals.length === 0 ? (
+                    <p style={{ color: 'hsl(var(--color-text-muted))' }}>No active goals.</p>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                        {goals.map(goal => (
+                            <GoalItem
+                                key={goal._id}
+                                goal={goal}
+                                onUpdate={(updated) => setGoals(prev => prev.map(g => g._id === updated._id ? updated : g))}
+                                onDelete={(e) => handleDelete(e, goal._id)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </Card>
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete Goal"
+                message="Are you sure you want to delete this goal? This action cannot be undone."
+            />
+        </>
     );
 }
 
-function GoalItem({ goal, onUpdate }: { goal: Goal, onUpdate: (g: Goal) => void }) {
+function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal) => void, onDelete: (e: React.MouseEvent) => void }) {
     const [addingFunds, setAddingFunds] = useState(false);
     const [amountToAdd, setAmountToAdd] = useState('');
+    const [isUpdating, setIsUpdating] = useState(false);
 
     // Target Editing State
     const [isEditingTarget, setIsEditingTarget] = useState(false);
     const [editTargetAmount, setEditTargetAmount] = useState(goal.targetAmount.toString());
 
     const handleAddFunds = async () => {
-        if (!amountToAdd) return;
+        if (!amountToAdd || isUpdating) return;
+        setIsUpdating(true);
         try {
             const newAmount = goal.currentAmount + Number(amountToAdd);
             const res = await fetch('/api/goals', {
@@ -121,6 +174,7 @@ function GoalItem({ goal, onUpdate }: { goal: Goal, onUpdate: (g: Goal) => void 
                 setAmountToAdd('');
             }
         } catch (err) { console.error(err); }
+        finally { setIsUpdating(false); }
     };
 
     const handleUpdateTarget = async () => {
@@ -146,8 +200,31 @@ function GoalItem({ goal, onUpdate }: { goal: Goal, onUpdate: (g: Goal) => void 
             background: 'rgba(255,255,255,0.05)',
             borderRadius: '12px',
             border: `1px solid ${goal.color || '#4F46E5'}40`,
-            textAlign: 'center'
-        }}>
+            textAlign: 'center',
+            position: 'relative'
+        }}
+            className="group"
+        >
+            <button
+                type="button"
+                onClick={onDelete}
+                style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '4px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#ff4d4d',
+                    cursor: 'pointer',
+                    opacity: 0.5,
+                    fontSize: '1rem'
+                }}
+                title="Delete Goal"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+                &times;
+            </button>
+
             <div style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
                 {goal.name}
             </div>
@@ -199,39 +276,41 @@ function GoalItem({ goal, onUpdate }: { goal: Goal, onUpdate: (g: Goal) => void 
                 )}
             </div>
 
-            {addingFunds ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <div style={{ display: 'flex', gap: '0.25rem' }}>
-                        <input
-                            type="number"
-                            value={amountToAdd}
-                            onChange={e => setAmountToAdd(e.target.value)}
-                            placeholder="+/- Amt"
-                            style={{ width: '100%', padding: '2px', borderRadius: '4px', border: '1px solid #555', fontSize: '0.8rem' }}
-                            autoFocus
-                        />
-                        <button onClick={handleAddFunds} style={{ background: 'var(--color-primary)', border: 'none', borderRadius: '4px', color: 'white' }}>✓</button>
-                        <button onClick={() => setAddingFunds(false)} style={{ background: 'transparent', border: 'none', color: '#999' }}>×</button>
+            {
+                addingFunds ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                            <input
+                                type="number"
+                                value={amountToAdd}
+                                onChange={e => setAmountToAdd(e.target.value)}
+                                placeholder="+/- Amt"
+                                style={{ width: '100%', padding: '2px', borderRadius: '4px', border: '1px solid #555', fontSize: '0.8rem' }}
+                                autoFocus
+                            />
+                            <button onClick={handleAddFunds} disabled={isUpdating} style={{ background: 'var(--color-primary)', border: 'none', borderRadius: '4px', color: 'white' }}>{isUpdating ? '.' : '✓'}</button>
+                            <button onClick={() => setAddingFunds(false)} style={{ background: 'transparent', border: 'none', color: '#999' }}>×</button>
+                        </div>
+                        <span style={{ fontSize: '0.6rem', color: '#aaa' }}>Use negative (-) to withdraw</span>
                     </div>
-                    <span style={{ fontSize: '0.6rem', color: '#aaa' }}>Use negative (-) to withdraw</span>
-                </div>
-            ) : (
-                <button
-                    onClick={() => setAddingFunds(true)}
-                    style={{
-                        border: '1px solid hsl(var(--color-border))',
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '44px',
-                        padding: '0.2rem 0.5rem',
-                        fontSize: '0.75rem',
-                        cursor: 'pointer',
-                        color: 'hsl(var(--color-text-main))',
-                        width: '100%'
-                    }}
-                >
-                    + Add / Withdraw
-                </button>
-            )}
-        </div>
+                ) : (
+                    <button
+                        onClick={() => setAddingFunds(true)}
+                        style={{
+                            border: '1px solid hsl(var(--color-border))',
+                            background: 'rgba(255,255,255,0.1)',
+                            borderRadius: '44px',
+                            padding: '0.2rem 0.5rem',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            color: 'hsl(var(--color-text-main))',
+                            width: '100%'
+                        }}
+                    >
+                        + Add / Withdraw
+                    </button>
+                )
+            }
+        </div >
     );
 }

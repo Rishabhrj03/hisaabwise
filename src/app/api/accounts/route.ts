@@ -92,3 +92,36 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await getSessionUser();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const id = searchParams.get('id');
+
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+        await dbConnect();
+
+        const user = await User.findById(session.userId);
+        if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+        const initialLength = user.bankAccounts.length;
+        user.bankAccounts = user.bankAccounts.filter((acc: any) => acc._id.toString() !== id);
+
+        if (user.bankAccounts.length === initialLength) {
+            return NextResponse.json({ error: 'Account not found' }, { status: 404 });
+        }
+
+        await user.save();
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}

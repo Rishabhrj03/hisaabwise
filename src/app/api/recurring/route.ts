@@ -92,3 +92,27 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await getSessionUser();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const id = searchParams.get('id');
+
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+        await dbConnect();
+
+        const deleted = await RecurringExpense.findOneAndDelete({ _id: id, user_id: session.userId });
+        if (!deleted) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting recurring expense:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}

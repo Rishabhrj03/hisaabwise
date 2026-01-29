@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
 interface Investment {
     _id: string;
@@ -23,6 +24,8 @@ export function InvestmentCard() {
     const [frequency, setFrequency] = useState('monthly');
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     useEffect(() => {
         fetch('/api/investments')
             .then(res => res.json())
@@ -34,6 +37,14 @@ export function InvestmentCard() {
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
+
+        if (!name.trim()) {
+            alert('Please enter an investment name.');
+            return;
+        }
+
+        setIsSubmitting(true);
         try {
             const res = await fetch('/api/investments', {
                 method: 'POST',
@@ -49,10 +60,44 @@ export function InvestmentCard() {
             });
             if (res.ok) {
                 const newInv = await res.json();
+                console.log("New investment added:", newInv); // Debug log
                 setInvestments(prev => [...prev, newInv]);
                 setShowAdd(false);
                 // Reset form
                 setName(''); setAmount(''); setSipAmount(''); setFrequency('monthly');
+            } else {
+                const error = await res.json();
+                alert(`Failed to add: ${error.error || 'Unknown error'}`);
+            }
+        } catch (err) { console.error(err); }
+        finally { setIsSubmitting(false); }
+    };
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+
+    const handleDelete = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setDeleteId(id);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
+
+        console.log("Attempting to delete investment ID:", deleteId);
+        try {
+            const res = await fetch(`/api/investments?id=${deleteId}`, { method: 'DELETE' });
+            if (res.ok) {
+                console.log("Delete success for ID:", deleteId);
+                setInvestments(prev => prev.filter(i => i._id !== deleteId));
+                setShowDeleteModal(false);
+                setDeleteId(null);
+            } else {
+                const err = await res.json();
+                console.error("Delete failed:", err);
+                alert("Failed to delete. Check console for details.");
             }
         } catch (err) { console.error(err); }
     };
@@ -60,70 +105,87 @@ export function InvestmentCard() {
     const totalPortfolio = investments.reduce((sum, i) => sum + i.currentAmount, 0);
 
     return (
-        <Card
-            variant="glass"
-            title="Investments 📈"
-            defaultOpen={false}
-            action={
-                <button
-                    onClick={() => setShowAdd(!showAdd)}
-                    style={{ background: 'none', border: 'none', color: 'hsl(var(--color-primary))', cursor: 'pointer', fontSize: '1.5rem' }}
-                >
-                    +
-                </button>
-            }
-        >
+        <>
+            <Card
+                variant="glass"
+                title="Investments 📈"
+                defaultOpen={false}
+                action={
+                    <button
+                        onClick={() => setShowAdd(!showAdd)}
+                        style={{ background: 'none', border: 'none', color: 'hsl(var(--color-primary))', cursor: 'pointer', fontSize: '1.5rem' }}
+                    >
+                        +
+                    </button>
+                }
+            >
 
-            {showAdd && (
-                <form onSubmit={handleAdd} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
-                    <input placeholder="Name (e.g. Nifty 50)" value={name} onChange={e => setName(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                {showAdd && (
+                    <form onSubmit={handleAdd} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
+                        <input placeholder="Name (e.g. Nifty 50)" value={name} onChange={e => setName(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
 
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <select value={type} onChange={e => setType(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
-                            {['SIP', 'MutualFund', 'Stock', 'NPS', 'FD', 'Gold', 'Crypto', 'Other'].map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                        <input type="number" placeholder="Current Value" value={amount} onChange={e => setAmount(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#888' }}>Start Date:</span>
-                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
-                    </div>
-
-                    {(type === 'SIP' || type === 'NPS' || type === 'MutualFund') && (
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <input type="number" placeholder="Auto-Add Amount" value={sipAmount} onChange={e => setSipAmount(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
-                            <select value={frequency} onChange={e => setFrequency(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
-                                <option value="monthly">Monthly</option>
-                                <option value="quarterly">Quarterly</option>
-                                <option value="half-yearly">Half-Yearly</option>
-                                <option value="yearly">Yearly</option>
-                                <option value="one-time">One Time</option>
+                            <select value={type} onChange={e => setType(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
+                                {['SIP', 'MutualFund', 'Stock', 'NPS', 'FD', 'Gold', 'Crypto', 'Other'].map(t => <option key={t} value={t}>{t}</option>)}
                             </select>
+                            <input type="number" placeholder="Current Value" value={amount} onChange={e => setAmount(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
                         </div>
-                    )}
-                    <button type="submit" style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer' }}>Add Investment</button>
-                </form>
-            )}
 
-            {investments.length === 0 ? (
-                <p style={{ color: 'hsl(var(--color-text-muted))' }}>No investments tracked.</p>
-            ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {investments.map(inv => (
-                        <InvestmentItem key={inv._id} investment={inv} onUpdate={(updated) => setInvestments(prev => prev.map(p => p._id === updated._id ? updated : p))} />
-                    ))}
-                    <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed hsl(var(--color-border))', display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-                        <span>Total Portfolio</span>
-                        <span>₹{totalPortfolio}</span>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#888' }}>Start Date:</span>
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                        </div>
+
+                        {(type === 'SIP' || type === 'NPS' || type === 'MutualFund') && (
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <input type="number" placeholder="Auto-Add Amount" value={sipAmount} onChange={e => setSipAmount(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                                <select value={frequency} onChange={e => setFrequency(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="half-yearly">Half-Yearly</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="one-time">One Time</option>
+                                </select>
+                            </div>
+                        )}
+                        <button type="submit" disabled={isSubmitting} style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                            {isSubmitting ? 'Adding...' : 'Add Investment'}
+                        </button>
+                    </form>
+                )}
+
+                {investments.length === 0 ? (
+                    <p style={{ color: 'hsl(var(--color-text-muted))' }}>No investments tracked.</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {investments.map(inv => (
+                            <InvestmentItem
+                                key={inv._id}
+                                investment={inv}
+                                onUpdate={(updated) => setInvestments(prev => prev.map(p => p._id === updated._id ? updated : p))}
+                                onDelete={(e) => handleDelete(e, inv._id)}
+                            />
+                        ))}
+                        <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed hsl(var(--color-border))', display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                            <span>Total Portfolio</span>
+                            <span>₹{totalPortfolio}</span>
+                        </div>
                     </div>
-                </div>
-            )}
-        </Card>
+                )}
+            </Card>
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete Investment"
+                message="Are you sure you want to delete this investment? This action cannot be undone."
+            />
+        </>
     );
 }
 
-function InvestmentItem({ investment, onUpdate }: { investment: Investment, onUpdate: (i: Investment) => void }) {
+function InvestmentItem({ investment, onUpdate, onDelete }: { investment: Investment, onUpdate: (i: Investment) => void, onDelete: (e: React.MouseEvent) => void }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editAmount, setEditAmount] = useState(investment.currentAmount.toString());
     const [editSipAmount, setEditSipAmount] = useState((investment.autoIncreaseAmount || 0).toString());
@@ -156,7 +218,7 @@ function InvestmentItem({ investment, onUpdate }: { investment: Investment, onUp
             <div style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontWeight: 500 }}>{investment.name}</span>
-                    <button onClick={() => setIsEditing(false)} style={{ background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer' }}>×</button>
+                    <button onClick={() => setIsEditing(false)} type="button" style={{ background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer' }}>×</button>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <label style={{ fontSize: '0.8rem' }}>Val: ₹</label>
@@ -172,7 +234,7 @@ function InvestmentItem({ investment, onUpdate }: { investment: Investment, onUp
                         <option value="yearly">Y</option>
                     </select>
                 </div>
-                <button onClick={handleSave} style={{ alignSelf: 'flex-end', padding: '0.25rem 0.5rem', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', borderRadius: '4px' }}>Save</button>
+                <button onClick={handleSave} type="button" style={{ alignSelf: 'flex-end', padding: '0.25rem 0.5rem', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', borderRadius: '4px' }}>Save</button>
             </div>
         )
     }
@@ -191,6 +253,14 @@ function InvestmentItem({ investment, onUpdate }: { investment: Investment, onUp
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{ fontWeight: 600 }}>₹{investment.currentAmount}</div>
                 <span onClick={() => setIsEditing(true)} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>✏️</span>
+                <button
+                    type="button"
+                    onClick={onDelete}
+                    style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', fontSize: '1rem', padding: '0 4px' }}
+                    title="Delete"
+                >
+                    &times;
+                </button>
             </div>
         </div>
     );
