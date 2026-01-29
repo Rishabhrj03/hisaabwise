@@ -9,7 +9,7 @@ export interface IExpense extends Document {
     description: string;
     amount: number;
     date: Date;
-    type: 'income' | 'expense';
+    type: 'income' | 'expense' | 'transfer';
     category: string;
     created_by: mongoose.Types.ObjectId; // User ID
     group_id?: mongoose.Types.ObjectId;
@@ -41,7 +41,7 @@ const ExpenseSchema: Schema<IExpense> = new Schema(
         },
         type: {
             type: String,
-            enum: ['income', 'expense'],
+            enum: ['income', 'expense', 'transfer'],
             required: true
         },
         category: {

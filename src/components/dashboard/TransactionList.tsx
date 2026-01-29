@@ -49,7 +49,12 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        borderLeft: `4px solid ${expense.type === 'income' ? 'hsl(var(--color-income))' : 'hsl(var(--color-expense))'}`
+                        borderLeft: `4px solid ${expense.type === 'income'
+                                ? 'hsl(var(--color-income))'
+                                : expense.type === 'transfer'
+                                    ? 'hsl(var(--color-text-main))'
+                                    : 'hsl(var(--color-expense))'
+                            }`
                     }}
                 >
                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, marginRight: '1rem' }}>
@@ -81,9 +86,13 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                         <span style={{
                             fontWeight: 600,
                             whiteSpace: 'nowrap',
-                            color: expense.type === 'income' ? 'hsl(var(--color-income))' : 'hsl(var(--color-expense))'
+                            color: expense.type === 'income'
+                                ? 'hsl(var(--color-income))'
+                                : expense.type === 'transfer'
+                                    ? 'hsl(var(--color-text-main))' // Neutral for transfer
+                                    : 'hsl(var(--color-expense))'
                         }}>
-                            {expense.type === 'income' ? '+' : '-'}{formatCurrency(expense.amount)}
+                            {expense.type === 'income' ? '+' : expense.type === 'transfer' ? '⇄ ' : '-'}{formatCurrency(expense.amount)}
                         </span>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <Button

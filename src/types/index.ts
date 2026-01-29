@@ -3,7 +3,7 @@ export interface Expense {
     description: string;
     amount: number;
     date: string; // ISO string
-    type: 'income' | 'expense';
+    type: 'income' | 'expense' | 'transfer';
     category: string;
     // Splitwise features
     relatedTo?: string[]; // IDs of friends involved in split

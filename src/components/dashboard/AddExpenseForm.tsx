@@ -20,7 +20,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     // Form State
     const [description, setDescription] = useState(initialData?.description || '');
     const [amount, setAmount] = useState(initialData?.amount.toString() || '');
-    const [type, setType] = useState<'income' | 'expense'>(initialData?.type || 'expense');
+    const [type, setType] = useState<'income' | 'expense' | 'transfer'>(initialData?.type || 'expense');
     const [category, setCategory] = useState(initialData?.category || '');
     const [selectedGroupId, setSelectedGroupId] = useState<string>(initialData?.group_id || '');
 
@@ -111,7 +111,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
             {/* Type Selection */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Button
                     type="button"
                     variant={type === 'expense' ? 'danger' : 'secondary'}
@@ -132,6 +132,22 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                     }}
                 >
                     Income
+                </Button>
+                <Button
+                    type="button"
+                    variant={type === 'transfer' ? 'secondary' : 'secondary'} // Use a distinct style or secondary for now
+                    onClick={() => {
+                        setType('transfer');
+                        setCategory('Transfer'); // Auto-set category
+                    }}
+                    style={{
+                        flex: 1,
+                        background: type === 'transfer' ? 'hsl(var(--color-text-main))' : undefined,
+                        color: type === 'transfer' ? 'var(--color-background)' : undefined,
+                        borderColor: type === 'transfer' ? 'transparent' : undefined
+                    }}
+                >
+                    Transfer
                 </Button>
             </div>
 
@@ -308,6 +324,13 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                             {categories.map(cat => (
                                 <option key={cat._id} value={cat.name}>{cat.name}</option>
                             ))}
+                        </>
+                    ) : type === 'transfer' ? (
+                        <>
+                            <option value="Transfer">Transfer</option>
+                            <option value="Credit Card Payment">Credit Card Payment</option>
+                            <option value="Loan Payment">Loan Payment</option>
+                            <option value="Savings">Savings</option>
                         </>
                     ) : (
                         <>
