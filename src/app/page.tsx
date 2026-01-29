@@ -26,7 +26,7 @@ import { VoiceInput } from '@/components/dashboard/VoiceInput';
 import { useExpenses } from '@/context/ExpenseContext';
 
 import { Expense } from '@/types';
-
+import { ShareDashboardModal } from '@/components/dashboard/ShareDashboardModal';
 import { Modal } from '@/components/ui/Modal';
 
 import { useAuth } from '@/context/AuthContext';
@@ -40,6 +40,7 @@ export default function Home() {
   /* Hook Calls - Must be unconditional */
   const { expenses, deleteExpense, categories } = useExpenses();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -156,6 +157,10 @@ export default function Home() {
 
             <Button variant="secondary" size="sm" onClick={() => setShowGroupManager(true)} tooltip="Manage expense groups">
               Groups
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)} tooltip="Share your dashboard">
+              Share 🔗
             </Button>
 
             <select
@@ -283,6 +288,11 @@ export default function Home() {
         >
           <GroupManager />
         </Modal>
+
+        <ShareDashboardModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+        />
 
         <TransactionList
           expenses={filteredExpenses}

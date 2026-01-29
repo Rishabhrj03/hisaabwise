@@ -15,6 +15,8 @@ export interface IUser extends Document {
         billingDate?: number;
     }[];
     user_upi_id?: string;
+    isPublic: boolean;
+    shareToken?: string;
     created_at: Date;
     updated_at: Date;
 }
@@ -43,6 +45,16 @@ const UserSchema: Schema<IUser> = new Schema(
         },
         image: {
             type: String,
+        },
+        isPublic: {
+            type: Boolean,
+            default: false
+        },
+        shareToken: {
+            type: String,
+            unique: true,
+            sparse: true, // Allow null/undefined to be non-unique
+            index: true
         },
         bankAccounts: [{
             name: String, // e.g., 'HDFC', 'SBI'
