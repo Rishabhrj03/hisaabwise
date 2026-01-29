@@ -38,7 +38,7 @@ export default function Home() {
   const router = useRouter();
 
   /* Hook Calls - Must be unconditional */
-  const { expenses, deleteExpense } = useExpenses();
+  const { expenses, deleteExpense, categories } = useExpenses();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -143,7 +143,7 @@ export default function Home() {
             <ImportButton />
             <ExportButton
               expenses={filteredExpenses}
-              currentMonthName={currentMonthName}
+              categories={categories}
             />
 
             <Button variant="secondary" size="sm" onClick={() => setShowStats(!showStats)} tooltip={showStats ? "Hide visual analytics" : "Show visual analytics"}>

@@ -1,75 +1,96 @@
-import React from 'react';
-import * as XLSX from 'xlsx';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Expense } from '@/types';
+import { Expense, Category } from '@/types';
+import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
 
 interface ExportButtonProps {
     expenses: Expense[];
-    currentMonthName: string;
+    categories: Category[];
 }
 
-export function ExportButton({ expenses, currentMonthName }: ExportButtonProps) {
-    const handleExport = () => {
-        if (expenses.length === 0) {
-            alert("No data to export for this month.");
-            return;
-        }
+export function ExportButton({ expenses, categories }: ExportButtonProps) {
+    const [isOpen, setIsOpen] = useState(false);
 
-        // 1. Prepare Transactions Data
-        const transactionData = expenses.map(e => ({
-            Date: new Date(e.date).toLocaleDateString(),
-            Type: e.type,
-            Category: e.category,
-            Description: e.description,
-            Amount: e.amount
-        }));
+    const calculateTotals = () => {
+        return expenses.reduce((acc, curr) => {
+            if (curr.type === 'income') acc.income += curr.amount;
+            else acc.expense += curr.amount;
+            return acc;
+        }, { income: 0, expense: 0 });
+    };
 
-        // 2. Prepare Category Summary Data (for Pie Chart)
-        const categoryMap = expenses
-            .filter(e => e.type === 'expense') // Usually pie charts focus on expenses
-            .reduce((acc, curr) => {
-                const cat = curr.category || 'Uncategorized';
-                acc[cat] = (acc[cat] || 0) + curr.amount;
-                return acc;
-            }, {} as Record<string, number>);
+    const handleExcel = () => {
+        if (expenses.length === 0) return alert("No data to export.");
+        exportToExcel(expenses, calculateTotals());
+        setIsOpen(false);
+    };
 
-        const summaryData = Object.entries(categoryMap).map(([Category, Total]) => ({
-            Category,
-            Total
-        }));
-
-        // 3. Create Workbook and Sheets
-        const wb = XLSX.utils.book_new();
-
-        const wsTransactions = XLSX.utils.json_to_sheet(transactionData);
-        XLSX.utils.book_append_sheet(wb, wsTransactions, "Transactions");
-
-        const wsSummary = XLSX.utils.json_to_sheet(summaryData);
-        XLSX.utils.book_append_sheet(wb, wsSummary, "Category Summary");
-
-        // 4. Generate Buffer
-        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-
-        // 5. Create Blob and Trigger Download
-        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `Expense_Tracker_${currentMonthName.replace(/\s+/g, '_')}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-
-        // Cleanup
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
+    const handlePDF = () => {
+        if (expenses.length === 0) return alert("No data to export.");
+        exportToPDF(expenses, calculateTotals(), categories);
+        setIsOpen(false);
     };
 
     return (
-        <Button variant="secondary" onClick={handleExport} size="sm">
-            Export to Excel
-        </Button>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+            <Button variant="secondary" size="sm" onClick={() => setIsOpen(!isOpen)}>
+                Export ⬇
+            </Button>
+
+            {isOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '0.5rem',
+                    background: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '0.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                    zIndex: 50,
+                    minWidth: '120px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}>
+                    <button
+                        onClick={handleExcel}
+                        style={{
+                            textAlign: 'left',
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-text-main)',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            padding: '0.25rem'
+                        }}
+                    >
+                        Excel (.xlsx)
+                    </button>
+                    <button
+                        onClick={handlePDF}
+                        style={{
+                            textAlign: 'left',
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-text-main)',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            padding: '0.25rem'
+                        }}
+                    >
+                        PDF (.pdf)
+                    </button>
+                </div>
+            )}
+
+            {isOpen && (
+                <div
+                    style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 40 }}
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
+        </div>
     );
 }
