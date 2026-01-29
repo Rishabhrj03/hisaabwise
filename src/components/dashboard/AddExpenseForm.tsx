@@ -13,7 +13,7 @@ interface AddExpenseFormProps {
 }
 
 export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
-    const { addExpense, updateExpense } = useExpenses();
+    const { addExpense, updateExpense, categories } = useExpenses();
     const { friends } = useFriends();
     const { groups } = useGroups();
 
@@ -305,13 +305,9 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                     <option value="" disabled>Select a category</option>
                     {type === 'expense' ? (
                         <>
-                            <option value="Food">Food & Dining</option>
-                            <option value="Transport">Transportation</option>
-                            <option value="Shopping">Shopping</option>
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Bills">Bills & Utilities</option>
-                            <option value="Health">Health & Fitness</option>
-                            <option value="Other">Other</option>
+                            {categories.map(cat => (
+                                <option key={cat._id} value={cat.name}>{cat.name}</option>
+                            ))}
                         </>
                     ) : (
                         <>

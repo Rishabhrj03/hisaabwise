@@ -19,6 +19,7 @@ import { BankAccountCard } from '@/components/dashboard/BankAccountCard';
 import { InvestmentCard } from '@/components/dashboard/InvestmentCard';
 import { RecurringExpenseCard } from '@/components/dashboard/RecurringExpenseCard';
 import { LoanCard } from '@/components/dashboard/LoanCard';
+import { CategoryManager } from '@/components/dashboard/CategoryManager';
 import { BalanceList } from '@/components/dashboard/BalanceList';
 import { Button } from '@/components/ui/Button';
 import { VoiceInput } from '@/components/dashboard/VoiceInput';
@@ -203,7 +204,10 @@ export default function Home() {
           <BankAccountCard />
           <InvestmentCard />
           <RecurringExpenseCard />
+          <InvestmentCard />
+          <RecurringExpenseCard />
           <LoanCard />
+          <CategoryManager />
         </div>
 
         <BalanceList />

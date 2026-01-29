@@ -25,16 +25,20 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         };
     };
 
+    const [categories, setCategories] = useState<any[]>([]);
+
     useEffect(() => {
         const fetchExpenses = async () => {
             if (!user) {
                 setExpenses([]);
+                setCategories([]);
                 setLoading(false);
                 return;
             }
 
             setLoading(true);
             try {
+                // Fetch Expenses
                 const res = await fetch('/api/expenses');
                 if (res.ok) {
                     const data = await res.json();
@@ -43,8 +47,15 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
                 } else {
                     console.error("Failed to fetch expenses");
                 }
+
+                // Fetch Categories
+                const catRes = await fetch('/api/categories');
+                if (catRes.ok) {
+                    const catData = await catRes.json();
+                    setCategories(catData);
+                }
             } catch (error) {
-                console.error("Error fetching expenses:", error);
+                console.error("Error fetching data:", error);
             }
             setLoading(false);
         };
@@ -112,7 +123,35 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
             console.error("Error updating expense", error);
         }
-    }
+    };
+
+    const addCategory = async (name: string, color: string) => {
+        try {
+            const res = await fetch('/api/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, color })
+            });
+            if (res.ok) {
+                const newCat = await res.json();
+                setCategories(prev => [...prev, newCat]);
+                return newCat;
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const deleteCategory = async (id: string) => {
+        try {
+            const res = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setCategories(prev => prev.filter(c => c._id !== id));
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const totalIncome = expenses
         .filter((e) => e.type === 'income')
@@ -134,6 +173,9 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
                 totalBalance,
                 totalIncome,
                 totalExpense,
+                categories,
+                addCategory,
+                deleteCategory
             }}
         >
             {children}

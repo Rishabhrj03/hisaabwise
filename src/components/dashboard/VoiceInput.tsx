@@ -24,7 +24,7 @@ interface ParsedData {
 }
 
 export function VoiceInput({ onTranscript }: VoiceInputProps) {
-    const { addExpense } = useExpenses();
+    const { addExpense, categories } = useExpenses();
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [recognition, setRecognition] = useState<any>(null);
@@ -230,6 +230,14 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
 
             recognition.onerror = (event: any) => {
                 console.error("Speech recognition error", event.error);
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission denied. Please allow microphone access in your settings.");
+                } else if (event.error === 'service-not-allowed') {
+                    alert("Voice recognition service not available. Please try again later.");
+                } else if (event.error !== 'no-speech') {
+                    // unexpected error
+                    alert(`Voice input error: ${event.error}`);
+                }
                 setIsListening(false);
             };
 
@@ -375,14 +383,10 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                                             outline: 'none'
                                         }}
                                     >
-                                        <option value="Food">Food & Dining</option>
-                                        <option value="Transport">Transportation</option>
-                                        <option value="Shopping">Shopping</option>
-                                        <option value="Entertainment">Entertainment</option>
-                                        <option value="Bills">Bills & Utilities</option>
-                                        <option value="Health">Health & Fitness</option>
-                                        <option value="Salary">Salary</option>
-                                        <option value="Other">Other</option>
+                                        <option value="" disabled>Select Category</option>
+                                        {categories.map(cat => (
+                                            <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>

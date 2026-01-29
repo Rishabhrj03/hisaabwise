@@ -48,4 +48,14 @@ export interface ExpenseContextType {
     totalBalance: number;
     totalIncome: number;
     totalExpense: number;
+    categories: Category[];
+    addCategory: (name: string, color: string) => Promise<any>;
+    deleteCategory: (id: string) => Promise<void>;
+}
+
+export interface Category {
+    _id: string;
+    name: string;
+    color: string;
+    is_default: boolean;
 }
