@@ -5,6 +5,7 @@ export interface IUser extends Document {
     email: string;
     password?: string;
     image?: string;
+    phone?: string;
     bankAccounts: {
         _id: string;
         name: string;

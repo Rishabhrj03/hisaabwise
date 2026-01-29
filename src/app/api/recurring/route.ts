@@ -64,7 +64,7 @@ export async function PUT(req: Request) {
         if (action === 'pay') {
             // 1. Record as actual expense
             await Expense.create({
-                user_id: session.userId,
+                created_by: session.userId,
                 description: expense.name,
                 amount: expense.amount,
                 category: expense.category,

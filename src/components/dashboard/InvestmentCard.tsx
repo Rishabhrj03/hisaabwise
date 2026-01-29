@@ -183,7 +183,7 @@ function InvestmentItem({ investment, onUpdate }: { investment: Investment, onUp
                 <div style={{ fontWeight: 500 }}>{investment.name} <span style={{ fontSize: '0.7rem', color: '#888' }}>({investment.type})</span></div>
                 {investment.autoIncreaseAmount && investment.autoIncreaseAmount > 0 ? (
                     <div style={{ fontSize: '0.7rem', color: 'hsl(var(--color-primary))' }}>
-                        +₹{investment.autoIncreaseAmount} / {investment.autoIncreaseFrequency?.charAt(0).toUpperCase() + investment.autoIncreaseFrequency?.slice(1)}
+                        +₹{investment.autoIncreaseAmount} / {(investment.autoIncreaseFrequency || 'monthly').charAt(0).toUpperCase() + (investment.autoIncreaseFrequency || 'monthly').slice(1)}
                     </div>
                 ) : null}
                 {investment.startDate && <div style={{ fontSize: '0.7rem', color: '#666' }}>Started: {new Date(investment.startDate).toLocaleDateString()}</div>}

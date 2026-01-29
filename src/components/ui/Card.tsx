@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
     children: React.ReactNode;
     className?: string;
     variant?: 'default' | 'glass';
