@@ -18,7 +18,7 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
     const [friends, setFriends] = useState<Friend[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const mapToFriend = (doc: any): Friend => ({
+    const mapToFriend = (doc: { _id: string; name: string; phone?: string; linked_user_id?: string; upi_id?: string }): Friend => ({
         id: doc._id,
         name: doc.name,
         phone: doc.phone,

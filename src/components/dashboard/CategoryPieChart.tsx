@@ -4,6 +4,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Expense } from '@/types';
 import { Card } from '@/components/ui/Card';
+import { useExpenses } from '@/context/ExpenseContext';
 
 interface CategoryPieChartProps {
     expenses: Expense[];
@@ -12,6 +13,8 @@ interface CategoryPieChartProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
 export function CategoryPieChart({ expenses }: CategoryPieChartProps) {
+    const { categories } = useExpenses();
+
     // Aggregate expenses by category
     const dataMap = expenses
         .filter(e => e.type === 'expense')
@@ -48,9 +51,11 @@ export function CategoryPieChart({ expenses }: CategoryPieChartProps) {
                             fill="#8884d8"
                             dataKey="value"
                         >
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
+                            {data.map((entry, index) => {
+                                const cat = categories.find(c => c.name === entry.name);
+                                const color = cat ? cat.color : COLORS[index % COLORS.length];
+                                return <Cell key={`cell-${index}`} fill={color} />;
+                            })}
                         </Pie>
                         <Tooltip
                             formatter={(value: any) => `₹${Number(value).toFixed(2)}`}

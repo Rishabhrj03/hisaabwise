@@ -127,7 +127,7 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     let splitWith: string[] = [];
     let splitRatios: number[] | undefined;
     let unknownFriends: string[] = [];
-    let excludedPeople: string[] = [];
+    const excludedPeople: string[] = [];
 
     const splitRatioMatch = cleanText.match(/split\s+(\d+)\s+(\d+)/i);
     if (splitRatioMatch) {
@@ -186,7 +186,7 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
 
     const excludeMatches = cleanText.matchAll(/(?:exclude|don't\s+include|not\s+include|not\s+including|not\s+for|except)\s+(me|myself|him|her|them|us|in\s+the\s+split|split\s+wise|splitwise|[a-zA-Z]+)(?:\s+(?:bhai|bro|sir|maam|ji))?/gi);
     for (const match of excludeMatches) {
-        let name = match[1].toLowerCase();
+        const name = match[1].toLowerCase();
 
         if (name === 'me' || name === 'myself') {
             excludedPeople.push('me');

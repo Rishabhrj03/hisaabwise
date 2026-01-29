@@ -49,6 +49,7 @@ export default function Home() {
   const [currency, setCurrency] = useState('INR');
   const [showFriendManager, setShowFriendManager] = useState(false);
   const [showGroupManager, setShowGroupManager] = useState(false);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -159,6 +160,10 @@ export default function Home() {
               Groups
             </Button>
 
+            <Button variant="secondary" size="sm" onClick={() => setShowCategoryManager(true)} tooltip="Manage categories">
+              Categories
+            </Button>
+
             <Button variant="secondary" size="sm" onClick={() => setShowShareModal(true)} tooltip="Share your dashboard">
               Share 🔗
             </Button>
@@ -212,7 +217,6 @@ export default function Home() {
           <InvestmentCard />
           <RecurringExpenseCard />
           <LoanCard />
-          <CategoryManager />
         </div>
 
         <BalanceList />
@@ -288,6 +292,11 @@ export default function Home() {
         >
           <GroupManager />
         </Modal>
+
+        <CategoryManager
+          isOpen={showCategoryManager}
+          onClose={() => setShowCategoryManager(false)}
+        />
 
         <ShareDashboardModal
           isOpen={showShareModal}

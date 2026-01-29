@@ -18,7 +18,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const mapToGroup = (doc: any): Group => ({
+    const mapToGroup = (doc: { _id: string; name: string; created_by: string; created_at: string; members?: string[] }): Group => ({
         id: doc._id,
         name: doc.name,
         created_by: doc.created_by,

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Expense } from '@/types';
+import { CategoryManager } from './CategoryManager';
 
 interface AddExpenseFormProps {
     onClose?: () => void;
@@ -23,6 +24,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const [type, setType] = useState<'income' | 'expense' | 'transfer'>(initialData?.type || 'expense');
     const [category, setCategory] = useState(initialData?.category || '');
     const [selectedGroupId, setSelectedGroupId] = useState<string>(initialData?.group_id || '');
+    const [showCategoryManager, setShowCategoryManager] = useState(false);
 
     // Splitwise Logic
     const [paidBy, setPaidBy] = useState(initialData?.splitDetails?.paidBy || 'me');
@@ -291,13 +293,18 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                <label style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: 'hsl(var(--color-text-muted))'
-                }}>
-                    Category
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        color: 'hsl(var(--color-text-muted))'
+                    }}>
+                        Category
+                    </label>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setShowCategoryManager(true)} style={{ fontSize: '0.75rem', padding: '0 0.5rem' }}>
+                        Manage +
+                    </Button>
+                </div>
                 <select
                     style={{
                         width: '100%',
@@ -322,7 +329,9 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                     {type === 'expense' ? (
                         <>
                             {categories.map(cat => (
-                                <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                <option key={cat._id} value={cat.name}>
+                                    {cat.icon || '🏷️'} {cat.name}
+                                </option>
                             ))}
                         </>
                     ) : type === 'transfer' ? (
@@ -354,6 +363,13 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                     </Button>
                 )}
             </div>
-        </form>
+
+
+            {
+                showCategoryManager && (
+                    <CategoryManager isOpen={showCategoryManager} onClose={() => setShowCategoryManager(false)} />
+                )
+            }
+        </form >
     );
 }

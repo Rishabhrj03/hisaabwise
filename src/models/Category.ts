@@ -4,6 +4,7 @@ export interface ICategory extends Document {
     user_id: mongoose.Types.ObjectId;
     name: string;
     color: string;
+    icon?: string;
     is_default: boolean; // If true, it was a system default. 
     created_at: Date;
     updated_at: Date;
@@ -25,6 +26,11 @@ const CategorySchema: Schema<ICategory> = new Schema(
             type: String, // Hex code like #FF5733
             required: true,
             default: '#808080'
+        },
+        icon: {
+            type: String, // Emoji character or icon name
+            required: false,
+            default: '🏷️'
         },
         is_default: {
             type: Boolean,

@@ -135,7 +135,7 @@ export const exportToPDF = (data: Expense[], totals: Totals, categories: Categor
     });
 
     // Totals Section
-    const finalY = (doc as any).lastAutoTable.finalY || 40;
+    const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY || 40;
 
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");

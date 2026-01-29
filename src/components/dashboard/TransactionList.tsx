@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFriends } from '@/context/FriendContext';
+import { useExpenses } from '@/context/ExpenseContext';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { Expense } from '@/types';
 import { Card } from '@/components/ui/Card';
@@ -14,6 +15,7 @@ interface TransactionListProps {
 
 export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }: TransactionListProps) {
     const { friends } = useFriends();
+    const { categories } = useExpenses();
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('en-US', {
             month: 'short',
@@ -50,10 +52,10 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         borderLeft: `4px solid ${expense.type === 'income'
-                                ? 'hsl(var(--color-income))'
-                                : expense.type === 'transfer'
-                                    ? 'hsl(var(--color-text-main))'
-                                    : 'hsl(var(--color-expense))'
+                            ? 'hsl(var(--color-income))'
+                            : expense.type === 'transfer'
+                                ? 'hsl(var(--color-text-main))'
+                                : 'hsl(var(--color-expense))'
                             }`
                     }}
                 >
@@ -78,7 +80,7 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                             </span>
                         </Tooltip>
                         <span style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))' }}>
-                            {formatDate(expense.date)} • {expense.category}
+                            {formatDate(expense.date)} • {categories.find(c => c.name === expense.category)?.icon || '🏷️'} {expense.category}
                         </span>
                     </div>
 

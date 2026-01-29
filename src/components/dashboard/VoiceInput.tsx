@@ -33,7 +33,7 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            // @ts-ignore
+            // @ts-expect-error - SpeechRecognition is not standard in all browsers yet
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
                 const reco = new SpeechRecognition();
@@ -71,7 +71,7 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                 return;
             }
 
-            let expenseData: any = {
+            const expenseData: any = {
                 description: parsedData.description,
                 amount: finalAmount,
                 type: parsedData.type,
@@ -309,7 +309,7 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                                 Listening...
                             </div>
                             <div style={{ fontStyle: 'italic', color: 'hsl(var(--color-text-muted))' }}>
-                                "{transcript || "Speak now..."}"
+                                "&quot;{transcript || "Speak now..."}&quot;"
                             </div>
                         </div>
                         <Button variant="danger" size="sm" onClick={toggleListening} style={{ width: '100%' }}>

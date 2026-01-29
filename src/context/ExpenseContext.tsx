@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Expense, ExpenseContextType } from '@/types';
+import { Expense, ExpenseContextType, Category } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
@@ -11,7 +11,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const mapToExpense = (doc: any): Expense => {
+    const mapToExpense = (doc: { _id?: string; id?: string; description: string; amount: number; date: string; type: 'income' | 'expense' | 'transfer'; category: string; splitDetails?: { paidBy: string; shares: Array<{ userId: string; amount: number }> }; relatedTo?: string[]; group_id?: string | null }): Expense => {
         return {
             id: String(doc._id || doc.id),
             description: doc.description,
@@ -25,7 +25,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         };
     };
 
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
         const fetchExpenses = async () => {
@@ -125,17 +125,34 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const addCategory = async (name: string, color: string) => {
+    const addCategory = async (name: string, color: string, icon?: string) => {
         try {
             const res = await fetch('/api/categories', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, color })
+                body: JSON.stringify({ name, color, icon })
             });
             if (res.ok) {
                 const newCat = await res.json();
                 setCategories(prev => [...prev, newCat]);
                 return newCat;
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const updateCategory = async (id: string, name: string, color: string, icon?: string) => {
+        try {
+            const res = await fetch('/api/categories', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, name, color, icon })
+            });
+            if (res.ok) {
+                const updatedCat = await res.json();
+                setCategories(prev => prev.map(c => c._id === id ? updatedCat : c));
+                return updatedCat;
             }
         } catch (err) {
             console.error(err);
@@ -175,7 +192,9 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
                 totalExpense,
                 categories,
                 addCategory,
-                deleteCategory
+                updateCategory,
+                deleteCategory,
+                loading
             }}
         >
             {children}
