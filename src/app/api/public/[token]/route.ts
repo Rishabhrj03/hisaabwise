@@ -22,8 +22,8 @@ export async function GET(
         // Fetch data for this user
         // Note: For public view, we might want to filter out sensitive details if any
         // But for this MVP, we show standard dashboard data
-        const expenses = await Expense.find({ user: user._id }).sort({ date: -1 });
-        const categories = await Category.find({ user: user._id });
+        const expenses = await Expense.find({ created_by: user._id }).sort({ date: -1 });
+        const categories = await Category.find({ user_id: user._id });
 
         return NextResponse.json({
             user: { name: user.name },
