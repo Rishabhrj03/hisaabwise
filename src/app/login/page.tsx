@@ -88,19 +88,14 @@ function LoginForm() {
         }}>
             <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                 <div style={{
-                    width: '60px',
-                    height: '60px',
-                    background: 'linear-gradient(135deg, hsl(var(--color-primary)), hsl(var(--hue-primary) 50% 40%))',
-                    borderRadius: '16px',
+                    width: '64px',
+                    height: '64px',
                     margin: '0 auto 1.5rem',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    color: 'white',
-                    boxShadow: '0 8px 16px var(--color-primary-glow)'
                 }}>
-                    🪙
+                    <img src="/logo.svg" alt="HisaabWise" style={{ width: '100%', height: '100%' }} />
                 </div>
                 <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
                     {isLogin ? 'Welcome Back' : 'Create Account'}
