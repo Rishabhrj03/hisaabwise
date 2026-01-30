@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import confetti from 'canvas-confetti';
 import { useExpenses } from '@/context/ExpenseContext';
 import { useFriends } from '@/context/FriendContext';
 import { useGroups } from '@/context/GroupContext';
@@ -90,6 +91,14 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             updateExpense(initialData.id, expenseData);
         } else {
             addExpense(expenseData);
+            // Trigger confetti if income is added
+            if (type === 'income') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
         }
 
         // Reset form

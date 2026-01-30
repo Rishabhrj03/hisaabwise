@@ -43,8 +43,8 @@ export function ExportButton({ expenses, categories }: ExportButtonProps) {
                     top: '100%',
                     right: 0,
                     marginTop: '0.5rem',
-                    background: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
+                    background: 'hsl(var(--color-surface))',
+                    border: '1px solid hsl(var(--color-border))',
                     borderRadius: 'var(--radius-md)',
                     padding: '0.5rem',
                     display: 'flex',
@@ -60,7 +60,7 @@ export function ExportButton({ expenses, categories }: ExportButtonProps) {
                             textAlign: 'left',
                             background: 'none',
                             border: 'none',
-                            color: 'var(--color-text-main)',
+                            color: 'hsl(var(--color-text-main))',
                             cursor: 'pointer',
                             fontSize: '0.9rem',
                             padding: '0.25rem'
@@ -74,7 +74,7 @@ export function ExportButton({ expenses, categories }: ExportButtonProps) {
                             textAlign: 'left',
                             background: 'none',
                             border: 'none',
-                            color: 'var(--color-text-main)',
+                            color: 'hsl(var(--color-text-main))',
                             cursor: 'pointer',
                             fontSize: '0.9rem',
                             padding: '0.25rem'
