@@ -1,11 +1,9 @@
 "use client";
 
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 
 export function Header() {
-    const router = useRouter();
     const { logout } = useAuth();
 
     const handleLogout = async () => {

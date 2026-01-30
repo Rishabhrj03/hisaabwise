@@ -49,7 +49,7 @@ export function ImportButton() {
 
             const arrayBuffer = await file.arrayBuffer();
 
-            const params: any = { data: arrayBuffer };
+            const params: { data: ArrayBuffer; password?: string } = { data: arrayBuffer };
             if (password) {
                 params.password = password;
             }
@@ -60,10 +60,10 @@ export function ImportButton() {
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                const items = textContent.items as any[];
+                const items = textContent.items as { str: string; transform: number[] }[];
 
                 // Fuzzy Y Grouping
-                const rows: { y: number, items: any[] }[] = [];
+                const rows: { y: number, items: { str: string; transform: number[] }[] }[] = [];
                 items.forEach(item => {
                     const y = item.transform[5];
                     const row = rows.find(r => Math.abs(r.y - y) < 5);
@@ -91,7 +91,7 @@ export function ImportButton() {
                         const isDebit = lineText.toLowerCase().includes(' debit');
                         const isCredit = lineText.toLowerCase().includes(' credit');
 
-                        let description = lineText
+                        const description = lineText
                             .replace(rawDate, '')
                             .replace(ppAmountMatch[0], '')
                             .replace(/Debit/i, '')
@@ -131,7 +131,7 @@ export function ImportButton() {
                     if (stdDateMatch && currencyAmounts.length >= 1) {
                         const rawDate = stdDateMatch[0];
                         const amountStr = currencyAmounts.length > 1 ? currencyAmounts[currencyAmounts.length - 2] : currencyAmounts[0];
-                        let transactionAmount = parseFloat(amountStr.replace(/,/g, '').replace('Dr', '').replace('Cr', ''));
+                        const transactionAmount = parseFloat(amountStr.replace(/,/g, '').replace('Dr', '').replace('Cr', ''));
 
                         const isCredit = lineText.toLowerCase().includes(' cr') || lineText.toLowerCase().includes(' credit');
                         const isDebit = lineText.toLowerCase().includes(' dr') || lineText.toLowerCase().includes(' debit') || lineText.toLowerCase().includes(' withdrawal');
@@ -156,7 +156,7 @@ export function ImportButton() {
 
                         if (isNaN(transactionAmount) || transactionAmount === 0) continue;
 
-                        let datePart = rawDate.replace(/-/g, '/');
+                        const datePart = rawDate.replace(/-/g, '/');
                         const parts = datePart.split(/[\/\-\.]/);
                         let isoDate = new Date().toISOString();
                         if (parts.length === 3) {
@@ -228,7 +228,7 @@ export function ImportButton() {
                                 // Assume text date like Matches 'Jan 01, 2024'
                                 isoDate = new Date(rawDate).toISOString();
                             }
-                        } catch (e) {
+                        } catch {
                             // Fallback to today if date parse fails
                         }
 

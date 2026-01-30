@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
-import { useExpenses } from '@/context/ExpenseContext';
+
 
 interface RecurringExpense {
     _id: string;
@@ -17,7 +17,6 @@ import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 // ... (interface remains same)
 
 export function RecurringExpenseCard() {
-    const { addExpense } = useExpenses(); // To refresh expense list if we pay
     const [recurrings, setRecurrings] = useState<RecurringExpense[]>([]);
     const [showAdd, setShowAdd] = useState(false);
 

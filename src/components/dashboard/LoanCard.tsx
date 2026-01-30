@@ -187,7 +187,7 @@ function LoanItem({ loan, onUpdate, onDelete }: { loan: Loan, onUpdate: (l: Loan
         } catch (err) { console.error(err); }
     };
 
-    const totalAmount = loan.principalAmount; // Simply principal for now, realistically interest adds up
+
     // For EMI, total payout is roughly EMI * Tenure
     const estimatedTotal = loan.repaymentType === 'emi' && loan.emiAmount
         ? loan.emiAmount * loan.tenureMonths

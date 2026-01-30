@@ -1,4 +1,6 @@
 import { useFriends } from '@/context/FriendContext';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 import { parseVoiceInput } from '@/utils/voiceParser';
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
@@ -23,24 +25,25 @@ interface ParsedData {
     };
 }
 
-export function VoiceInput({ onTranscript }: VoiceInputProps) {
+export function VoiceInput({ }: VoiceInputProps) {
     const { addExpense, categories } = useExpenses();
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
-    const [recognition, setRecognition] = useState<any>(null);
-    const [isSupported, setIsSupported] = useState(true);
+    const recognitionRef = useRef<any>(null);
+    const [isSupported, setIsSupported] = useState(false);
     const [parsedData, setParsedData] = useState<ParsedData | null>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            // @ts-expect-error - SpeechRecognition is not standard in all browsers yet
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
             if (SpeechRecognition) {
+                setIsSupported(true);
                 const reco = new SpeechRecognition();
                 reco.continuous = false;
                 reco.interimResults = true;
                 reco.lang = 'en-US';
-                setRecognition(reco);
+                recognitionRef.current = reco;
             } else {
                 setIsSupported(false);
             }
@@ -199,9 +202,12 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
         }
 
         if (isListening) {
-            recognition.stop();
+            recognitionRef.current?.stop();
             setIsListening(false);
         } else {
+            const recognition = recognitionRef.current;
+            if (!recognition) return;
+
             setParsedData(null); // Clear previous review
             setTranscript('');
             setIsListening(true);
@@ -302,14 +308,14 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                         flexDirection: 'column',
                         alignItems: 'center',
                         gap: '1rem'
-                    }} onClick={e => e.stopPropagation()}>
+                    }} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                         <div className="animate-pulse" style={{ fontSize: '2rem' }}>🎤</div>
                         <div style={{ textAlign: 'center' }}>
                             <div style={{ fontWeight: 600, color: 'hsl(var(--color-primary))', marginBottom: '0.5rem' }}>
                                 Listening...
                             </div>
                             <div style={{ fontStyle: 'italic', color: 'hsl(var(--color-text-muted))' }}>
-                                "&quot;{transcript || "Speak now..."}&quot;"
+                                &quot;{transcript || "Speak now..."}&quot;
                             </div>
                         </div>
                         <Button variant="danger" size="sm" onClick={toggleListening} style={{ width: '100%' }}>
@@ -345,7 +351,7 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '1rem'
-                    }} onClick={e => e.stopPropagation()}>
+                    }} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                         <h3 style={{ margin: 0, fontSize: '1.125rem', textAlign: 'center' }}>Review Transaction</h3>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

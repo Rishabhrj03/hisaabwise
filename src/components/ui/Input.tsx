@@ -37,6 +37,7 @@ export function Input({ label, style, className, ...props }: InputProps) {
                     e.currentTarget.style.borderColor = 'hsl(var(--color-border))';
                     e.currentTarget.style.boxShadow = 'none';
                 }}
+                className={className}
                 {...props}
             />
         </div>
