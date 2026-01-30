@@ -17,22 +17,8 @@ export default function LandingPage() {
             {/* Header */}
             <header className={styles.header}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{
-                        width: '40px',
-                        height: '40px',
-                        background: 'linear-gradient(135deg, hsl(var(--color-primary)), hsl(var(--hue-primary) 50% 40%))',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.25rem',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        boxShadow: '0 4px 12px var(--color-primary-glow)'
-                    }}>
-                        🪙
-                    </div>
-                    <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.5px' }}>ExpenseTracker</span>
+                    <img src="/logo.svg" alt="HisaabWise Logo" style={{ width: '64px', height: '64px' }} />
+                    <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.5px' }}>HISAABWISE</span>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <Link href="/login">
@@ -47,7 +33,7 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className={styles.hero}>
                 <h1 className={styles.heroTitle}>
-                    Master Your Finances.<br /> Effortlessly.
+                    Track Expense, <br /> Analyze Easily.
                 </h1>
                 <p style={{
                     fontSize: '1.25rem',
@@ -140,7 +126,7 @@ export default function LandingPage() {
                 borderTop: '1px solid var(--color-border)',
                 color: 'hsl(var(--color-text-muted))'
             }}>
-                <p>&copy; {new Date().getFullYear()} Expense Tracker. Built for simplicity.</p>
+                <p>&copy; {new Date().getFullYear()} HISAABWISE. Built for simplicity.</p>
             </footer>
         </div>
     );

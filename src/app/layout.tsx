@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
 */
 
 export const metadata: Metadata = {
-  title: "Expense Tracker",
-  description: "A premium expense tracking application",
+  title: "HISAABWISE",
+  description: "Track Expense, Analyze Easily.",
 };
 
 export default function RootLayout({

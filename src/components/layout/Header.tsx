@@ -23,26 +23,13 @@ export function Header() {
             borderRadius: 'var(--radius-full)'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(135deg, hsl(var(--color-primary)), hsl(var(--hue-primary), 70%, 70%))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '1.25rem'
-                }}>
-                    ET
-                </div>
+                <img src="/logo.svg" alt="HisaabWise Logo" style={{ width: '64px', height: '64px' }} />
                 <div>
-                    <h1 style={{ fontSize: '1.25rem', marginBottom: '0', lineHeight: 1 }}>
-                        <span className="text-gradient">Expense Tracker</span>
+                    <h1 style={{ fontSize: '1.5rem', marginBottom: '0', lineHeight: 1, fontWeight: 700, letterSpacing: '-0.02em' }}>
+                        <span className="text-gradient">HISAABWISE</span>
                     </h1>
-                    <p style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.75rem', marginTop: '0.1rem' }}>
-                        Welcome back, {user?.name?.split(' ')[0] || 'User'}
+                    <p style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.75rem', marginTop: '0.2rem', fontWeight: 500 }}>
+                        Track Expense, Analyze Easily.
                     </p>
                 </div>
             </div>

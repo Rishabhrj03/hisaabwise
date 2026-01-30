@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <!-- Wallet Leather Gradient -->
+    <linearGradient id="leatherGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4338ca;stop-opacity:1" /> <!-- Indigo -->
+      <stop offset="100%" style="stop-color:#312e81;stop-opacity:1" /> <!-- Deep Navy -->
+    </linearGradient>
+
+    <!-- Growth Chart Gradient -->
+    <linearGradient id="growthGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#86efac;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- The "Proper Wallet": Back Bifold -->
+  <rect x="25" y="60" width="150" height="100" rx="15" fill="url(#leatherGrad)" stroke="#1e1b4b" stroke-width="4" />
+  
+  <!-- "The Graph": Rising Chart Bars sticking out of the wallet like cash -->
+  <rect x="50" y="40" width="20" height="60" fill="url(#growthGrad)" rx="2" /> <!-- Bar 1 -->
+  <rect x="80" y="25" width="20" height="75" fill="url(#growthGrad)" rx="2" /> <!-- Bar 2 -->
+  <rect x="110" y="10" width="20" height="90" fill="url(#growthGrad)" rx="2" /> <!-- Bar 3 (Tallest) -->
+  
+  <!-- "The Proper Wallet": Front Flap (Covering the bottom of bars) -->
+  <path d="M25 100 L 175 100 L 175 145 C 175 155 165 160 155 160 L 45 160 C 35 160 25 155 25 145 Z" 
+        fill="url(#leatherGrad)" stroke="#1e1b4b" stroke-width="4" />
+  
+  <!-- Wallet Detail: Stitching -->
+  <path d="M35 110 H 165" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="8,4" fill="none" />
+
+  <!-- "The Mind": A 'Chip' on the front of the wallet -->
+  <rect x="130" y="120" width="30" height="25" rx="4" fill="#fbbf24" stroke="#d97706" stroke-width="2" />
+  <path d="M135 120 V 145 M145 120 V 145 M155 120 V 145" stroke="#d97706" stroke-width="2" />
+
+  <!-- "The Money": A Coin tucked in front -->
+  <circle cx="60" cy="135" r="18" fill="#f59e0b" stroke="#fcd34d" stroke-width="2" />
+  <text x="60" y="142" font-family="sans-serif" font-size="16" font-weight="bold" fill="#78350f" text-anchor="middle">₹</text>
+
+</svg>
