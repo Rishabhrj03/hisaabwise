@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/Button';
 import { useFriends } from '@/context/FriendContext';
 import { Input } from '@/components/ui/Input';
 
+import { Friend } from '@/types';
+
 export function FriendManager() {
     const { friends, addFriend, deleteFriend } = useFriends();
     const [newFriendName, setNewFriendName] = useState('');
@@ -20,7 +22,7 @@ export function FriendManager() {
         }
     };
 
-    const handleInvite = (friend: any) => {
+    const handleInvite = (friend: Friend) => {
         if (!friend.phone) return;
 
         // Clean phone number (remove spaces, etc)

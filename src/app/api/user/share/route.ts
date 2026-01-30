@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
         const { isPublic } = await req.json();
 
-        const updateData: any = { isPublic };
+        const updateData: { isPublic: boolean; shareToken?: string } = { isPublic };
 
         // If enabling public access and no token exists, generate one
         if (isPublic) {

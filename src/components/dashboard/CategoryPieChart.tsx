@@ -58,7 +58,7 @@ export function CategoryPieChart({ expenses }: CategoryPieChartProps) {
                             })}
                         </Pie>
                         <Tooltip
-                            formatter={(value: any) => `₹${Number(value).toFixed(2)}`}
+                            formatter={(value: number | undefined) => `₹${Number(value || 0).toFixed(2)}`}
                             contentStyle={{ backgroundColor: 'hsl(var(--color-surface))', borderColor: 'hsl(var(--color-border))', borderRadius: '8px' }}
                             itemStyle={{ color: 'hsl(var(--color-text-main))' }}
                         />

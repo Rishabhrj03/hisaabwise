@@ -1,19 +1,21 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+export interface IBankAccount {
+    _id: string;
+    name: string;
+    type: 'bank' | 'wallet' | 'card' | 'cash';
+    balance: number;
+    creditLimit?: number;
+    billingDate?: number;
+}
+
 export interface IUser extends Document {
     name: string;
     email: string;
     password?: string;
     image?: string;
     phone?: string;
-    bankAccounts: {
-        _id: string;
-        name: string;
-        type: 'bank' | 'wallet' | 'card' | 'cash';
-        balance: number;
-        creditLimit?: number;
-        billingDate?: number;
-    }[];
+    bankAccounts: IBankAccount[];
     user_upi_id?: string;
     isPublic: boolean;
     shareToken?: string;

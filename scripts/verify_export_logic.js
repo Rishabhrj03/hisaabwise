@@ -1,3 +1,4 @@
+/* eslint-disable */
 const expenseData = [
     { date: '2024-01-01', category: 'Food', description: 'Lunch', type: 'expense', amount: 150 },
     { date: '2024-01-02', category: 'Salary', description: 'Jan Salary', type: 'income', amount: 5000 },

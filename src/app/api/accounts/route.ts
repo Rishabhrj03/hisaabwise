@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
-import User from '@/models/User';
+import User, { IBankAccount } from '@/models/User';
 import { getSessionUser } from '@/lib/auth';
 
 export async function GET(req: Request) {
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
         if (!user.bankAccounts) user.bankAccounts = [];
 
-        const newAccount = {
+        const newAccount: IBankAccount = {
             name,
             type: type || 'bank',
             balance: Number(balance),
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
             _id: new mongoose.Types.ObjectId().toString()
         };
 
-        user.bankAccounts.push(newAccount as any);
+        user.bankAccounts.push(newAccount);
 
         await user.save();
 
@@ -76,7 +76,7 @@ export async function PUT(req: Request) {
         const user = await User.findById(session.userId);
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-        const account = user.bankAccounts.find((acc: any) => acc._id.toString() === _id);
+        const account = user.bankAccounts.find((acc: IBankAccount) => acc._id.toString() === _id);
         if (!account) return NextResponse.json({ error: 'Account not found' }, { status: 404 });
 
         if (name) account.name = name;
@@ -111,7 +111,7 @@ export async function DELETE(req: Request) {
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
         const initialLength = user.bankAccounts.length;
-        user.bankAccounts = user.bankAccounts.filter((acc: any) => acc._id.toString() !== id);
+        user.bankAccounts = user.bankAccounts.filter((acc: IBankAccount) => acc._id.toString() !== id);
 
         if (user.bankAccounts.length === initialLength) {
             return NextResponse.json({ error: 'Account not found' }, { status: 404 });

@@ -34,8 +34,8 @@ export default function SharedDashboard({ params }: { params: Promise<{ token: s
             const data = await res.json();
             setUserData(data.user);
             setExpenses(data.expenses);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -84,7 +84,7 @@ export default function SharedDashboard({ params }: { params: Promise<{ token: s
             flexDirection: 'column'
         }}>
             <header style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>{userData?.name}'s Expense Tracker</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>{userData?.name}&apos;s Expense Tracker</h1>
                 <span style={{
                     background: 'var(--color-primary)',
                     color: 'white',

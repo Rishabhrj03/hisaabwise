@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 
         for (const inv of investments) {
             if (inv.autoIncreaseAmount && inv.autoIncreaseAmount > 0 && inv.autoIncreaseFrequency !== 'one-time') {
-                let lastUpdate = inv.lastAutoUpdate ? new Date(inv.lastAutoUpdate) : new Date(inv.startDate || inv.created_at);
+                const lastUpdate = inv.lastAutoUpdate ? new Date(inv.lastAutoUpdate) : new Date(inv.startDate || inv.created_at);
 
                 // Determine period in milliseconds
                 let periodMs = 30 * 24 * 60 * 60 * 1000; // Default monthly

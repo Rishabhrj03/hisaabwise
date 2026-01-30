@@ -246,16 +246,17 @@ export function ImportButton() {
                 }
             }
             alert(`Imported ${count} transactions from PDF.`);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error("PDF Parsing Error", e);
-            if (e.name === 'PasswordException' || e.message?.includes('password')) {
+            const err = e as Error;
+            if (err.name === 'PasswordException' || err.message?.includes('password')) {
                 const userPassword = prompt("This PDF is password protected. Please enter the password:");
                 if (userPassword) {
                     parsePDF(file, userPassword);
                     return;
                 }
             }
-            alert(`Failed to parse PDF: ${e.message || e}.`);
+            alert(`Failed to parse PDF: ${err.message || String(e)}.`);
         }
     };
 
@@ -289,6 +290,7 @@ export function ImportButton() {
 
             let count = 0;
             for (let i = 1; i < data.length; i++) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const row = data[i] as any[];
                 if (!row || row.length === 0) continue;
 

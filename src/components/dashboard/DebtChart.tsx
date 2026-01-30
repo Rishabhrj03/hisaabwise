@@ -8,6 +8,9 @@ import {
     Title,
     Tooltip,
     Legend,
+    TooltipItem,
+    ActiveElement,
+    ChartEvent,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { Card } from '@/components/ui/Card';
@@ -114,8 +117,8 @@ export function DebtChart({ expenses }: DebtChartProps) {
             },
             tooltip: {
                 callbacks: {
-                    label: function (context: any) {
-                        const val = context.raw;
+                    label: function (context: TooltipItem<'bar'>) {
+                        const val = context.raw as number;
                         return val > 0
                             ? `They owe you: ${val.toFixed(2)}`
                             : `You owe them: ${Math.abs(val).toFixed(2)}`;
@@ -143,7 +146,7 @@ export function DebtChart({ expenses }: DebtChartProps) {
         }
     };
 
-    const handleBarClick = (event: any, elements: any) => {
+    const handleBarClick = (event: ChartEvent, elements: ActiveElement[]) => {
         if (elements.length > 0) {
             const index = elements[0].index;
             const friendName = debtData.labels[index];

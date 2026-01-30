@@ -42,9 +42,9 @@ export function BankAccountCard() {
         if (isSubmitting) return;
         setIsSubmitting(true);
         try {
-            const body: any = {
+            const body: Partial<BankAccount> = {
                 name: newName,
-                type: newType,
+                type: newType as BankAccount['type'],
                 balance: Number(newBalance)
             };
             if (newType === 'card') {
@@ -242,7 +242,7 @@ function AccountItem({ account, onUpdate, onDelete }: { account: BankAccount, on
 
     const handleSave = async () => {
         try {
-            const body: any = {
+            const body: Partial<BankAccount> = {
                 _id: account._id,
                 name: editName,
                 balance: Number(editBalance)
