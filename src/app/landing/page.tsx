@@ -17,7 +17,7 @@ export default function LandingPage() {
             {/* Header */}
             <header className={styles.header}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <img src="/logo.svg" alt="HisaabWise Logo" style={{ width: '64px', height: '64px' }} />
+                    <img src="/logo.svg" alt="HisaabWise Logo" style={{ width: '42px', height: '42px' }} />
                     <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.5px' }}>HISAABWISE</span>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>

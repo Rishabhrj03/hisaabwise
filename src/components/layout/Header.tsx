@@ -23,7 +23,7 @@ export function Header() {
             borderRadius: 'var(--radius-full)'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <img src="/logo.svg" alt="HisaabWise Logo" style={{ width: '64px', height: '64px' }} />
+                <img src="/logo.svg" alt="HisaabWise Logo" style={{ width: '42px', height: '42px' }} />
                 <div>
                     <h1 style={{ fontSize: '1.5rem', marginBottom: '0', lineHeight: 1, fontWeight: 700, letterSpacing: '-0.02em' }}>
                         <span className="text-gradient">HISAABWISE</span>
