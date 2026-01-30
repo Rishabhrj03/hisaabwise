@@ -24,6 +24,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const [amount, setAmount] = useState(initialData?.amount.toString() || '');
     const [type, setType] = useState<'income' | 'expense' | 'transfer'>(initialData?.type || 'expense');
     const [category, setCategory] = useState(initialData?.category || '');
+    const [date, setDate] = useState(initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
     const [selectedGroupId, setSelectedGroupId] = useState<string>(initialData?.group_id || '');
     const [showCategoryManager, setShowCategoryManager] = useState(false);
 
@@ -44,6 +45,20 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             }
         }
     };
+
+    // Auto-detect Opening Balance date
+    React.useEffect(() => {
+        if (!initialData && description.toLowerCase().includes('opening')) {
+            const now = new Date();
+            // Set to 1st of month
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            // Format YYYY-MM-DD (local time via offset trick or string manipulation)
+            const year = firstDay.getFullYear();
+            const month = String(firstDay.getMonth() + 1).padStart(2, '0');
+            const day = String(firstDay.getDate()).padStart(2, '0');
+            setDate(`${year}-${month}-${day}`);
+        }
+    }, [description, initialData]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,7 +96,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             amount: numAmount,
             type,
             category: category || 'General',
-            date: initialData?.date || new Date().toISOString(),
+            date: new Date(date).toISOString(), // Use the user-selected date
             relatedTo: relatedTo,
             splitDetails: splitDetails,
             group_id: selectedGroupId || null
@@ -107,6 +122,9 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
         setCategory('');
         setPaidBy('me');
         setSplitWith(['me']);
+        // Reset date to today
+        setDate(new Date().toISOString().split('T')[0]);
+
         if (onClose) onClose();
     };
 
@@ -170,15 +188,28 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                 required
             />
 
-            <Input
-                label="Amount"
-                type="number"
-                placeholder="0.00"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-            />
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ flex: 1 }}>
+                    <Input
+                        label="Amount"
+                        type="number"
+                        placeholder="0.00"
+                        step="0.01"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        required
+                    />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <Input
+                        label="Date"
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        required
+                    />
+                </div>
+            </div>
 
             {/* Group Selection */}
             {type === 'expense' && groups.length > 0 && (

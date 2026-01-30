@@ -103,6 +103,7 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     if (
         cleanText.includes('received') || cleanText.includes('got') || cleanText.includes('income') ||
         cleanText.includes('deposit') || cleanText.includes('credit') || cleanText.includes('salary') ||
+        cleanText.includes('refund') || cleanText.includes('return') || cleanText.includes('cashback') ||
         cleanText.includes('aaya') || cleanText.includes('aaye') || cleanText.includes('mila')
     ) {
         type = 'income';
