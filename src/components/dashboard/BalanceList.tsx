@@ -113,6 +113,20 @@ export function BalanceList() {
                                 >
                                     Settle Up
                                 </Button>
+                                {!isOwed && friend.upi_id && (
+                                    <Button
+                                        size="sm"
+                                        variant="primary"
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', height: 'auto', backgroundColor: 'hsl(var(--color-primary))' }}
+                                        onClick={() => {
+                                            const upiLink = `upi://pay?pa=${friend.upi_id}&pn=${friend.name.replace(/\s/g, '%20')}&am=${Math.abs(balance).toFixed(2)}&cu=INR&tn=Settlement`;
+                                            window.location.href = upiLink;
+                                        }}
+                                        title={`Pay to ${friend.upi_id}`}
+                                    >
+                                        Pay Now  UPI
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     );
