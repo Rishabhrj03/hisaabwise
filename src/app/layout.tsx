@@ -29,7 +29,12 @@ export const metadata: Metadata = {
   icons: {
     icon: '/logo.svg',
     shortcut: '/logo.svg',
-    apple: '/logo.svg',
+    apple: '/icon-192.png', // iOS requires PNG
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "HisaabWise",
   },
 };
 
