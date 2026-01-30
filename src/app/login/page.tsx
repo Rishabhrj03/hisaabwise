@@ -176,6 +176,13 @@ function LoginForm() {
                         placeholder="••••••••"
                         required
                     />
+                    {isLogin && (
+                        <div style={{ textAlign: 'right', marginTop: '0.25rem' }}>
+                            <a href="/forgot-password" style={{ fontSize: '0.75rem', color: 'hsl(var(--color-primary))', textDecoration: 'none' }}>
+                                Forgot Password?
+                            </a>
+                        </div>
+                    )}
                 </div>
 
                 <Button

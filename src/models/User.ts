@@ -21,6 +21,8 @@ export interface IUser extends Document {
     shareToken?: string;
     created_at: Date;
     updated_at: Date;
+    resetPasswordToken?: string;
+    resetPasswordExpire?: Date;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -69,7 +71,9 @@ const UserSchema: Schema<IUser> = new Schema(
         user_upi_id: {
             type: String,
             trim: true
-        }
+        },
+        resetPasswordToken: String,
+        resetPasswordExpire: Date,
     },
     {
         timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
