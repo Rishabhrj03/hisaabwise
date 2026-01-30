@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import Friend from '@/models/Friend';
 import { signToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -33,6 +34,31 @@ export async function POST(req: Request) {
             name: name || email.split('@')[0],
             phone,
         });
+
+        // Link pending friends
+        if (phone) {
+            const pendingFriends = await Friend.find({ phone });
+            for (const pf of pendingFriends) {
+                // Link the pending friend record to this new user
+                pf.linked_user_id = user._id;
+                await pf.save();
+
+                // Create reciprocal connection
+                const inviter = await User.findById(pf.user_id);
+                if (inviter) {
+                    // Check if already exists to be safe
+                    const exists = await Friend.findOne({ user_id: user._id, linked_user_id: inviter._id });
+                    if (!exists) {
+                        await Friend.create({
+                            user_id: user._id,
+                            name: inviter.name,
+                            phone: inviter.phone,
+                            linked_user_id: inviter._id
+                        });
+                    }
+                }
+            }
+        }
 
         const token = signToken({ userId: user._id.toString(), email: user.email });
 

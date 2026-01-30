@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Expense from '@/models/Expense';
+import Friend from '@/models/Friend';
 import { getSessionUser } from '@/lib/auth';
 
 export async function GET() {
@@ -11,14 +12,17 @@ export async function GET() {
         }
 
         await dbConnect();
-        // Fetch expenses created by user OR where user is involved in split
-        // For now, let's match the previous logic: created_by user.
-        // Ideally we should also include where user is in relatedTo or splitDetails.
+        // 1. Find all "Friend" identities that link to ME (the logged in user)
+        const myFriendIdentities = await Friend.find({ linked_user_id: session.userId }).select('_id');
+        const myFriendIds = myFriendIdentities.map(f => f._id.toString());
 
-        // Previous logic: .eq('created_by', user.id)
-
-        const expenses = await Expense.find({ created_by: session.userId })
-            .sort({ date: -1 });
+        // 2. Query expenses: Created by me OR where I am a "related friend"
+        const expenses = await Expense.find({
+            $or: [
+                { created_by: session.userId },
+                { relatedTo: { $in: myFriendIds } }
+            ]
+        }).sort({ date: -1 });
 
         return NextResponse.json(expenses);
     } catch (error) {

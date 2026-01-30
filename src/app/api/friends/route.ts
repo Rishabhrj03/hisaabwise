@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Friend from '@/models/Friend';
+import User from '@/models/User';
 import { getSessionUser } from '@/lib/auth';
 
 export async function GET() {
@@ -30,12 +31,20 @@ export async function POST(req: Request) {
         await dbConnect();
         const { name, phone, upi_id } = await req.json();
 
+        let linked_user_id = undefined;
+        if (phone) {
+            const existingUser = await User.findOne({ phone });
+            if (existingUser) {
+                linked_user_id = existingUser._id;
+            }
+        }
+
         const friend = await Friend.create({
             user_id: session.userId,
             name,
             phone,
             upi_id,
-            linked_user_id: undefined // logic to link can go here
+            linked_user_id
         });
 
         return NextResponse.json(friend);
