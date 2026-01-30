@@ -6,7 +6,7 @@ import { useFriends } from '@/context/FriendContext';
 
 export function BalanceList() {
     const { expenses, addExpense } = useExpenses();
-    const { friends } = useFriends();
+    const { friends, updateFriend } = useFriends();
 
     const handleSettleUp = (friendId: string, friendName: string, balance: number) => {
         const isOwed = balance > 0;
@@ -113,6 +113,28 @@ export function BalanceList() {
                                 >
                                     Settle Up
                                 </Button>
+                                {!isOwed && !friend.upi_id && (
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', height: 'auto', border: '1px dashed hsl(var(--color-primary))', color: 'hsl(var(--color-primary))' }}
+                                        onClick={async () => {
+                                            const upiId = window.prompt(`Enter UPI ID for ${friend.name} (e.g. name@upi)`);
+                                            if (upiId && upiId.includes('@')) {
+                                                try {
+                                                    await updateFriend(friend.id, { upi_id: upiId });
+                                                } catch (err) {
+                                                    alert('Failed to update UPI ID');
+                                                }
+                                            } else if (upiId) {
+                                                alert('Invalid UPI ID format');
+                                            }
+                                        }}
+                                        title="Add UPI ID to pay"
+                                    >
+                                        + Add UPI ID
+                                    </Button>
+                                )}
                                 {!isOwed && friend.upi_id && (
                                     <Button
                                         size="sm"

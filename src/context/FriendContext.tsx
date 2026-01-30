@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 interface FriendContextType {
     friends: Friend[];
     addFriend: (name: string, phone?: string, upi_id?: string) => Promise<string>;
+    updateFriend: (id: string, updates: Partial<{ name: string; phone: string; upi_id: string }>) => Promise<void>;
     deleteFriend: (id: string) => Promise<void>;
     loading: boolean;
 }
@@ -77,6 +78,29 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const updateFriend = async (id: string, updates: Partial<{ name: string; phone: string; upi_id: string }>) => {
+        if (!user) return;
+
+        try {
+            const res = await fetch(`/api/friends/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates),
+            });
+
+            if (res.ok) {
+                const updatedDoc = await res.json();
+                const updatedFriend = mapToFriend(updatedDoc);
+                setFriends((prev) => prev.map(f => f.id === id ? updatedFriend : f));
+            } else {
+                console.error("Failed to update friend");
+            }
+        } catch (error) {
+            console.error("Error updating friend:", error);
+            throw error;
+        }
+    };
+
     const deleteFriend = async (id: string) => {
         if (!user) return;
 
@@ -94,14 +118,12 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
                 setFriends(previousFriends);
             }
         } catch (error) {
-            console.error("Error deleting friend:", error);
-            setFriends(previousFriends);
             throw error;
         }
     };
 
     return (
-        <FriendContext.Provider value={{ friends, addFriend, deleteFriend, loading }}>
+        <FriendContext.Provider value={{ friends, addFriend, updateFriend, deleteFriend, loading }}>
             {children}
         </FriendContext.Provider>
     );
