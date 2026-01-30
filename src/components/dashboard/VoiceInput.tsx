@@ -3,6 +3,7 @@ import { useFriends } from '@/context/FriendContext';
 /* eslint-disable react-hooks/set-state-in-effect */
 import { parseVoiceInput } from '@/utils/voiceParser';
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input'; // Import Input
 import { useExpenses } from '@/context/ExpenseContext';
@@ -282,7 +283,7 @@ export function VoiceInput({ }: VoiceInputProps) {
             </Button>
 
             {/* Listening State - Modal Overlay */}
-            {isListening && (
+            {isListening && typeof document !== 'undefined' && createPortal(
                 <div style={{
                     position: 'fixed',
                     top: 0,
@@ -290,7 +291,7 @@ export function VoiceInput({ }: VoiceInputProps) {
                     right: 0,
                     bottom: 0,
                     backgroundColor: 'rgba(0,0,0,0.5)',
-                    zIndex: 100,
+                    zIndex: 9999, // High z-index just in case
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -322,11 +323,12 @@ export function VoiceInput({ }: VoiceInputProps) {
                             Stop
                         </Button>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Review State - Modal Overlay */}
-            {!isListening && parsedData && (
+            {!isListening && parsedData && typeof document !== 'undefined' && createPortal(
                 <div style={{
                     position: 'fixed',
                     top: 0,
@@ -334,7 +336,7 @@ export function VoiceInput({ }: VoiceInputProps) {
                     right: 0,
                     bottom: 0,
                     backgroundColor: 'rgba(0,0,0,0.5)',
-                    zIndex: 100,
+                    zIndex: 9999,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -368,7 +370,7 @@ export function VoiceInput({ }: VoiceInputProps) {
                                     <label style={{ fontSize: '0.75rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', marginBottom: '0.25rem', display: 'block' }}>Amount</label>
                                     <Input
                                         type="number"
-                                        value={parsedData.amount}
+                                        value={parsedData.amount!}
                                         onChange={(e) => setParsedData({ ...parsedData, amount: e.target.value })}
                                         placeholder="0.00"
                                     />
@@ -386,7 +388,8 @@ export function VoiceInput({ }: VoiceInputProps) {
                                             background: 'hsl(var(--color-surface))',
                                             padding: '0 0.75rem',
                                             fontSize: '0.875rem',
-                                            outline: 'none'
+                                            outline: 'none',
+                                            color: 'hsl(var(--color-text-main))'
                                         }}
                                     >
                                         <option value="" disabled>Select Category</option>
@@ -443,7 +446,8 @@ export function VoiceInput({ }: VoiceInputProps) {
                             </Button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
