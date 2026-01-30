@@ -49,29 +49,27 @@
   --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark Theme - Deep & Sleek */
-    --color-background: 240 15% 8%;
-    /* Very dark distinct blue-grey */
-    --color-surface: 240 12% 12%;
-    --color-surface-hover: 240 12% 16%;
-    --color-text-main: 240 10% 96%;
-    --color-text-muted: 240 8% 65%;
-    --color-border: 240 10% 20%;
+[data-theme='dark'] {
+  /* Dark Theme - Deep & Sleek */
+  --color-background: 240 15% 8%;
+  /* Very dark distinct blue-grey */
+  --color-surface: 240 12% 12%;
+  --color-surface-hover: 240 12% 16%;
+  --color-text-main: 240 10% 96%;
+  --color-text-muted: 240 8% 65%;
+  --color-border: 240 10% 20%;
 
-    --color-primary: var(--hue-primary) 80% 70%;
-    --color-primary-dark: var(--hue-primary) 80% 60%;
-    --color-primary-light: var(--hue-primary) 80% 85%;
-    --color-primary-glow: var(--hue-primary) 80% 70% / 0.25;
+  --color-primary: var(--hue-primary) 80% 70%;
+  --color-primary-dark: var(--hue-primary) 80% 60%;
+  --color-primary-light: var(--hue-primary) 80% 85%;
+  --color-primary-glow: var(--hue-primary) 80% 70% / 0.25;
 
-    --color-income: var(--hue-success) 65% 55%;
-    --color-expense: var(--hue-danger) 80% 65%;
+  --color-income: var(--hue-success) 65% 55%;
+  --color-expense: var(--hue-danger) 80% 65%;
 
-    --glass-bg: rgba(18, 18, 26, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-  }
+  --glass-bg: rgba(18, 18, 26, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 * {

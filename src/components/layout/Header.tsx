@@ -2,9 +2,12 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
+import { useTheme } from '@/context/ThemeContext';
+import { Moon, Sun } from 'lucide-react';
 
 export function Header() {
     const { logout, user } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     const handleLogout = async () => {
         await logout();
@@ -35,6 +38,15 @@ export function Header() {
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <Button
+                    variant="ghost"
+                    onClick={toggleTheme}
+                    style={{ padding: '0.5rem' }}
+                    title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                >
+                    {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                </Button>
+
                 <Button
                     variant="ghost"
                     onClick={handleLogout}

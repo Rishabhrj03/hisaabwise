@@ -3,6 +3,7 @@ import "./globals.css";
 import { ExpenseProvider } from "@/context/ExpenseContext";
 import { FriendProvider } from "@/context/FriendContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 import { GroupProvider } from "@/context/GroupContext";
 
@@ -37,15 +38,17 @@ export default function RootLayout({
         className={`antialiased`}
       >
         <AuthProvider>
+          <ThemeProvider>
 
 
-          <FriendProvider>
-            <GroupProvider>
-              <ExpenseProvider>
-                {children}
-              </ExpenseProvider>
-            </GroupProvider>
-          </FriendProvider>
+            <FriendProvider>
+              <GroupProvider>
+                <ExpenseProvider>
+                  {children}
+                </ExpenseProvider>
+              </GroupProvider>
+            </FriendProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
