@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
+import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 interface SummaryCardsProps {
     totalBalance: number;
@@ -19,63 +20,119 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency
     return (
         <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', // Responsive grid
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '1.5rem',
             marginBottom: '0'
         }}>
-            {/* Total Balance - Full Width on small, 1st on large */}
-            <Card variant="glass" className="summary-card" style={{
-                gridColumn: '1 / -1',
-                background: 'linear-gradient(135deg, hsl(var(--color-primary)), hsl(var(--color-primary-dark)))',
-                color: 'white',
-                border: 'none',
-                boxShadow: 'var(--shadow-glow)',
+            {/* Total Balance - Professional Wallet */}
+            <div className="glass-panel" style={{
+                background: 'linear-gradient(135deg, hsl(230, 20%, 15%), hsl(230, 20%, 10%))',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1.5rem', // Fixed padding
+                position: 'relative',
+                overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center'
+                justifyContent: 'space-between',
+                minHeight: '160px',
+                border: '1px solid rgba(255,255,255,0.05)',
+                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.4)'
             }}>
-                <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: 500 }}>
-                    Total Balance
-                </h3>
-                <div style={{ fontSize: '3rem', fontWeight: 800, color: 'white', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-                    {formatCurrency(totalBalance)}
+                <div style={{ position: 'relative', zIndex: 2 }}>
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem',
+                        color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', fontWeight: 500
+                    }}>
+                        <div style={{ padding: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', display: 'flex' }}>
+                            <Wallet size={18} color="white" />
+                        </div>
+                        Total Balance
+                    </div>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'white', letterSpacing: '-0.03em', lineHeight: 1 }}>
+                        {formatCurrency(totalBalance)}
+                    </div>
                 </div>
-            </Card>
+
+                {/* Subtle sheen effect */}
+                <div style={{
+                    position: 'absolute', top: 0, right: 0, bottom: 0, left: 0,
+                    background: 'radial-gradient(circle at 100% 0%, rgba(255,255,255,0.08) 0%, transparent 40%)',
+                    pointerEvents: 'none'
+                }} />
+            </div>
 
             {/* Income */}
-            <Card variant="glass">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <Card variant="glass" style={{
+                minHeight: '160px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                padding: '1.5rem', // Explicit padding to match
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{
-                        width: '32px', height: '32px', borderRadius: '50%',
-                        background: 'hsla(var(--hue-success), 70%, 40%, 0.1)',
-                        color: 'hsl(var(--color-income))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>↓</div>
-                    <h3 style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.875rem', fontWeight: 500 }}>
-                        Income
-                    </h3>
+                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                        color: 'hsl(var(--color-text-muted))', fontSize: '0.9rem', fontWeight: 500
+                    }}>
+                        <div style={{
+                            padding: '8px', borderRadius: '10px',
+                            background: 'hsla(var(--hue-success), 80%, 40%, 0.15)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'hsl(var(--hue-success), 80%, 60%)'
+                        }}>
+                            <TrendingUp size={18} />
+                        </div>
+                        Total Income
+                    </div>
+                    <div style={{
+                        padding: '4px 10px', borderRadius: '20px',
+                        background: 'hsla(var(--hue-success), 80%, 40%, 0.15)',
+                        color: 'hsl(var(--hue-success), 80%, 60%)', fontSize: '0.75rem', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', gap: '4px'
+                    }}>
+                        <ArrowUpRight size={14} /> 2.5%
+                    </div>
                 </div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'hsl(var(--color-income))' }}>
+
+                <div style={{ fontSize: '2rem', fontWeight: 700, color: 'hsl(var(--color-text-main))', letterSpacing: '-0.02em', lineHeight: 1 }}>
                     {formatCurrency(totalIncome)}
                 </div>
             </Card>
 
             {/* Expense */}
-            <Card variant="glass">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <Card variant="glass" style={{
+                minHeight: '160px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                padding: '1.5rem', // Explicit padding to match
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{
-                        width: '32px', height: '32px', borderRadius: '50%',
-                        background: 'hsla(var(--hue-danger), 85%, 60%, 0.1)',
-                        color: 'hsl(var(--color-expense))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>↑</div>
-                    <h3 style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.875rem', fontWeight: 500 }}>
-                        Expense
-                    </h3>
+                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                        color: 'hsl(var(--color-text-muted))', fontSize: '0.9rem', fontWeight: 500
+                    }}>
+                        <div style={{
+                            padding: '8px', borderRadius: '10px',
+                            background: 'hsla(var(--hue-danger), 80%, 50%, 0.15)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'hsl(var(--hue-danger), 90%, 70%)'
+                        }}>
+                            <TrendingDown size={18} />
+                        </div>
+                        Total Expense
+                    </div>
+                    <div style={{
+                        padding: '4px 10px', borderRadius: '20px',
+                        background: 'hsla(var(--hue-danger), 80%, 50%, 0.15)',
+                        color: 'hsl(var(--hue-danger), 90%, 70%)', fontSize: '0.75rem', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', gap: '4px'
+                    }}>
+                        <ArrowDownRight size={14} /> 4.1%
+                    </div>
                 </div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'hsl(var(--color-expense))' }}>
+
+                <div style={{ fontSize: '2rem', fontWeight: 700, color: 'hsl(var(--color-text-main))', letterSpacing: '-0.02em', lineHeight: 1 }}>
                     {formatCurrency(totalExpense)}
                 </div>
             </Card>
