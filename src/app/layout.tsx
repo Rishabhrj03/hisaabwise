@@ -25,11 +25,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "HISAABWISE",
   description: "Track Expense, Analyze Easily.",
+  manifest: "/manifest.json",
   icons: {
     icon: '/logo.svg',
     shortcut: '/logo.svg',
     apple: '/logo.svg',
   },
+};
+
+export const viewport = {
+  themeColor: "#09090b",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 
 export default function RootLayout({
