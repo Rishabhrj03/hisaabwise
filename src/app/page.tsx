@@ -124,49 +124,57 @@ export default function Home() {
   };
 
   return (
-    <div style={{
-      maxWidth: '800px',
-      margin: '0 auto',
-      padding: '0 1rem',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
+    <div className="container flex-col" style={{ minHeight: '100vh', gap: '2rem' }}>
       <Header />
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
           <MonthSelector
             currentDate={currentDate}
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
           />
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+
+          {/* Action Toolbar */}
+          <div className="glass-panel" style={{
+            display: 'flex',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '0.75rem 1.5rem',
+            borderRadius: 'var(--radius-full)'
+          }}>
             <ImportButton />
             <ExportButton
               expenses={filteredExpenses}
               categories={categories}
             />
 
-            <Button variant="secondary" size="sm" onClick={() => setShowStats(!showStats)} tooltip={showStats ? "Hide visual analytics" : "Show visual analytics"}>
+            <div style={{ width: '1px', height: '24px', background: 'var(--glass-border)', margin: '0 0.5rem' }}></div>
+
+            <Button variant="ghost" size="sm" onClick={() => setShowStats(!showStats)}
+              title={showStats ? "Hide visual analytics" : "Show visual analytics"}>
               {showStats ? 'Hide Stats' : 'Show Stats'}
             </Button>
 
-            <Button variant="secondary" size="sm" onClick={() => setShowFriendManager(true)} tooltip="Manage friends for splitting expenses">
+            <Button variant="ghost" size="sm" onClick={() => setShowFriendManager(true)} title="Manage friends">
               Friends
             </Button>
 
-            <Button variant="secondary" size="sm" onClick={() => setShowGroupManager(true)} tooltip="Manage expense groups">
+            <Button variant="ghost" size="sm" onClick={() => setShowGroupManager(true)} title="Manage groups">
               Groups
             </Button>
 
-            <Button variant="secondary" size="sm" onClick={() => setShowCategoryManager(true)} tooltip="Manage categories">
+            <Button variant="ghost" size="sm" onClick={() => setShowCategoryManager(true)} title="Manage categories">
               Categories
             </Button>
 
-            <Button variant="secondary" size="sm" onClick={() => setShowShareModal(true)} tooltip="Share your dashboard">
-              Share 🔗
+            <Button variant="primary" size="sm" onClick={() => setShowShareModal(true)} title="Share your dashboard">
+              Share
             </Button>
+
+            <div style={{ width: '1px', height: '24px', background: 'var(--glass-border)', margin: '0 0.5rem' }}></div>
 
             <select
               value={currency}
@@ -174,13 +182,14 @@ export default function Home() {
               style={{
                 height: '32px',
                 padding: '0 0.75rem',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid hsl(var(--color-border))',
-                background: 'hsl(var(--color-surface))',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--glass-border)',
+                background: 'transparent',
                 color: 'hsl(var(--color-text-main))',
                 fontSize: '0.875rem',
                 outline: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                fontWeight: 500
               }}
             >
               <option value="INR">INR (₹)</option>
@@ -208,12 +217,10 @@ export default function Home() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
           <BudgetCard />
           <GoalCard />
           <BankAccountCard />
-          <InvestmentCard />
-          <RecurringExpenseCard />
           <InvestmentCard />
           <RecurringExpenseCard />
           <LoanCard />
@@ -221,103 +228,104 @@ export default function Home() {
 
         <BalanceList />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.25rem' }}>Transactions</h2>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <VoiceInput />
-            <Button onClick={() => {
-              setEditingExpense(null);
-              setShowAddForm(true);
-            }} tooltip="Add a new transaction">
-              Add New
-            </Button>
+        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Recent Transactions</h2>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <VoiceInput />
+              <Button onClick={() => {
+                setEditingExpense(null);
+                setShowAddForm(true);
+              }} title="Add a new transaction">
+                + New
+              </Button>
+            </div>
           </div>
-        </div>
-
-        {/* Floating Action Button for Mobile */}
-        <div style={{
-          position: 'fixed',
-          bottom: '2rem',
-          right: '2rem',
-          zIndex: 100
-        }}>
-          <Button
-            variant="primary"
-            style={{
-              borderRadius: '50%',
-              width: '56px',
-              height: '56px',
-              padding: 0,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem'
-            }}
-            onClick={() => {
-              setEditingExpense(null);
-              setShowAddForm(true);
-            }}
-            tooltip="Add New Transaction"
-          >
-            +
-          </Button>
-        </div>
-
-        {/* Modal for Add/Edit Form */}
-        <Modal
-          isOpen={showAddForm}
-          onClose={handleCloseForm}
-          title={editingExpense ? "Edit Transaction" : "Add New Transaction"}
-        >
-          <AddExpenseForm
-            onClose={handleCloseForm}
-            initialData={editingExpense || undefined}
+          <TransactionList
+            expenses={filteredExpenses}
+            onDelete={deleteExpense}
+            onEdit={handleEdit}
+            currency={currency}
           />
-        </Modal>
-
-        {/* Friend Manager Modal */}
-        <Modal
-          isOpen={showFriendManager}
-          onClose={() => setShowFriendManager(false)}
-          title=""
-        >
-          <FriendManager />
-        </Modal>
-
-        <Modal
-          isOpen={showGroupManager}
-          onClose={() => setShowGroupManager(false)}
-          title=""
-        >
-          <GroupManager />
-        </Modal>
-
-        <CategoryManager
-          isOpen={showCategoryManager}
-          onClose={() => setShowCategoryManager(false)}
-        />
-
-        <ShareDashboardModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-        />
-
-        <TransactionList
-          expenses={filteredExpenses}
-          onDelete={deleteExpense}
-          onEdit={handleEdit}
-          currency={currency}
-        />
+        </div>
       </main>
 
+      {/* Floating Action Button for Mobile */}
+      <div style={{
+        position: 'fixed',
+        bottom: '2rem',
+        right: '2rem',
+        zIndex: 100
+      }}>
+        <Button
+          variant="primary"
+          style={{
+            borderRadius: '50%',
+            width: '64px',
+            height: '64px',
+            padding: 0,
+            boxShadow: 'var(--shadow-glow)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '2rem'
+          }}
+          onClick={() => {
+            setEditingExpense(null);
+            setShowAddForm(true);
+          }}
+          title="Add New Transaction"
+        >
+          +
+        </Button>
+      </div>
+
+      {/* Modals */}
+      <Modal
+        isOpen={showAddForm}
+        onClose={handleCloseForm}
+        title={editingExpense ? "Edit Transaction" : "New Transaction"}
+      >
+        <AddExpenseForm
+          onClose={handleCloseForm}
+          initialData={editingExpense || undefined}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showFriendManager}
+        onClose={() => setShowFriendManager(false)}
+        title="Friends"
+      >
+        <FriendManager />
+      </Modal>
+
+      <Modal
+        isOpen={showGroupManager}
+        onClose={() => setShowGroupManager(false)}
+        title="Groups"
+      >
+        <GroupManager />
+      </Modal>
+
+      <CategoryManager
+        isOpen={showCategoryManager}
+        onClose={() => setShowCategoryManager(false)}
+      />
+
+      <ShareDashboardModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
+
       <footer style={{
-        padding: '2rem 0',
+        padding: '3rem 0',
         textAlign: 'center',
         color: 'hsl(var(--color-text-muted))',
-        fontSize: '0.875rem'
+        fontSize: '0.875rem',
+        opacity: 0.7
       }}>
-        <p>&copy; {new Date().getFullYear()} Expense Tracker</p>
+        <p>Expertly Designed with ❤️ &copy; {new Date().getFullYear()}</p>
       </footer>
     </div>
   );
