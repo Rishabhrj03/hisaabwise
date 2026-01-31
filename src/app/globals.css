@@ -242,3 +242,35 @@ h3 {
     display: none;
   }
 }
+
+/* Summary Cards specific grid */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* 2 columns by default on mobile */
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.summary-card-balance {
+  grid-column: 1 / -1;
+  /* Balance takes full width */
+}
+
+.summary-card-small {
+  grid-column: span 1;
+  /* Income/Expense take 1 column each */
+}
+
+@media (min-width: 768px) {
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 columns on desktop */
+  }
+
+  .summary-card-balance,
+  .summary-card-small {
+    grid-column: span 1;
+    /* All cards take 1 column on desktop */
+  }
+}
