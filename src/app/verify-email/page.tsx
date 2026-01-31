@@ -53,7 +53,7 @@ function VerifyEmailContent() {
                 {status === 'success' && (
                     <div>
                         <p style={{ color: 'green', marginBottom: '1rem' }}>{message}</p>
-                        <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
+                        <Button onClick={() => router.push('/')}>Go to Dashboard</Button>
                     </div>
                 )}
 

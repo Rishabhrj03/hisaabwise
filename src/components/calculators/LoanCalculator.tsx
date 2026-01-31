@@ -192,7 +192,7 @@ export default function LoanCalculator() {
                                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                                 ))}
                                             </Pie>
-                                            <Tooltip formatter={(val: number) => `₹${formatCurrency(val)}`} />
+                                            <Tooltip formatter={(val: number | undefined) => `₹${formatCurrency(val || 0)}`} />
                                         </PieChart>
                                     </ResponsiveContainer>
                                 </div>
