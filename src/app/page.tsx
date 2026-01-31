@@ -28,6 +28,7 @@ import { useExpenses } from '@/context/ExpenseContext';
 import { Expense } from '@/types';
 import { ShareDashboardModal } from '@/components/dashboard/ShareDashboardModal';
 import { Modal } from '@/components/ui/Modal';
+import { MobileNav } from '@/components/layout/MobileNav';
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -135,8 +136,8 @@ export default function Home() {
             onNextMonth={handleNextMonth}
           />
 
-          {/* Action Toolbar */}
-          <div className="glass-panel" style={{
+          {/* Action Toolbar - Desktop */}
+          <div className="glass-panel hide-on-mobile" style={{
             display: 'flex',
             gap: '0.75rem',
             flexWrap: 'wrap',
@@ -199,6 +200,33 @@ export default function Home() {
               <option value="JPY">JPY (¥)</option>
             </select>
           </div>
+
+          {/* Mobile Currency Selector and Action Buttons */}
+          <div className="hide-on-desktop" style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center' }}>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="glass-panel"
+              style={{
+                height: '40px',
+                padding: '0 1rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--glass-border)',
+                background: 'transparent',
+                color: 'hsl(var(--color-text-main))',
+                fontSize: '0.9rem',
+                outline: 'none',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              <option value="INR">INR (₹)</option>
+              <option value="USD">USD ($)</option>
+            </select>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <ImportButton />
+            </div>
+          </div>
         </div>
 
         <SummaryCards
@@ -253,22 +281,22 @@ export default function Home() {
       {/* Floating Action Button for Mobile */}
       <div style={{
         position: 'fixed',
-        bottom: '2rem',
-        right: '2rem',
+        bottom: '6rem', // Moved up for MobileNav
+        right: '1.5rem',
         zIndex: 100
       }}>
         <Button
           variant="primary"
           style={{
             borderRadius: '50%',
-            width: '64px',
-            height: '64px',
+            width: '56px',
+            height: '56px',
             padding: 0,
             boxShadow: 'var(--shadow-glow)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '2rem'
+            fontSize: '1.75rem'
           }}
           onClick={() => {
             setEditingExpense(null);
@@ -279,6 +307,16 @@ export default function Home() {
           +
         </Button>
       </div>
+
+      <MobileNav
+        onShowStats={() => { setShowStats(!showStats); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        onShowFriends={() => setShowFriendManager(true)}
+        onShowGroups={() => setShowGroupManager(true)}
+        onShowCategories={() => setShowCategoryManager(true)}
+        onShare={() => setShowShareModal(true)}
+      />
+      <div className="mobile-nav-spacer"></div>
+
 
       {/* Modals */}
       <Modal
@@ -323,7 +361,8 @@ export default function Home() {
         textAlign: 'center',
         color: 'hsl(var(--color-text-muted))',
         fontSize: '0.875rem',
-        opacity: 0.7
+        opacity: 0.7,
+        marginBottom: '4rem'
       }}>
         <p>Expertly Designed with ❤️ &copy; {new Date().getFullYear()}</p>
       </footer>

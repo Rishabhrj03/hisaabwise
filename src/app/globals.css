@@ -219,4 +219,26 @@ h3 {
   h1 {
     font-size: 2rem;
   }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
+}
+
+/* Mobile Bottom Nav Spacer */
+.mobile-nav-spacer {
+  height: 80px;
+  /* Space for fixed bottom nav */
+}
+
+@media (min-width: 769px) {
+  .mobile-nav-spacer {
+    display: none;
+  }
 }

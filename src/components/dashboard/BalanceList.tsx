@@ -162,7 +162,7 @@ export function BalanceList() {
                                         </span>
                                     )}
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                     <span style={{
                                         fontWeight: 600,
                                         color: isOwed ? 'hsl(var(--color-income))' : 'hsl(var(--color-expense))',

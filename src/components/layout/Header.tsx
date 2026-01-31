@@ -31,7 +31,8 @@ export function Header() {
                     <h1 style={{ fontSize: '1.5rem', marginBottom: '0', lineHeight: 1, fontWeight: 700, letterSpacing: '-0.02em' }}>
                         <span className="text-gradient">HISAABWISE</span>
                     </h1>
-                    <p style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.75rem', marginTop: '0.2rem', fontWeight: 500 }}>
+
+                    <p className="hide-on-mobile" style={{ color: 'hsl(var(--color-text-muted))', fontSize: '0.75rem', marginTop: '0.2rem', fontWeight: 500 }}>
                         Track Expense, Analyze Easily.
                     </p>
                 </div>
@@ -76,6 +77,6 @@ export function Header() {
                     )}
                 </div>
             </div>
-        </header>
+        </header >
     );
 }
