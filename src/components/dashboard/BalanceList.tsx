@@ -6,6 +6,7 @@ import { useFriends } from '@/context/FriendContext';
 
 import { QRScannerModal } from '@/components/ui/QRScannerModal';
 import { PaymentQRModal } from '@/components/ui/PaymentQRModal';
+import { EditUpiModal } from '@/components/ui/EditUpiModal';
 
 export function BalanceList() {
     const { expenses, addExpense } = useExpenses();
@@ -16,6 +17,14 @@ export function BalanceList() {
     // Payment Modal State
     const [showPaymentQR, setShowPaymentQR] = React.useState(false);
     const [paymentDetails, setPaymentDetails] = React.useState({ upiUrl: '', amount: '', name: '' });
+
+    // Edit UPI Modal State
+    const [editUpiState, setEditUpiState] = React.useState<{ isOpen: boolean; friendId: string; friendName: string; initialValue: string }>({
+        isOpen: false,
+        friendId: '',
+        friendName: '',
+        initialValue: ''
+    });
 
     const handleSettleUp = (friendId: string, friendName: string, balance: number) => {
         const isOwed = balance > 0;
@@ -77,6 +86,21 @@ export function BalanceList() {
         }
         setShowScanner(false);
         setScanningFriendId(null);
+    };
+
+    const openEditUpiModal = (friendId: string, name: string, currentUpi: string = '') => {
+        setEditUpiState({
+            isOpen: true,
+            friendId,
+            friendName: name,
+            initialValue: currentUpi
+        });
+    };
+
+    const saveUpiId = async (newUpiId: string) => {
+        if (editUpiState.friendId) {
+            await updateFriend(editUpiState.friendId, { upi_id: newUpiId });
+        }
     };
 
     if (friends.length === 0) return null;
@@ -150,25 +174,29 @@ export function BalanceList() {
 
                                     <div style={{ display: 'flex', gap: '0.25rem' }}>
                                         {/* Edit / Add Buttons - Always Visible now */}
-                                        <Button
-                                            size="sm"
-                                            variant="secondary"
-                                            style={{ padding: '0.25rem', height: '24px', width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            onClick={async () => {
-                                                const upiId = window.prompt(`Enter UPI ID for ${friend.name}`, friend.upi_id || '');
-                                                if (upiId && upiId.includes('@')) {
-                                                    try {
-                                                        await updateFriend(friend.id, { upi_id: upiId });
-                                                    } catch (err) {
-                                                        alert('Failed');
-                                                    }
-                                                }
-                                            }}
-                                            title="Edit UPI ID"
-                                            tooltip="Edit UPI ID"
-                                        >
-                                            ✎
-                                        </Button>
+                                        {!friend.upi_id ? (
+                                            <Button
+                                                size="sm"
+                                                variant="secondary"
+                                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', height: 'auto', border: '1px dashed hsl(var(--color-primary))', color: 'hsl(var(--color-primary))' }}
+                                                onClick={() => openEditUpiModal(friend.id, friend.name, '')}
+                                                title="Add UPI ID Manually"
+                                            >
+                                                + Add ID
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                variant="secondary"
+                                                style={{ padding: '0.25rem', height: '24px', width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onClick={() => openEditUpiModal(friend.id, friend.name, friend.upi_id)}
+                                                title="Edit UPI ID"
+                                                tooltip="Edit UPI ID"
+                                            >
+                                                ✎
+                                            </Button>
+                                        )}
+
                                         <Button
                                             size="sm"
                                             variant="secondary"
@@ -239,6 +267,14 @@ export function BalanceList() {
                 upiUrl={paymentDetails.upiUrl}
                 amount={paymentDetails.amount}
                 recipientName={paymentDetails.name}
+            />
+
+            <EditUpiModal
+                isOpen={editUpiState.isOpen}
+                onClose={() => setEditUpiState(prev => ({ ...prev, isOpen: false }))}
+                onSave={saveUpiId}
+                initialValue={editUpiState.initialValue}
+                friendName={editUpiState.friendName}
             />
         </>
     );
