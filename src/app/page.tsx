@@ -249,7 +249,7 @@ export default function Home() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+        <div className="responsive-feature-grid">
           <BudgetCard />
           <GoalCard />
           <BankAccountCard />

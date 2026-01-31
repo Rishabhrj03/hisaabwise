@@ -20,7 +20,7 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency
     return (
         <div className="summary-grid">
             {/* Total Balance - Professional Wallet */}
-            <div className="glass-panel summary-card-balance" style={{
+            <div className="glass-panel summary-card-balance hide-on-mobile" style={{
                 background: 'linear-gradient(135deg, hsl(230, 20%, 15%), hsl(230, 20%, 10%))',
                 borderRadius: 'var(--radius-lg)',
                 padding: '1.5rem',

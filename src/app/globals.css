@@ -274,3 +274,32 @@ h3 {
     /* All cards take 1 column on desktop */
   }
 }
+
+/* Feature Grid - Horizontal Scroll on Mobile */
+.responsive-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .responsive-feature-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 1rem;
+    gap: 1rem;
+    margin-right: -1rem;
+    /* Negative margin to overflow container padding */
+    padding-right: 1rem;
+    /* Pad right to see last item */
+  }
+
+  .responsive-feature-grid>* {
+    min-width: 85vw;
+    /* Take mostly full width */
+    scroll-snap-align: center;
+    flex-shrink: 0;
+  }
+}

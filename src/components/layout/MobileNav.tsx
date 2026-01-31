@@ -48,6 +48,11 @@ export const MobileNav: React.FC<MobileNavProps> = ({
                 <span>Friends</span>
             </Button>
 
+            <Button variant="ghost" size="sm" onClick={onShowGroups} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>
+                <Users size={20} />
+                <span>Groups</span>
+            </Button>
+
             <Button variant="ghost" size="sm" onClick={onShowCategories} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>
                 <Layers size={20} />
                 <span>Cats</span>
