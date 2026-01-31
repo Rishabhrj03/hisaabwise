@@ -73,6 +73,12 @@ export default function Home() {
 
   if (!user) return null; // Prevent flash of content before redirect
 
+  // Enforce Verification
+  if (!user.isEmailVerified && !user.isPhoneVerified) {
+    router.push('/verification');
+    return null;
+  }
+
   // Filter Logic
   console.log('DEBUG: All Expenses:', expenses.length, expenses);
   console.log('DEBUG: Current Date:', currentDate.toISOString());

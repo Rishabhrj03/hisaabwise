@@ -18,7 +18,7 @@ export default function VerificationPage() {
 
     // Check if everything is verified
     if (user.isPhoneVerified && user.isEmailVerified) {
-        router.push('/dashboard');
+        router.push('/');
         return null;
     }
 
@@ -174,11 +174,6 @@ export default function VerificationPage() {
                     <Button variant="secondary" onClick={() => window.location.reload()}>
                         Refresh Status
                     </Button>
-                    <div style={{ marginTop: '1rem' }}>
-                        <Button variant="ghost" onClick={() => router.push('/dashboard')}>
-                            Skip for now (Go to Dashboard)
-                        </Button>
-                    </div>
                 </div>
             </Card>
         </div>
