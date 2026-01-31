@@ -5,12 +5,17 @@ import { useExpenses } from '@/context/ExpenseContext';
 import { useFriends } from '@/context/FriendContext';
 
 import { QRScannerModal } from '@/components/ui/QRScannerModal';
+import { PaymentQRModal } from '@/components/ui/PaymentQRModal';
 
 export function BalanceList() {
     const { expenses, addExpense } = useExpenses();
     const { friends, updateFriend } = useFriends();
     const [showScanner, setShowScanner] = React.useState(false);
     const [scanningFriendId, setScanningFriendId] = React.useState<string | null>(null);
+
+    // Payment Modal State
+    const [showPaymentQR, setShowPaymentQR] = React.useState(false);
+    const [paymentDetails, setPaymentDetails] = React.useState({ upiUrl: '', amount: '', name: '' });
 
     const handleSettleUp = (friendId: string, friendName: string, balance: number) => {
         const isOwed = balance > 0;
@@ -125,58 +130,69 @@ export function BalanceList() {
 
                         return (
                             <div key={friend.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 500 }}>{friend.name}</span>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div>
+                                    <span style={{ fontWeight: 500, display: 'block' }}>{friend.name}</span>
+                                    {friend.upi_id && (
+                                        <span style={{ fontSize: '0.7rem', color: 'hsl(var(--color-text-muted))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                            UPI: {friend.upi_id}
+                                        </span>
+                                    )}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <span style={{
                                         fontWeight: 600,
-                                        color: isOwed ? 'hsl(var(--color-income))' : 'hsl(var(--color-expense))'
+                                        color: isOwed ? 'hsl(var(--color-income))' : 'hsl(var(--color-expense))',
+                                        fontSize: '0.9rem',
+                                        marginRight: '0.25rem'
                                     }}>
                                         {isOwed ? 'owes you' : 'you owe'} ${Math.abs(balance).toFixed(2)}
                                     </span>
+
+                                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                        {/* Edit / Add Buttons - Always Visible now */}
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            style={{ padding: '0.25rem', height: '24px', width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            onClick={async () => {
+                                                const upiId = window.prompt(`Enter UPI ID for ${friend.name}`, friend.upi_id || '');
+                                                if (upiId && upiId.includes('@')) {
+                                                    try {
+                                                        await updateFriend(friend.id, { upi_id: upiId });
+                                                    } catch (err) {
+                                                        alert('Failed');
+                                                    }
+                                                }
+                                            }}
+                                            title="Edit UPI ID"
+                                            tooltip="Edit UPI ID"
+                                        >
+                                            ✎
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            style={{ padding: '0.25rem', height: '24px', width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            onClick={() => {
+                                                setScanningFriendId(friend.id);
+                                                setShowScanner(true);
+                                            }}
+                                            title="Scan QR"
+                                            tooltip="Scan QR Code"
+                                        >
+                                            📷
+                                        </Button>
+                                    </div>
+
                                     <Button
                                         size="sm"
                                         variant="secondary"
                                         style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', height: 'auto' }}
                                         onClick={() => handleSettleUp(friend.id, friend.name, balance)}
                                     >
-                                        Settle Up
+                                        Settle
                                     </Button>
-                                    {!friend.upi_id && (
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                            <Button
-                                                size="sm"
-                                                variant="secondary"
-                                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', height: 'auto', border: '1px dashed hsl(var(--color-primary))', color: 'hsl(var(--color-primary))' }}
-                                                onClick={async () => {
-                                                    const upiId = window.prompt(`Enter UPI ID for ${friend.name} (e.g. name@upi)`);
-                                                    if (upiId && upiId.includes('@')) {
-                                                        try {
-                                                            await updateFriend(friend.id, { upi_id: upiId });
-                                                        } catch (err) {
-                                                            alert('Failed to update UPI ID');
-                                                        }
-                                                    } else if (upiId) {
-                                                        alert('Invalid UPI ID format');
-                                                    }
-                                                }}
-                                                title="Add UPI ID Manually"
-                                            >
-                                                + Add ID
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="secondary"
-                                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', height: 'auto', border: '1px solid hsl(var(--color-border))' }}
-                                                onClick={() => {
-                                                    setScanningFriendId(friend.id);
-                                                    setShowScanner(true);
-                                                }}
-                                                title="Scan QR Code"
-                                            >
-                                                📷
-                                            </Button>
-                                        </div>
-                                    )}
+
                                     {!isOwed && friend.upi_id && (
                                         <Button
                                             size="sm"
@@ -184,11 +200,21 @@ export function BalanceList() {
                                             style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', height: 'auto', backgroundColor: 'hsl(var(--color-primary))' }}
                                             onClick={() => {
                                                 const upiLink = `upi://pay?pa=${friend.upi_id}&pn=${friend.name.replace(/\s/g, '%20')}&am=${Math.abs(balance).toFixed(2)}&cu=INR&tn=Settlement`;
-                                                window.location.href = upiLink;
+                                                setPaymentDetails({
+                                                    upiUrl: upiLink,
+                                                    amount: Math.abs(balance).toFixed(2),
+                                                    name: friend.name
+                                                });
+                                                setShowPaymentQR(true);
+
+                                                // Also try to open immediately for mobile users
+                                                // window.location.href = upiLink; // Optional: maybe just let the modal handle it?
+                                                // Let's rely on the modal link for clarity on desktop, or auto-trigger?
+                                                // Auto-triggering might block the modal on some browsers. Let's stick to the modal.
                                             }}
                                             title={`Pay to ${friend.upi_id}`}
                                         >
-                                            Pay Now  UPI
+                                            Pay
                                         </Button>
                                     )}
                                 </div>
@@ -205,6 +231,14 @@ export function BalanceList() {
                     setScanningFriendId(null);
                 }}
                 onScanSuccess={handleScanSuccess}
+            />
+
+            <PaymentQRModal
+                isOpen={showPaymentQR}
+                onClose={() => setShowPaymentQR(false)}
+                upiUrl={paymentDetails.upiUrl}
+                amount={paymentDetails.amount}
+                recipientName={paymentDetails.name}
             />
         </>
     );
