@@ -141,7 +141,7 @@ export function BalanceList() {
                                     >
                                         Settle Up
                                     </Button>
-                                    {!isOwed && !friend.upi_id && (
+                                    {!friend.upi_id && (
                                         <div style={{ display: 'flex', gap: '0.25rem' }}>
                                             <Button
                                                 size="sm"
