@@ -51,13 +51,17 @@ export function Header() {
                 <Button
                     variant="ghost"
                     onClick={handleLogout}
-                    style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                    style={{ fontSize: '0.875rem', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    title="Sign Out"
                 >
-                    Sign Out
+                    <span className="hide-on-mobile">Sign Out</span>
+                    <span className="hide-on-desktop">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                    </span>
                 </Button>
 
                 <div style={{
-                    width: '40px',
+                    minWidth: '40px', // Prevent shrinking
                     height: '40px',
                     borderRadius: '50%',
                     background: 'hsl(var(--color-surface))',

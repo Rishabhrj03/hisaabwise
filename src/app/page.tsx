@@ -335,15 +335,16 @@ export default function Home() {
         </div>
 
         <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Recent Transactions</h2>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h2 style={{ fontSize: '1.25rem', margin: 0, flex: 1, minWidth: '150px' }}>Recent Transactions</h2>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
               <VoiceInput />
               <Button onClick={() => {
                 setEditingExpense(null);
                 setShowAddForm(true);
-              }} title="Add a new transaction">
-                + New
+              }} title="Add a new transaction" size="sm">
+                <span className="hide-on-mobile">+ New</span>
+                <span className="hide-on-desktop">+</span>
               </Button>
             </div>
           </div>
@@ -359,7 +360,7 @@ export default function Home() {
       {/* Floating Action Button for Mobile */}
       <div style={{
         position: 'fixed',
-        bottom: '6rem', // Moved up for MobileNav
+        bottom: '7rem', // Moved up further to avoid overlap
         right: '1.5rem',
         zIndex: 100
       }}>
