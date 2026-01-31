@@ -138,7 +138,7 @@ export default function VerificationPage() {
                             */}
                             <Button onClick={() => {
                                 const code = user.phoneVerificationCode || 'ERROR';
-                                const waLink = `https://wa.me/919876543210?text=Verify code: ${code}`;
+                                const waLink = `https://wa.me/${user.phone}?text=Verify code: ${code}`;
                                 window.open(waLink, '_blank');
 
                                 // After they return:
