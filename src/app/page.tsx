@@ -51,6 +51,7 @@ export default function Home() {
   const [showFriendManager, setShowFriendManager] = useState(false);
   const [showGroupManager, setShowGroupManager] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showMobileBalances, setShowMobileBalances] = useState(false); // New state for mobile balances
 
   useEffect(() => {
     if (!loading && !user) {
@@ -258,7 +259,10 @@ export default function Home() {
           <LoanCard />
         </div>
 
-        <BalanceList />
+        {/* Hidden on mobile, shown via Modal */}
+        <div className="hide-on-mobile">
+          <BalanceList />
+        </div>
 
         <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -317,6 +321,7 @@ export default function Home() {
         onShowFriends={() => setShowFriendManager(true)}
         onShowGroups={() => setShowGroupManager(true)}
         onShowCategories={() => setShowCategoryManager(true)}
+        onShowBalances={() => setShowMobileBalances(true)}
         onShare={() => setShowShareModal(true)}
       />
       <div className="mobile-nav-spacer"></div>
@@ -354,6 +359,14 @@ export default function Home() {
         isOpen={showCategoryManager}
         onClose={() => setShowCategoryManager(false)}
       />
+
+      <Modal
+        isOpen={showMobileBalances}
+        onClose={() => setShowMobileBalances(false)}
+        title="Balances (Owes)"
+      >
+        <BalanceList />
+      </Modal>
 
       <ShareDashboardModal
         isOpen={showShareModal}

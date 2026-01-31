@@ -7,6 +7,7 @@ interface MobileNavProps {
     onShowFriends: () => void;
     onShowGroups: () => void;
     onShowCategories: () => void;
+    onShowBalances: () => void;
     onShare: () => void;
     currentView?: string;
 }
@@ -16,6 +17,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
     onShowFriends,
     onShowGroups,
     onShowCategories,
+    onShowBalances,
     onShare
 }) => {
     return (
@@ -33,9 +35,9 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             background: 'rgba(255, 255, 255, 0.9)', // More opaque for visibility
             boxShadow: '0 -5px 20px rgba(0,0,0,0.1)'
         }}>
-            <Button variant="ghost" size="sm" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>
-                <Home size={20} />
-                <span>Home</span>
+            <Button variant="ghost" size="sm" onClick={onShowBalances} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>
+                <Users size={20} />
+                <span>Owes</span>
             </Button>
 
             <Button variant="ghost" size="sm" onClick={onShowStats} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>
