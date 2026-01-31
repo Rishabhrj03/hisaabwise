@@ -225,6 +225,10 @@ export default function Home() {
             </select>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <ImportButton />
+              <ExportButton
+                expenses={filteredExpenses}
+                categories={categories}
+              />
             </div>
           </div>
         </div>
