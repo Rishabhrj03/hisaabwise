@@ -22,7 +22,11 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose,
 
             // Clean up previous instance if exists
             if (scannerRef.current) {
-                scannerRef.current.clear().catch(console.error);
+                try {
+                    scannerRef.current.clear();
+                } catch (e) {
+                    console.error("Failed to clear scanner", e);
+                }
             }
 
             const html5QrCode = new Html5Qrcode(scannerId);
