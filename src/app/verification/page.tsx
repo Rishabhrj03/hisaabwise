@@ -128,44 +128,43 @@ export default function VerificationPage() {
                                 To verify <strong>{user.phone}</strong>, please send a WhatsApp message from this number.
                             </p>
 
-                            {/* We need the code here. For now, let's create a "Generate Code" button or fetch it. 
-                                Or simply, if the API isn't returning it, we can't show it.
-                                I'll add a "Get Code" logic or just mock it for the button click if I can't fetch.
-                             */}
 
-                            {/* Workaround for now: I will modify `register` to return code or create a `me` endpoint fix. 
-                                Or better: Just put a placeholder code for the mock.
-                            */}
                             <Button onClick={() => {
                                 const code = user.phoneVerificationCode || 'ERROR';
                                 const waLink = `https://wa.me/${user.phone}?text=Verify code: ${code}`;
                                 window.open(waLink, '_blank');
+                            }} variant="secondary" style={{ width: '100%', marginBottom: '1rem' }}>
+                                Open WhatsApp
+                            </Button>
 
-                                // After they return:
-                                if (confirm("Did you send the message?")) {
-                                    setVerificationCode(code); // Set code to verify
-                                    const shouldVerify = true; // Flag to trigger effect or call function
-                                    // Actually we can just call handleWhatsAppVerify directly if we refactor, 
-                                    // but handleWhatsAppVerify uses `verificationCode` state.
-                                    // Let's just manually trigger fetch here or update state and call.
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <Input
+                                    placeholder="Enter Code"
+                                    value={verificationCode}
+                                    onChange={(e) => setVerificationCode(e.target.value)}
+                                />
+                                <Button onClick={async () => {
+                                    if (!verificationCode) return alert("Please enter the code");
+                                    setVerifying(true);
+                                    try {
+                                        const res = await fetch('/api/auth/verify-phone', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ code: verificationCode }),
+                                        });
 
-                                    // Refactored logic inline for simplicity:
-                                    fetch('/api/auth/verify-phone', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ code: code }),
-                                    }).then(res => {
                                         if (res.ok) {
                                             alert('Verification successful!');
                                             window.location.reload();
                                         } else {
-                                            alert('Verification failed. Please try again.');
+                                            alert('Invalid Code. Please try again.');
                                         }
-                                    });
-                                }
-                            }}>
-                                Verify via WhatsApp
-                            </Button>
+                                    } catch (e) { console.error(e); }
+                                    finally { setVerifying(false); }
+                                }}>
+                                    {verifying ? '...' : 'Verify'}
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </div>
