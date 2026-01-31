@@ -58,7 +58,10 @@ export function FriendManager() {
         const text = encodeURIComponent(`Hey ${friend.name}, join me on Expense Tracker to split bills! ${appUrl}`);
         const waLink = `https://wa.me/${cleanPhone}?text=${text}`;
 
-        window.open(waLink, '_blank');
+        // Use window.location.href instead of window.open
+        // forcing a navigation is more reliable for triggering App Links/Deep Links
+        // inside in-app browsers (like Instagram/Facebook) than opening a new popup.
+        window.location.href = waLink;
     };
 
     return (

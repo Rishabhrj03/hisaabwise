@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 
 import { GroupProvider } from "@/context/GroupContext";
+import { PWAInstallPrompt } from "@/components/ui/PWAInstallPrompt";
 
 
 /*
@@ -61,6 +62,7 @@ export default function RootLayout({
               <GroupProvider>
                 <ExpenseProvider>
                   {children}
+                  <PWAInstallPrompt />
                 </ExpenseProvider>
               </GroupProvider>
             </FriendProvider>

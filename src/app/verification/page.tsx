@@ -134,7 +134,7 @@ export default function VerificationPage() {
                             <Button onClick={() => {
                                 const code = user.phoneVerificationCode || 'ERROR';
                                 const waLink = `https://wa.me/${user.phone}?text=Verify code: ${code}`;
-                                window.open(waLink, '_blank');
+                                window.location.href = waLink;
                             }} variant="secondary" style={{ width: '100%', marginBottom: '1rem' }}>
                                 Open WhatsApp
                             </Button>
