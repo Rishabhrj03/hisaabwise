@@ -8,6 +8,10 @@ export type User = {
     email: string;
     name: string;
     image?: string;
+    phone?: string;
+    isEmailVerified?: boolean;
+    isPhoneVerified?: boolean;
+    phoneVerificationCode?: string;
 }
 
 type AuthContextType = {

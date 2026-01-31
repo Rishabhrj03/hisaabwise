@@ -21,6 +21,14 @@ export interface IUser extends Document {
     shareToken?: string;
     created_at: Date;
     updated_at: Date;
+
+    // Verification fields
+    isEmailVerified: boolean;
+    emailVerificationToken?: string;
+    emailVerificationExpire?: Date;
+    isPhoneVerified: boolean;
+    phoneVerificationCode?: string;
+
     resetPasswordToken?: string;
     resetPasswordExpire?: Date;
 }
@@ -72,6 +80,21 @@ const UserSchema: Schema<IUser> = new Schema(
             type: String,
             trim: true
         },
+
+        // Verification
+        isEmailVerified: {
+            type: Boolean,
+            default: false
+        },
+        emailVerificationToken: String,
+        emailVerificationExpire: Date,
+
+        isPhoneVerified: {
+            type: Boolean,
+            default: false
+        },
+        phoneVerificationCode: String,
+
         resetPasswordToken: String,
         resetPasswordExpire: Date,
     },
@@ -82,8 +105,6 @@ const UserSchema: Schema<IUser> = new Schema(
 
 // Prevent overwrite on model compile
 if (process.env.NODE_ENV === 'development') {
-    // In development mode, we delete the model from the cache so that it can be
-    // recompiled with the new schema changes.
     delete mongoose.models.User;
 }
 

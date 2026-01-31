@@ -1,10 +1,17 @@
 import nodemailer from 'nodemailer';
 
-const sendEmail = async (options: { email: string; subject: string; message: string }) => {
+interface EmailOptions {
+    to: string;
+    subject: string;
+    text: string;
+    html?: string;
+}
+
+export const sendEmail = async (options: EmailOptions) => {
     const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtpout.secureserver.net',
-        port: Number(process.env.EMAIL_PORT) || 465,
-        secure: true, // true for 465, false for other ports
+        host: process.env.EMAIL_HOST,
+        port: Number(process.env.EMAIL_PORT),
+        secure: process.env.EMAIL_SECURE === 'true',
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
@@ -12,14 +19,19 @@ const sendEmail = async (options: { email: string; subject: string; message: str
     });
 
     const message = {
-        from: `${process.env.EMAIL_FROM_NAME || 'HisaabWise'} <${process.env.EMAIL_USER}>`,
-        to: options.email,
+        from: `Expense Tracker <${process.env.EMAIL_USER}>`,
+        to: options.to,
         subject: options.subject,
-        text: options.message,
-        // html: options.html // Optional if we want to send HTML emails later
+        text: options.text,
+        html: options.html,
     };
 
-    await transporter.sendMail(message);
+    try {
+        await transporter.sendMail(message);
+        console.log('Email sent successfully');
+        return true;
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return false;
+    }
 };
-
-export default sendEmail;

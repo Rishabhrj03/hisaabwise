@@ -22,6 +22,11 @@ export async function GET() {
                 id: user._id,
                 email: user.email,
                 name: user.name,
+                image: user.image,
+                phone: user.phone,
+                isEmailVerified: user.isEmailVerified,
+                isPhoneVerified: user.isPhoneVerified,
+                phoneVerificationCode: user.phoneVerificationCode
             },
         });
 

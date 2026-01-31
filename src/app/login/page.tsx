@@ -44,7 +44,7 @@ function LoginForm() {
                 if (res.error) {
                     setError(res.error)
                 } else {
-                    router.push('/')
+                    router.push('/verification')
                 }
             }
         } catch (err) {

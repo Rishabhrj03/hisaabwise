@@ -48,6 +48,10 @@ export async function POST(req: Request) {
                 id: user._id,
                 email: user.email,
                 name: user.name,
+                phone: user.phone,
+                isEmailVerified: user.isEmailVerified,
+                isPhoneVerified: user.isPhoneVerified,
+                phoneVerificationCode: user.phoneVerificationCode
             },
         });
 
