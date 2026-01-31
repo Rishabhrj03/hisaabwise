@@ -31,6 +31,15 @@ function LoginForm() {
         setError('')
         setLoading(true)
 
+        // Basic Validation
+        if (!isLogin) {
+            if (phone.length !== 10) {
+                setError('Please enter a valid 10-digit phone number.')
+                setLoading(false)
+                return
+            }
+        }
+
         try {
             if (isLogin) {
                 const res = await login(email, password)
@@ -142,9 +151,14 @@ function LoginForm() {
                             <input
                                 type="tel"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    if (val.length <= 10) {
+                                        setPhone(val);
+                                    }
+                                }}
                                 style={inputStyle}
-                                placeholder="1234567890"
+                                placeholder="9876543210 (10 digits)"
                             />
                         </div>
                     </>

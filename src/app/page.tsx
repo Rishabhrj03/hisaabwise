@@ -56,6 +56,7 @@ export default function Home() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [showMobileBalances, setShowMobileBalances] = useState(false);
   const [showMobileActions, setShowMobileActions] = useState(false);
+  const [showMobileExport, setShowMobileExport] = useState(false);
   const [showCalculators, setShowCalculators] = useState(false);
 
   useEffect(() => {
@@ -176,7 +177,9 @@ export default function Home() {
             justifyContent: 'center',
             alignItems: 'center',
             padding: '0.75rem 1.5rem',
-            borderRadius: 'var(--radius-full)'
+            borderRadius: 'var(--radius-full)',
+            zIndex: 20, /* Ensure dropdowns appear above SummaryCards */
+            position: 'relative'
           }}>
             <ImportButton />
             <ExportButton
@@ -301,10 +304,54 @@ export default function Home() {
                   {/* Wrapper to style the buttons inside as full width list items */}
                   <div onClick={() => setShowMobileActions(false)} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <ImportButton />
-                    <ExportButton
-                      expenses={filteredExpenses}
-                      categories={categories}
-                    />
+                    {/* Collapsible Export Menu */}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowMobileExport(!showMobileExport);
+                        }}
+                        style={{
+                          justifyContent: 'center', /* Match ImportButton */
+                          position: 'relative',
+                          width: '100%',
+                          height: 'auto',
+                          padding: '0.4rem 0.5rem',
+                        }}
+                      >
+                        <span style={{ marginRight: '0.5rem' }}>Export Data</span>
+                        <span style={{ position: 'absolute', right: '1rem', transform: showMobileExport ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', fontSize: '0.7em' }}>▼</span>
+                      </Button>
+
+                      {showMobileExport && (
+                        <div className="animate-in slide-in-from-top-2" style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.25rem',
+                          paddingLeft: '1rem',
+                          borderLeft: '2px solid var(--glass-border)',
+                          marginLeft: '0.5rem',
+                          marginTop: '0.25rem'
+                        }}>
+                          <Button
+                            variant="ghost"
+                            onClick={(e) => { e.stopPropagation(); handleExportExcel(); }}
+                            style={{ justifyContent: 'flex-start', height: 'auto', padding: '0.4rem', fontSize: '0.85rem' }}
+                          >
+                            Excel (.xlsx)
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={(e) => { e.stopPropagation(); handleExportPDF(); }}
+                            style={{ justifyContent: 'flex-start', height: 'auto', padding: '0.4rem', fontSize: '0.85rem' }}
+                          >
+                            PDF (.pdf)
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>

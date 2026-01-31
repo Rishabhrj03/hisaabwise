@@ -26,7 +26,10 @@ export function FriendManager() {
         if (!friend.phone) return;
 
         // Clean phone number (remove spaces, etc)
-        const cleanPhone = friend.phone.replace(/\D/g, '');
+        let cleanPhone = friend.phone.replace(/\D/g, '');
+        if (cleanPhone.length === 10) {
+            cleanPhone = '91' + cleanPhone;
+        }
         const appUrl = window.location.origin;
         const text = encodeURIComponent(`Hey ${friend.name}, join me on Expense Tracker to split bills! ${appUrl}`);
         const waLink = `https://wa.me/${cleanPhone}?text=${text}`;
@@ -39,30 +42,38 @@ export function FriendManager() {
             <h3 style={{ marginBottom: '1rem' }}>Manage Friends</h3>
 
             <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Input
-                        placeholder="Friend's Name"
-                        value={newFriendName}
-                        onChange={(e) => setNewFriendName(e.target.value)}
-                        style={{ flex: 2 }}
-                    />
-                    <Input
-                        placeholder="Phone (incl. country code)"
-                        value={newFriendPhone}
-                        onChange={(e) => setNewFriendPhone(e.target.value)}
-                        type="tel"
-                        style={{ flex: 1.5 }}
-                    />
-                    <Input
-                        placeholder="UPI ID (optional)"
-                        value={newFriendUpi}
-                        onChange={(e) => setNewFriendUpi(e.target.value)}
-                        style={{ flex: 1.5 }}
-                    />
-                    <Button type="submit" size="sm">Add</Button>
-                </div>
+                {/* Row 1: Name */}
+                <Input
+                    placeholder="Friend's Name"
+                    value={newFriendName}
+                    onChange={(e) => setNewFriendName(e.target.value)}
+                    style={{ width: '100%' }}
+                />
+
+                {/* Row 2: Contact Details & Action */}
+                {/* <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr auto', gap: '0.75rem' }}> */}
+                <Input
+                    placeholder="Phone (10 digits)"
+                    value={newFriendPhone}
+                    style={{ width: '100%' }}
+                    onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 10) {
+                            setNewFriendPhone(val);
+                        }
+                    }}
+                    type="tel"
+                />
+                <Input
+                    placeholder="UPI ID (optional)"
+                    value={newFriendUpi}
+                    onChange={(e) => setNewFriendUpi(e.target.value)}
+                    style={{ width: '100%' }}
+                />
+                <Button type="submit" size="sm">Add</Button>
+                {/* </div> */}
                 <p style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>
-                    * Add phone number (e.g. 919876543210) to enable WhatsApp invites.
+                    * Add 10-digit phone number to enable WhatsApp invites.
                 </p>
             </form>
 
