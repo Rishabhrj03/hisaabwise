@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Users, Layers, PieChart, Share2 } from 'lucide-react';
+import { Home, Users, Layers, PieChart, Share2, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface MobileNavProps {
@@ -9,6 +9,7 @@ interface MobileNavProps {
     onShowCategories: () => void;
     onShowBalances: () => void;
     onShare: () => void;
+    onShowCalculators: () => void;
     currentView?: string;
 }
 
@@ -18,7 +19,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({
     onShowGroups,
     onShowCategories,
     onShowBalances,
-    onShare
+    onShare,
+    onShowCalculators
 }) => {
     return (
         <div className="glass-panel hide-on-desktop" style={{
@@ -58,6 +60,11 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             <Button variant="ghost" size="sm" onClick={onShowCategories} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>
                 <Layers size={20} />
                 <span>Cats</span>
+            </Button>
+
+            <Button variant="ghost" size="sm" onClick={onShowCalculators} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>
+                <Calculator size={20} />
+                <span>Calc</span>
             </Button>
 
             <Button variant="ghost" size="sm" onClick={onShare} style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.7rem', padding: '0.5rem' }}>

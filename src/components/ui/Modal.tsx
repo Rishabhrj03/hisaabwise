@@ -6,9 +6,10 @@ interface ModalProps {
     onClose: () => void;
     title: string;
     children: React.ReactNode;
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
     // Prevent scrolling when modal is open
     useEffect(() => {
         if (isOpen) {
@@ -22,6 +23,17 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     }, [isOpen]);
 
     if (!isOpen) return null;
+
+    const getMaxWidth = () => {
+        switch (size) {
+            case 'sm': return '400px';
+            case 'lg': return '800px';
+            case 'xl': return '1000px';
+            case '2xl': return '1200px';
+            case 'md':
+            default: return '500px';
+        }
+    };
 
     return (
         <div
@@ -42,17 +54,19 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             onClick={onClose}
         >
             <div
+                className="hide-scrollbar" // Helper class if defined, or just style
                 style={{
                     background: 'hsl(var(--color-surface))',
                     border: '1px solid hsl(var(--color-border))',
                     borderRadius: 'var(--radius-lg)',
                     width: '100%',
-                    maxWidth: '500px',
+                    maxWidth: getMaxWidth(),
                     maxHeight: '90vh',
                     display: 'flex',
                     flexDirection: 'column',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                    animation: 'slideUp 0.3s ease-out'
+                    animation: 'slideUp 0.3s ease-out',
+                    transition: 'max-width 0.3s ease'
                 }}
                 onClick={(e) => e.stopPropagation()}
             >

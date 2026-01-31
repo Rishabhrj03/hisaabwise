@@ -28,6 +28,7 @@ import { useExpenses } from '@/context/ExpenseContext';
 import { Expense } from '@/types';
 import { ShareDashboardModal } from '@/components/dashboard/ShareDashboardModal';
 import { Modal } from '@/components/ui/Modal';
+import CalculatorModal from '@/components/calculators/CalculatorModal';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { MoreHorizontal, Download, Upload, FileSpreadsheet, FileText } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
@@ -54,7 +55,8 @@ export default function Home() {
   const [showGroupManager, setShowGroupManager] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [showMobileBalances, setShowMobileBalances] = useState(false);
-  const [showMobileActions, setShowMobileActions] = useState(false); // New state for mobile actions menu // New state for mobile balances
+  const [showMobileActions, setShowMobileActions] = useState(false);
+  const [showCalculators, setShowCalculators] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -399,8 +401,16 @@ export default function Home() {
         onShowCategories={() => setShowCategoryManager(true)}
         onShowBalances={() => setShowMobileBalances(true)}
         onShare={() => setShowShareModal(true)}
+        onShowCalculators={() => setShowCalculators(true)}
       />
+
       <div className="mobile-nav-spacer"></div>
+
+      {/* Calculator Modal */}
+      <CalculatorModal
+        isOpen={showCalculators}
+        onClose={() => setShowCalculators(false)}
+      />
 
 
       {/* Modals */}
