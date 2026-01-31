@@ -17,9 +17,13 @@ export default function SIPCalculator() {
         let totalValue = 0;
 
         if (mode === 'sip') {
-            const monthlyRate = i / 12;
+            // Groww uses Effective Annual Rate (EAR) logic for SIPs
+            // Monthly rate = (1 + annual_rate)^(1/12) - 1
+            const monthlyRate = Math.pow(1 + i, 1 / 12) - 1;
             const months = years * 12;
             invested = monthly * months;
+
+            // Future Value of Annuity Due (Investment at BO Month)
             totalValue = monthly * ((Math.pow(1 + monthlyRate, months) - 1) * (1 + monthlyRate)) / monthlyRate;
         } else {
             invested = lumpsum;
