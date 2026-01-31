@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useFriends } from '@/context/FriendContext';
+import { useAuth } from '@/context/AuthContext';
 import { Input } from '@/components/ui/Input';
+import { PhoneUpdateModal } from './PhoneUpdateModal';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 import { Friend } from '@/types';
 
@@ -12,8 +15,29 @@ export function FriendManager() {
     const [newFriendPhone, setNewFriendPhone] = useState('');
     const [newFriendUpi, setNewFriendUpi] = useState('');
 
+    const [showPhoneModal, setShowPhoneModal] = useState(false);
+    const [alertConfig, setAlertConfig] = useState<{ show: boolean, message: string }>({ show: false, message: '' });
+    const { user } = useAuth();
+
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // 1. Validate Current User's Phone
+        const myPhone = user?.phone?.replace(/\D/g, '');
+        if (!myPhone || myPhone.length !== 10) {
+            setShowPhoneModal(true);
+            return;
+        }
+
+        // 2. Validate Friend's Phone (Mandatory)
+        if (!newFriendPhone || newFriendPhone.length !== 10) {
+            setAlertConfig({
+                show: true,
+                message: "Please enter a valid 10-digit phone number. A phone number is required to add a friend."
+            });
+            return;
+        }
+
         if (newFriendName.trim()) {
             await addFriend(newFriendName, newFriendPhone, newFriendUpi);
             setNewFriendName('');
@@ -127,6 +151,20 @@ export function FriendManager() {
                     ))
                 )}
             </div>
+
+
+            <PhoneUpdateModal
+                isOpen={showPhoneModal}
+                onClose={() => setShowPhoneModal(false)}
+                onSuccess={() => setShowPhoneModal(false)}
+            />
+
+            <AlertModal
+                isOpen={alertConfig.show}
+                onClose={() => setAlertConfig(prev => ({ ...prev, show: false }))}
+                message={alertConfig.message}
+                title="Invalid Phone Number"
+            />
         </Card>
     );
 }

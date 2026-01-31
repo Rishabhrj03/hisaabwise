@@ -20,6 +20,7 @@ type AuthContextType = {
     login: (email: string, password: string) => Promise<{ error?: string }>
     register: (email: string, password: string, name?: string, phone?: string) => Promise<{ error?: string }>
     logout: () => Promise<void>
+    updateProfile: (phone: string) => Promise<{ error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
     login: async () => ({}),
     register: async () => ({}),
     logout: async () => { },
+    updateProfile: async () => ({}),
 })
 
 export const useAuth = () => useContext(AuthContext)
@@ -107,8 +109,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+    const updateProfile = async (phone: string) => {
+        try {
+            const res = await fetch('/api/user/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                return { error: data.error };
+            }
+            setUser(data.user);
+            router.refresh();
+            return {};
+        } catch (error) {
+            return { error: 'Something went wrong' };
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
             {children}
         </AuthContext.Provider>
     )
