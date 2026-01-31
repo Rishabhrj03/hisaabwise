@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/context/AuthContext';
 
 export default function VerificationPage() {
@@ -11,6 +12,7 @@ export default function VerificationPage() {
     const { user } = useAuth();
     const [verifying, setVerifying] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
     if (!user) {
         return <div style={{ padding: '2rem' }}>Loading user details... (If stuck, please login again)</div>;
@@ -143,8 +145,12 @@ export default function VerificationPage() {
                                     value={verificationCode}
                                     onChange={(e) => setVerificationCode(e.target.value)}
                                 />
+
                                 <Button onClick={async () => {
-                                    if (!verificationCode) return alert("Please enter the code");
+                                    if (!verificationCode) {
+                                        setToast({ message: "Please enter the code", type: 'error' });
+                                        return;
+                                    }
                                     setVerifying(true);
                                     try {
                                         const res = await fetch('/api/auth/verify-phone', {
@@ -154,10 +160,10 @@ export default function VerificationPage() {
                                         });
 
                                         if (res.ok) {
-                                            alert('Verification successful!');
-                                            window.location.reload();
+                                            setToast({ message: "Verification successful! Redirecting...", type: 'success' });
+                                            setTimeout(() => window.location.reload(), 1500);
                                         } else {
-                                            alert('Invalid Code. Please try again.');
+                                            setToast({ message: "Invalid Code. Please try again.", type: 'error' });
                                         }
                                     } catch (e) { console.error(e); }
                                     finally { setVerifying(false); }
@@ -174,6 +180,14 @@ export default function VerificationPage() {
                         Refresh Status
                     </Button>
                 </div>
+
+                {toast && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(null)}
+                    />
+                )}
             </Card>
         </div>
     );
