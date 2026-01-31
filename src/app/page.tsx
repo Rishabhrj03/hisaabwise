@@ -342,9 +342,8 @@ export default function Home() {
               <Button onClick={() => {
                 setEditingExpense(null);
                 setShowAddForm(true);
-              }} title="Add a new transaction" size="sm">
-                <span className="hide-on-mobile">+ New</span>
-                <span className="hide-on-desktop">+</span>
+              }} title="Add a new transaction" className="hide-on-mobile">
+                + New
               </Button>
             </div>
           </div>
@@ -358,7 +357,7 @@ export default function Home() {
       </main>
 
       {/* Floating Action Button for Mobile */}
-      <div style={{
+      <div className="hide-on-desktop" style={{
         position: 'fixed',
         bottom: '7rem', // Moved up further to avoid overlap
         right: '1.5rem',
