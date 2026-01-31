@@ -6,9 +6,11 @@ import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
 interface ExportButtonProps {
     expenses: Expense[];
     categories: Category[];
+    compact?: boolean;
+    fullWidth?: boolean;
 }
 
-export function ExportButton({ expenses, categories }: ExportButtonProps) {
+export function ExportButton({ expenses, categories, compact = false, fullWidth = false }: ExportButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     const calculateTotals = () => {
@@ -32,9 +34,9 @@ export function ExportButton({ expenses, categories }: ExportButtonProps) {
     };
 
     return (
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-            <Button variant="secondary" size="sm" onClick={() => setIsOpen(!isOpen)}>
-                Export ⬇
+        <div style={{ position: 'relative', display: fullWidth ? 'block' : 'inline-block', width: fullWidth ? '100%' : 'auto' }}>
+            <Button variant="secondary" size="sm" onClick={() => setIsOpen(!isOpen)} title="Export Data" style={{ width: '100%', justifyContent: 'center' }}>
+                {compact ? '📤' : 'Export ⬇'}
             </Button>
 
             {isOpen && (

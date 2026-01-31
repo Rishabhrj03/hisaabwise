@@ -303,3 +303,18 @@ h3 {
     flex-shrink: 0;
   }
 }
+
+/* Month Selector Responsive Text */
+.month-selector-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .month-selector-title {
+    font-size: 1.1rem;
+    min-width: 130px;
+  }
+}

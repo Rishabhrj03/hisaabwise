@@ -3,7 +3,12 @@ import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/Button';
 import { useExpenses } from '@/context/ExpenseContext';
 
-export function ImportButton() {
+interface ImportButtonProps {
+    compact?: boolean;
+    fullWidth?: boolean;
+}
+
+export function ImportButton({ compact = false, fullWidth = false }: ImportButtonProps) {
     const { addExpense, expenses } = useExpenses();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -368,8 +373,10 @@ export function ImportButton() {
                 variant="secondary"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
+                title="Import Statement"
+                style={{ width: fullWidth ? '100%' : 'auto', justifyContent: 'center' }}
             >
-                Import Statement
+                {compact ? '📥' : 'Import Statement'}
             </Button>
         </>
     );

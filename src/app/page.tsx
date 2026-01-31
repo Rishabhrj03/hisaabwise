@@ -29,6 +29,8 @@ import { Expense } from '@/types';
 import { ShareDashboardModal } from '@/components/dashboard/ShareDashboardModal';
 import { Modal } from '@/components/ui/Modal';
 import { MobileNav } from '@/components/layout/MobileNav';
+import { MoreHorizontal, Download, Upload, FileSpreadsheet, FileText } from 'lucide-react';
+import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -51,7 +53,8 @@ export default function Home() {
   const [showFriendManager, setShowFriendManager] = useState(false);
   const [showGroupManager, setShowGroupManager] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [showMobileBalances, setShowMobileBalances] = useState(false); // New state for mobile balances
+  const [showMobileBalances, setShowMobileBalances] = useState(false);
+  const [showMobileActions, setShowMobileActions] = useState(false); // New state for mobile actions menu // New state for mobile balances
 
   useEffect(() => {
     if (!loading && !user) {
@@ -123,6 +126,26 @@ export default function Home() {
   const handleCloseForm = () => {
     setShowAddForm(false);
     setTimeout(() => setEditingExpense(null), 300); // Small delay to prevent clearing while closing animation
+  };
+
+  const calculateTotals = () => {
+    return expenses.reduce((acc, curr) => {
+      if (curr.type === 'income') acc.income += curr.amount;
+      else acc.expense += curr.amount;
+      return acc;
+    }, { income: 0, expense: 0 });
+  };
+
+  const handleExportExcel = () => {
+    if (filteredExpenses.length === 0) return alert("No data to export.");
+    exportToExcel(filteredExpenses, calculateTotals());
+    setShowMobileActions(false);
+  };
+
+  const handleExportPDF = () => {
+    if (filteredExpenses.length === 0) return alert("No data to export.");
+    exportToPDF(filteredExpenses, calculateTotals(), categories);
+    setShowMobileActions(false);
   };
 
   return (
@@ -202,35 +225,82 @@ export default function Home() {
             </select>
           </div>
 
-          {/* Mobile Currency Selector and Action Buttons */}
-          <div className="hide-on-desktop" style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center' }}>
+          {/* Mobile Currency & Actions - Compact */}
+          {/* Mobile Currency & Actions - Compact Line */}
+          <div className="hide-on-desktop" style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+
+            {/* Currency Selector */}
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
               className="glass-panel"
               style={{
-                height: '40px',
-                padding: '0 1rem',
-                borderRadius: 'var(--radius-full)',
+                height: '32px',
+                padding: '0 0.5rem',
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--glass-border)',
                 background: 'transparent',
                 color: 'hsl(var(--color-text-main))',
-                fontSize: '0.9rem',
+                fontSize: '0.85rem',
                 outline: 'none',
-                cursor: 'pointer',
-                fontWeight: 600
+                fontWeight: 600,
+                minWidth: '80px'
               }}
             >
-              <option value="INR">INR (₹)</option>
-              <option value="USD">USD ($)</option>
+              <option value="INR">₹ INR</option>
+              <option value="USD">$ USD</option>
             </select>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <ImportButton />
-              <ExportButton
-                expenses={filteredExpenses}
-                categories={categories}
-              />
-            </div>
+
+            {/* Combined Actions Button */}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowMobileActions(!showMobileActions)}
+              style={{ height: '32px', padding: '0 0.75rem', gap: '0.5rem' }}
+            >
+              <MoreHorizontal size={18} />
+              <span>Actions</span>
+            </Button>
+
+            {/* Mobile Actions Menu Dropdown */}
+            {showMobileActions && (
+              <>
+                <div
+                  style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+                  onClick={() => setShowMobileActions(false)}
+                />
+                <div className="glass-panel animate-in fade-in zoom-in-95" style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: '50%', // Center relative to container
+                  transform: 'translateX(50%)',
+                  marginTop: '0.5rem',
+                  zIndex: 50,
+                  padding: '0.75rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  minWidth: '200px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'hsl(var(--color-surface))',
+                  border: '1px solid var(--glass-border)',
+                  boxShadow: 'var(--shadow-lg)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'hsl(var(--color-text-muted))', paddingBottom: '0.25rem', borderBottom: '1px solid var(--glass-border)' }}>
+                    <small>DATA MANAGEMENT</small>
+                  </div>
+
+                  {/* Wrapper to style the buttons inside as full width list items */}
+                  <div onClick={() => setShowMobileActions(false)} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <ImportButton />
+                    <ExportButton
+                      expenses={filteredExpenses}
+                      categories={categories}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
