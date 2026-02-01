@@ -3,73 +3,103 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useExpenses } from '@/context/ExpenseContext';
 import { Category } from '@/types';
+import {
+    ShoppingBag, Utensils, Car, Plane, GraduationCap,
+    HeartPulse, Gamepad2, Smartphone, Shirt, Gift,
+    Briefcase, Banknote, Receipt, Zap, Hammer,
+    PawPrint, Baby, Coffee, Music, LayoutGrid,
+    Home, Wifi, Dumbbell, BookOpen, Crown,
+    LucideIcon
+} from 'lucide-react';
 
 interface CategoryManagerProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-const EMOJI_LIST = [
-    // Objects
-    '🏷️', '📦', '🎁', '🛍️', '🛒', '🎫', '🎟️', '📚', '🎒', '🎓',
-    '💼', '📁', '📅', '📝', '📌', '📎', '🔒', '🔑', '🔓', '🔨',
-    '🔧', '🔫', '💣', '🔪', '🛡️', '🚬', '⚰️', '🪦', '🏺', '🔮',
-
-    // Food & Drink
-    '🍔', '🍕', '🌮', '🌯', '🥗', '🍝', '🍜', '🍲', '🍱', '🥘',
-    '🥪', '🍛', '🍣', '🍤', '🥡', '🥟', '🥞', '🧇', '🍖',
-    '🍗', '🥩', '🥓', '🍞', '🥐', '🥖', '🥨', '🥯', '🧀', '🥬',
-    '🥦', '🍄', '🌽', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇',
-    '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅',
-    '🍆', '🥑', '🥜', '🌰', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧',
-    '🍫', '🍬', '🍭', '🍮', '🍯', '🍼', '🥛', '☕', '🫖', '🍵',
-    '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤',
-
-    // Transport & Places
-    '🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐',
-    '🚚', '🚛', '🚜', '🏍️', '🛵', '🚲', '🦼', '🦽', '🛴', '🛹',
-    '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋',
-    '🚞', '🚝', '🚄', '🚅', '🚈', '🚂', '🚆', '🚇', '🚊', '🚉',
-    '🚁', '🛩️', '✈️', '🛫', '🛬', '🚀', '🛰️', '🛸', '🛶', '⛵',
-    '🛥️', '🚤', '🛳️', '⛴️', '🚢', '⚓', '⛽', '🚧', '🚦', '🚥',
-    '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪',
-    '🏫', '🏬', '🏭', '🏯', '🏰', '💒', '🗼', '🗽', '⛪', '🕌',
-    '🛕', '🕍', '⛩️', '🕋', '⛲', '⛺', '🌁', '🌃', '🏙️', '🌄',
-
-    // Activities & Sports
-    '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱',
-    '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥅', '⛳', '🪁',
-    '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸️',
-    '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🤼', '🤸', '🤺', '⛹️',
-    '🤾', '🧗', '🧘', '🛀', '🛌', '🧖', '💆', '💇', '🚶', '🏃',
-    '🎨', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸',
-    '🎻', '🎲', '♟️', '🎯', '🎳', '🎮', '🎰', '🧩',
-
-    // Tech & Devices
-    '⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️',
-    '🗜️', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥',
-    '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️',
-    '🎛️', '🧭', '⏱️', '⏲️', '⏰', '🕰️', '⌛', '⏳', '📡', '🔋',
-    '🔌', '💡', '🔦', '🕯️', '🪔',
-
-    // Health & Body
-    '💊', '💉', '🩸', '🦠', '🦷', '🦴', '👀', '👁️', '👅', '👄',
-    '👶', '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👨‍🦰', '👨‍🦱',
-
-    // Nature & Animals
-    '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
-    '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒',
-    '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇',
-    '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜',
-    '🦟', '🦗', '🕷️', '🕸️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕',
-    '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳',
-    '🐋', '🦈', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🦣', '🐘',
-    '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🦬', '🐃', '🐂', '🐄',
-    '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🦮',
-    '🐕‍🦺', '🐈', '🐈‍⬛', '🐓', '🦃', '🦚', '🦜', '🦢', '🦩', '🕊️',
-    '🐇', '🦝', '🦨', '🦡', '🦦', '🦥', '🐁', '🐀', '🐿️', '🦔'
+// --- Data Constants ---
+const EMOJI_CATEGORIES = [
+    {
+        name: 'Objects',
+        emojis: [
+            '🏷️', '📦', '🎁', '🛍️', '🛒', '🎫', '🎟️', '📚', '🎒', '🎓',
+            '💼', '📁', '📅', '📝', '📌', '📎', '🔒', '🔑', '🔓', '🔨',
+            '🔧', '🔫', '💣', '🔪', '🛡️', '🚬', '⚰️', '🪦', '🏺', '🔮',
+        ]
+    },
+    {
+        name: 'Food',
+        emojis: [
+            '🍔', '🍕', '🌮', '🌯', '🥗', '🍝', '🍜', '🍲', '🍱', '🥘',
+            '🥪', '🍛', '🍣', '🍤', '🥡', '🥟', '🥞', '🧇', '🍖',
+            '🍗', '🥩', '🥓', '🍞', '🥐', '🥖', '🥨', '🥯', '🧀', '🥬',
+            '🥦', '🍄', '🌽', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇',
+            '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅',
+            '🍆', '🥑', '🥜', '🌰', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧',
+            '🍫', '🍬', '🍭', '🍮', '🍯', '🍼', '🥛', '☕', '🫖', '🍵',
+            '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤',
+        ]
+    },
+    {
+        name: 'Travel',
+        emojis: [
+            '🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐',
+            '🚚', '🚛', '🚜', '🏍️', '🛵', '🚲', '🦼', '🦽', '🛴', '🛹',
+            '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋',
+            '🚞', '🚝', '🚄', '🚅', '🚈', '🚂', '🚆', '🚇', '🚊', '🚉',
+            '🚁', '🛩️', '✈️', '🛫', '🛬', '🚀', '🛰️', '🛸', '🛶', '⛵',
+            '🛥️', '🚤', '🛳️', '⛴️', '🚢', '⚓', '⛽', '🚧', '🚦', '🚥',
+            '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪',
+            '🏫', '🏬', '🏭', '🏯', '🏰', '💒', '🗼', '🗽', '⛪', '🕌',
+            '🛕', '🕍', '⛩️', '🕋', '⛲', '⛺', '🌁', '🌃', '🏙️', '🌄',
+        ]
+    },
+    {
+        name: 'Activity',
+        emojis: [
+            '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱',
+            '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥅', '⛳', '🪁',
+            '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸️',
+            '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🤼', '🤸', '🤺', '⛹️',
+            '🤾', '🧗', '🧘', '🛀', '🛌', '🧖', '💆', '💇', '🚶', '🏃',
+            '🎨', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸',
+            '🎻', '🎲', '♟️', '🎯', '🎳', '🎮', '🎰', '🧩',
+        ]
+    },
+    {
+        name: 'Tech',
+        emojis: [
+            '⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️',
+            '🗜️', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥',
+            '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️',
+            '🎛️', '🧭', '⏱️', '⏲️', '⏰', '🕰️', '⌛', '⏳', '📡', '🔋',
+            '🔌', '💡', '🔦', '🕯️', '🪔',
+        ]
+    },
+    {
+        name: 'Health',
+        emojis: [
+            '💊', '💉', '🩸', '🦠', '🦷', '🦴', '👀', '👁️', '👅', '👄',
+            '👶', '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👨‍🦰', '👨‍🦱',
+        ]
+    },
+    {
+        name: 'Nature',
+        emojis: [
+            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
+            '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒',
+            '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇',
+            '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜',
+            '🦟', '🦗', '🕷️', '🕸️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕',
+            '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳',
+            '🐋', '🦈', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🦣', '🐘',
+            '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🦬', '🐃', '🐂', '🐄',
+            '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🦮',
+            '🐕‍🦺', '🐈', '🐈‍⬛', '🐓', '🦃', '🦚', '🦜', '🦢', '🦩', '🕊️',
+            '🐇', '🦝', '🦨', '🦡', '🦦', '🦥', '🐁', '🐀', '🐿️', '🦔'
+        ]
+    }
 ];
-
 
 const COLOR_LIST = [
     // Reds & Pinks
@@ -105,33 +135,57 @@ const COLOR_LIST = [
     '#78716C', '#57534E', '#44403C', '#292524', '#A8A29E', '#D6D3D1',
 ];
 
+const ICON_MAP: Record<string, LucideIcon> = {
+    'Home': Home, 'Shopping': ShoppingBag, 'Food': Utensils, 'Transport': Car,
+    'Travel': Plane, 'Education': GraduationCap, 'Health': HeartPulse, 'Entertainment': Gamepad2,
+    'Tech': Smartphone, 'Clothing': Shirt, 'Gift': Gift, 'Work': Briefcase,
+    'Salary': Banknote, 'Bills': Receipt, 'Utilities': Zap, 'Tools': Hammer,
+    'Pets': PawPrint, 'Kids': Baby, 'Coffee': Coffee, 'Music': Music,
+    'General': LayoutGrid, 'Internet': Wifi, 'Fitness': Dumbbell, 'Books': BookOpen,
+    'Premium': Crown
+};
+
+// Helper to render icon safely
+const CategoryIcon = ({ icon, size = 24, color = 'currentColor' }: { icon: string, size?: number, color?: string }) => {
+    const IconComponent = ICON_MAP[icon];
+    if (IconComponent) {
+        return <IconComponent size={size} color={color} />;
+    }
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>{icon || '🏷️'}</span>;
+};
+
 export function CategoryManager({ isOpen, onClose }: CategoryManagerProps) {
     const { categories, addCategory, updateCategory, deleteCategory } = useExpenses();
     const [view, setView] = useState<'list' | 'edit'>('list');
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-    const [formData, setFormData] = useState({ name: '', color: '#3498DB', icon: '🏷️' });
+    const [formData, setFormData] = useState({ name: '', color: '#3B82F6', icon: 'General' });
     const [loading, setLoading] = useState(false);
 
-    const UNIQUE_EMOJI_LIST = React.useMemo(
-        () => [...new Set(EMOJI_LIST)],
-        []
-    );
+    // UI States
+    const [iconType, setIconType] = useState<'icons' | 'emojis'>('icons');
+    const [activeEmojiTab, setActiveEmojiTab] = useState(EMOJI_CATEGORIES[0].name);
 
     const resetForm = () => {
-        setFormData({ name: '', color: '#3498DB', icon: '🏷️' });
+        setFormData({ name: '', color: '#3B82F6', icon: 'General' });
         setEditingCategory(null);
         setView('list');
+        setIconType('icons');
     };
 
     const handleEdit = (cat: Category) => {
         setEditingCategory(cat);
-        setFormData({ name: cat.name, color: cat.color, icon: cat.icon || '🏷️' });
+        setFormData({ name: cat.name, color: cat.color, icon: cat.icon || 'General' });
         setView('edit');
+        if (ICON_MAP[cat.icon || '']) {
+            setIconType('icons');
+        } else {
+            setIconType('emojis');
+        }
     };
 
     const handleCreate = () => {
         setEditingCategory(null);
-        setFormData({ name: '', color: '#3498DB', icon: '🏷️' });
+        setFormData({ name: '', color: '#3B82F6', icon: 'General' });
         setView('edit');
     };
 
@@ -156,29 +210,35 @@ export function CategoryManager({ isOpen, onClose }: CategoryManagerProps) {
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={view === 'list' ? "Manage Categories" : (editingCategory ? "Edit Category" : "New Category")}>
-            <div style={{ minHeight: '300px', display: 'flex', flexDirection: 'column' }}>
+            {/* The root container fixes the height so the modal never overflows */}
+            <div style={{ maxHeight: '72vh', display: 'flex', flexDirection: 'column' }}>
 
                 {view === 'list' ? (
                     <>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
                             <Button size="sm" onClick={handleCreate}>+ New Category</Button>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', paddingRight: '0.25rem', flex: 1 }}>
                             {categories.map(cat => (
                                 <div key={cat._id} style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                    padding: '0.75rem', borderRadius: '8px', background: 'var(--color-surface)',
-                                    borderLeft: `4px solid ${cat.color}`
+                                    padding: '0.75rem', borderRadius: '10px', background: 'var(--color-surface)',
+                                    border: '1px solid var(--color-border)',
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <span style={{ fontSize: '1.25rem' }}>{cat.icon || '🏷️'}</span>
+                                        <div style={{
+                                            width: '36px', height: '36px', borderRadius: '10px',
+                                            background: `${cat.color}15`, color: cat.color,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <CategoryIcon icon={cat.icon || 'General'} size={20} color={cat.color} />
+                                        </div>
                                         <span style={{ fontWeight: 500 }}>{cat.name}</span>
-                                        {cat.is_default && <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>(Default)</span>}
                                     </div>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <div style={{ display: 'flex', gap: '0.25rem' }}>
                                         <Button variant="ghost" size="sm" onClick={() => handleEdit(cat)}>✎</Button>
                                         {!cat.is_default && cat.name !== 'Other' && (
-                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(cat._id, cat.name)} style={{ color: 'red' }}>✕</Button>
+                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(cat._id, cat.name)} style={{ color: 'var(--hue-danger)' }}>✕</Button>
                                         )}
                                     </div>
                                 </div>
@@ -186,129 +246,191 @@ export function CategoryManager({ isOpen, onClose }: CategoryManagerProps) {
                         </div>
                     </>
                 ) : (
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
-                        {/* Name Input */}
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Name</label>
-                            <input
-                                type="text"
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                style={{
-                                    width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
-                                    border: '1px solid var(--color-border)', background: 'var(--color-background)', color: 'var(--color-text-main)'
-                                }}
-                                required
-                                placeholder="Category Name"
-                            />
-                        </div>
-
-                        {/* Icon Picker */}
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Icon</label>
+                        {/* 1. Header Area: Preview + Input (Fixed at top) */}
+                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexShrink: 0 }}>
+                            {/* Compact Preview Card */}
                             <div style={{
-                                display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(36px, 1fr))',
-                                gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', padding: '0.5rem',
-                                border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)'
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                width: '60px', height: '60px', borderRadius: '14px',
+                                background: formData.color,
+                                color: 'white',
+                                boxShadow: `0 4px 10px ${formData.color}60`,
+                                flexShrink: 0
                             }}>
-                                {UNIQUE_EMOJI_LIST.map(emoji => (
-                                    <button
-                                        key={emoji}
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            // Directly update state, simple handler
-                                            setFormData(prev => ({ ...prev, icon: emoji }));
-                                        }}
-                                        className="emoji-btn"
-                                        style={{
-                                            fontSize: '1.5rem',
-                                            padding: '0.5rem',
-                                            border: formData.icon === emoji ? '2px solid var(--color-primary)' : '1px solid transparent',
-                                            background: formData.icon === emoji ? 'rgba(var(--color-primary-rgb), 0.1)' : 'transparent',
-                                            cursor: 'pointer',
-                                            borderRadius: '8px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            boxShadow: formData.icon === emoji ? '0 0 0 2px rgba(var(--color-primary-rgb), 0.2)' : 'none'
-                                        }}
-                                    >
-                                        {emoji}
-                                    </button>
-                                ))}
+                                <CategoryIcon icon={formData.icon} size={28} color="white" />
+                            </div>
+
+                            {/* Wide Name Input */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>NAME</label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    style={{
+                                        width: '100%', padding: '0.5rem 0.75rem', borderRadius: '8px',
+                                        border: '1px solid var(--color-border)',
+                                        background: 'var(--color-background)',
+                                        color: 'var(--color-text-main)',
+                                        fontSize: '1rem',
+                                        outline: 'none'
+                                    }}
+                                    onFocus={(e) => e.target.style.borderColor = 'hsl(var(--color-primary))'}
+                                    onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
+                                    required
+                                    placeholder="e.g. Shopping"
+                                    autoFocus
+                                />
                             </div>
                         </div>
 
-                        {/* Color Picker */}
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Color</label>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(28px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
+                        {/* 2. Middle Area: Icon Picker (Flexible & Scrollable) */}
+                        <div style={{
+                            flex: 1, display: 'flex', flexDirection: 'column',
+                            background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                            borderRadius: '12px', overflow: 'hidden', marginBottom: '1rem'
+                        }}>
+                            {/* Sticky Tabs */}
+                            <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-hover)' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setIconType('icons')}
+                                    style={{
+                                        flex: 1, padding: '0.75rem',
+                                        fontWeight: iconType === 'icons' ? 600 : 400,
+                                        color: iconType === 'icons' ? 'hsl(var(--color-text-main))' : 'var(--color-text-muted)',
+                                        background: iconType === 'icons' ? 'var(--color-surface)' : 'none',
+                                        border: 'none', cursor: 'pointer',
+                                        borderBottom: iconType === 'icons' ? `2px solid ${formData.color}` : '2px solid transparent',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    ✨ Icons
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIconType('emojis')}
+                                    style={{
+                                        flex: 1, padding: '0.75rem',
+                                        fontWeight: iconType === 'emojis' ? 600 : 400,
+                                        color: iconType === 'emojis' ? 'hsl(var(--color-text-main))' : 'var(--color-text-muted)',
+                                        background: iconType === 'emojis' ? 'var(--color-surface)' : 'none',
+                                        border: 'none', cursor: 'pointer',
+                                        borderBottom: iconType === 'emojis' ? `2px solid ${formData.color}` : '2px solid transparent',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    😀 Emojis
+                                </button>
+                            </div>
+
+                            {/* Scrollable Content */}
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+                                {iconType === 'icons' ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(42px, 1fr))', gap: '0.75rem' }}>
+                                        {Object.keys(ICON_MAP).map(iconKey => {
+                                            const IconComp = ICON_MAP[iconKey];
+                                            const isSelected = formData.icon === iconKey;
+                                            return (
+                                                <button
+                                                    key={iconKey}
+                                                    type="button"
+                                                    onClick={() => setFormData(prev => ({ ...prev, icon: iconKey }))}
+                                                    style={{
+                                                        aspectRatio: '1',
+                                                        border: isSelected ? `2px solid ${formData.color}` : '1px solid var(--color-border)',
+                                                        background: isSelected ? `${formData.color}15` : 'var(--color-background)',
+                                                        color: isSelected ? formData.color : 'var(--color-text-muted)',
+                                                        cursor: 'pointer', borderRadius: '10px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        transition: 'all 0.1s'
+                                                    }}
+                                                >
+                                                    <IconComp size={20} />
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {/* Horizontal Category Scroll */}
+                                        <div style={{ display: 'flex', overflowX: 'auto', paddingBottom: '0.25rem', gap: '0.5rem', scrollbarWidth: 'none', position: 'sticky', top: '-1rem', background: 'var(--color-surface)', zIndex: 1, padding: '0.5rem 0' }}>
+                                            {EMOJI_CATEGORIES.map(cat => (
+                                                <button key={cat.name} type="button" onClick={() => setActiveEmojiTab(cat.name)}
+                                                    style={{
+                                                        whiteSpace: 'nowrap', background: activeEmojiTab === cat.name ? `${formData.color}20` : 'var(--color-border)',
+                                                        border: 'none', borderRadius: '20px', padding: '4px 12px', fontSize: '0.8rem',
+                                                        color: activeEmojiTab === cat.name ? formData.color : 'var(--color-text-muted)',
+                                                        fontWeight: activeEmojiTab === cat.name ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s'
+                                                    }}>
+                                                    {cat.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(36px, 1fr))', gap: '0.5rem' }}>
+                                            {EMOJI_CATEGORIES.find(c => c.name === activeEmojiTab)?.emojis.map(emoji => (
+                                                <button
+                                                    key={emoji} type="button"
+                                                    onClick={() => setFormData(prev => ({ ...prev, icon: emoji }))}
+                                                    style={{
+                                                        fontSize: '1.5rem', aspectRatio: '1', borderRadius: '8px', cursor: 'pointer',
+                                                        border: formData.icon === emoji ? `2px solid ${formData.color}` : '1px solid transparent',
+                                                        background: formData.icon === emoji ? `${formData.color}15` : 'transparent',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }}
+                                                >
+                                                    {emoji}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 3. Bottom Area: Colors + Actions (Fixed) */}
+                        <div style={{ flexShrink: 0 }}>
+                            <div style={{
+                                display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(24px, 1fr))', gap: '0.5rem',
+                                padding: '0.5rem 0', overflowY: 'auto', maxHeight: '70px', marginBottom: '1rem',
+                                scrollbarWidth: 'thin'
+                            }}>
                                 {COLOR_LIST.map(color => (
                                     <button
                                         key={color}
                                         type="button"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setFormData({ ...formData, color: color });
-                                        }}
+                                        onClick={() => setFormData({ ...formData, color: color })}
                                         style={{
-                                            width: '28px',
-                                            height: '28px',
-                                            borderRadius: '50%',
+                                            width: '24px', height: '24px', borderRadius: '50%',
                                             background: color,
-                                            border: formData.color === color ? '3px solid white' : '2px solid transparent',
-                                            boxShadow: formData.color === color ? '0 0 0 2px var(--color-text-main)' : 'none',
-                                            cursor: 'pointer',
+                                            border: formData.color === color ? '2px solid white' : 'none',
+                                            boxShadow: formData.color === color ? `0 0 0 2px ${color}` : 'none',
+                                            cursor: 'pointer', transform: formData.color === color ? 'scale(1.2)' : 'scale(1)',
                                             transition: 'transform 0.1s'
                                         }}
                                         title={color}
                                     />
                                 ))}
-                            </div>
-
-                            {/* Custom Color Bar */}
-                            <div style={{ position: 'relative', width: '100%', height: '40px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-                                <input
-                                    type="color"
-                                    value={formData.color}
-                                    onChange={e => setFormData({ ...formData, color: e.target.value })}
-                                    style={{
-                                        border: 'none',
-                                        padding: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        cursor: 'pointer',
-                                        background: 'none',
-                                    }}
-                                />
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    height: '20px',
-                                    background: 'rgba(0,0,0,0.5)',
-                                    color: 'white',
-                                    fontSize: '0.75rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    pointerEvents: 'none'
-                                }}>
-                                    Custom Color Picker
+                                {/* Custom Color Input Hidden in a Circle */}
+                                <div style={{ position: 'relative', width: '24px', height: '24px', borderRadius: '50%', overflow: 'hidden', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
+                                    <input
+                                        type="color"
+                                        value={formData.color}
+                                        onChange={e => setFormData({ ...formData, color: e.target.value })}
+                                        style={{ border: 'none', padding: 0, width: '150%', height: '150%', cursor: 'pointer', transform: 'translate(-25%, -25%)' }}
+                                    />
                                 </div>
                             </div>
-                        </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                            <Button type="button" variant="ghost" onClick={resetForm}>Cancel</Button>
-                            <Button type="submit" disabled={loading}>
-                                {loading ? 'Saving...' : (editingCategory ? 'Update' : 'Create')}
-                            </Button>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
+                                <Button type="button" variant="ghost" onClick={resetForm}>Cancel</Button>
+                                <Button type="submit" disabled={loading} style={{ background: formData.color, minWidth: '100px' }}>
+                                    {loading ? '...' : (editingCategory ? 'Update' : 'Create')}
+                                </Button>
+                            </div>
                         </div>
-
                     </form>
                 )}
             </div>

@@ -140,40 +140,49 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
             {/* Type Selection */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Button
                     type="button"
                     variant={type === 'expense' ? 'danger' : 'secondary'}
-                    onClick={() => setType('expense')}
-                    style={{ flex: 1 }}
+                    onClick={() => {
+                        setType('expense');
+                        setCategory(''); // Reset category for expense
+                    }}
+                    style={{
+                        opacity: type === 'expense' ? 1 : 0.7,
+                        border: type === 'expense' ? '2px solid transparent' : '1px solid var(--color-border)'
+                    }}
                 >
                     Expense
                 </Button>
                 <Button
                     type="button"
                     variant={type === 'income' ? 'primary' : 'secondary'}
-                    onClick={() => setType('income')}
+                    onClick={() => {
+                        setType('income');
+                        setCategory('Salary'); // Default for income
+                    }}
                     style={{
-                        flex: 1,
                         backgroundColor: type === 'income' ? 'hsl(var(--color-income))' : undefined,
                         borderColor: type === 'income' ? 'transparent' : undefined,
-                        color: type === 'income' ? '#fff' : undefined
+                        color: type === 'income' ? '#fff' : undefined,
+                        opacity: type === 'income' ? 1 : 0.7
                     }}
                 >
                     Income
                 </Button>
                 <Button
                     type="button"
-                    variant={type === 'transfer' ? 'secondary' : 'secondary'} // Use a distinct style or secondary for now
+                    variant={type === 'transfer' ? 'primary' : 'secondary'}
                     onClick={() => {
                         setType('transfer');
                         setCategory('Transfer'); // Auto-set category
                     }}
                     style={{
-                        flex: 1,
-                        background: type === 'transfer' ? 'hsl(var(--color-text-main))' : undefined,
-                        color: type === 'transfer' ? 'var(--color-background)' : undefined,
-                        borderColor: type === 'transfer' ? 'transparent' : undefined
+                        backgroundColor: type === 'transfer' ? 'hsl(var(--color-text-main))' : undefined,
+                        color: type === 'transfer' ? 'hsl(var(--color-background))' : undefined,
+                        borderColor: type === 'transfer' ? 'transparent' : undefined,
+                        opacity: type === 'transfer' ? 1 : 0.7
                     }}
                 >
                     Transfer

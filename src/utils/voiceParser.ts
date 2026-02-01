@@ -115,12 +115,12 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         else if (cleanText.includes('freelance')) category = 'Freelance';
         else if (cleanText.includes('gift')) category = 'Gift';
     } else {
-        if (/(coffee|burger|pizza|food|lunch|dinner|restaurant|swiggy|zomato|tea|snack)/.test(cleanText)) category = 'Food';
-        else if (/(taxi|uber|bus|train|flight|gas|fuel|petrol|metro|cab|auto)/.test(cleanText)) category = 'Transport';
-        else if (/(clothes|shoes|amazon|buy|bought|shopping|zara|h&m|jeans|shirt)/.test(cleanText)) category = 'Shopping';
+        if (/(coffee|burger|pizza|food|lunch|dinner|restaurant|swiggy|zomato|tea|snack|khana|khane|bhojan)/.test(cleanText)) category = 'Food';
+        else if (/(taxi|uber|bus|train|flight|gas|fuel|petrol|metro|cab|auto|gadi|gaadi|bike|car)/.test(cleanText)) category = 'Transport';
+        else if (/(clothes|shoes|amazon|buy|bought|shopping|zara|h&m|jeans|shirt|kapde|jute|kharid)/.test(cleanText)) category = 'Shopping';
         else if (/(movie|netflix|game|cinema|fun|party)/.test(cleanText)) category = 'Entertainment';
-        else if (/(electricity|water|internet|bill|rent|recharge|wifi|mobile)/.test(cleanText)) category = 'Bills';
-        else if (/(medicine|doctor|hospital|gym|health|yoga)/.test(cleanText)) category = 'Health';
+        else if (/(electricity|water|internet|bill|rent|recharge|wifi|mobile|bijli|phone)/.test(cleanText)) category = 'Bills';
+        else if (/(medicine|doctor|hospital|gym|health|yoga|dawai|dawa)/.test(cleanText)) category = 'Health';
     }
 
     // Split details
@@ -157,32 +157,75 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         }
     }
 
+    // Date Extraction
+    let finalDate = new Date();
+    const dateLower = cleanText.toLowerCase();
+
+    if (dateLower.includes('yesterday') || dateLower.includes('cal') || dateLower.includes('kal')) {
+        // "Kal" in Hindi can be yesterday or tomorrow, context matters but usually yesterday for expenses
+        finalDate.setDate(finalDate.getDate() - 1);
+    } else if (dateLower.includes('day before yesterday') || dateLower.includes('parso')) {
+        finalDate.setDate(finalDate.getDate() - 2);
+    } else if (dateLower.includes('tomorrow')) {
+        finalDate.setDate(finalDate.getDate() + 1);
+    } else if (dateLower.includes('today') || dateLower.includes('aaj')) {
+        // Explicit logic if needed
+        finalDate.setDate(finalDate.getDate());
+    }
+
+    // Friend Matching with Original Casing
+    // Map lower to original for lookup
+    const friendMap: Record<string, string> = {};
+    friends.forEach(f => {
+        friendMap[f.toLowerCase()] = f;
+    });
+
     lowerFriends.forEach(friend => {
-        if (friend !== paidBy && cleanText.includes(friend)) {
-            if (!splitWith.includes(friend)) {
-                splitWith.push(friend);
+        if (friend !== paidBy.toLowerCase() && cleanText.includes(friend)) {
+            // Use the original name from the map
+            const originalName = friendMap[friend];
+            if (originalName && !splitWith.includes(originalName)) {
+                splitWith.push(originalName);
             }
         }
     });
 
+    // Also fix paidBy casing if possible
+    if (paidBy !== 'me' && friendMap[paidBy]) {
+        paidBy = friendMap[paidBy];
+    }
+
     const withMatches = cleanText.matchAll(/(?:split\s+with|with)\s+([a-zA-Z]+)(?:\s+(?:bhai|bro|sir|maam|ji))?/gi);
     for (const match of withMatches) {
-        const potentialName = match[1].toLowerCase();
-        const stopWords = ['me', 'us', 'him', 'her', 'them', 'all', 'everyone', 'some', 'rupees', 'bucks', 'cash', 'card', 'upi'];
+        let potentialName = match[1];
+        const lowerPot = potentialName.toLowerCase();
 
-        if (!lowerFriends.includes(potentialName) && !stopWords.includes(potentialName) && potentialName.length > 2) {
-            if (!unknownFriends.includes(potentialName) && potentialName !== 'split' && potentialName !== 'friends') {
+        // If we found it in our friend list, use the canonical version
+        if (friendMap[lowerPot]) {
+            potentialName = friendMap[lowerPot];
+            if (!splitWith.includes(potentialName)) {
+                splitWith.push(potentialName);
+            }
+            continue;
+        }
+
+        const stopWords = ['me', 'us', 'him', 'her', 'them', 'all', 'everyone', 'some', 'rupees', 'bucks', 'cash', 'card', 'upi', 'yesterday', 'today', 'tomorrow'];
+
+        if (!lowerFriends.includes(lowerPot) && !stopWords.includes(lowerPot) && lowerPot.length > 2) {
+            // Capitalize for unknown friend
+            potentialName = potentialName.charAt(0).toUpperCase() + potentialName.slice(1).toLowerCase();
+            if (!unknownFriends.includes(potentialName) && lowerPot !== 'split' && lowerPot !== 'friends') {
                 unknownFriends.push(potentialName);
             }
         }
     }
 
-    // Check for hanging exclusion first?
+    // Check for hanging exclusion first
     // "but not including" at the end, or "not including" followed by nothing useful.
     if (/(?:but\s+)?not\s+including\s*$/i.test(cleanText)) {
         // Implicitly exclude the last added person
-        if (splitWith.length > 0) excludedPeople.push(splitWith[splitWith.length - 1]);
-        if (unknownFriends.length > 0) excludedPeople.push(unknownFriends[unknownFriends.length - 1]);
+        if (splitWith.length > 0) excludedPeople.push(splitWith[splitWith.length - 1].toLowerCase());
+        if (unknownFriends.length > 0) excludedPeople.push(unknownFriends[unknownFriends.length - 1].toLowerCase());
     }
 
     const excludeMatches = cleanText.matchAll(/(?:exclude|don't\s+include|not\s+include|not\s+including|not\s+for|except)\s+(me|myself|him|her|them|us|in\s+the\s+split|split\s+wise|splitwise|[a-zA-Z]+)(?:\s+(?:bhai|bro|sir|maam|ji))?/gi);
@@ -196,10 +239,10 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         } else if (['him', 'her', 'them'].includes(name)) {
             // Heuristic: Exclude last added person
             if (splitWith.length > 0) {
-                excludedPeople.push(splitWith[splitWith.length - 1]);
+                excludedPeople.push(splitWith[splitWith.length - 1].toLowerCase());
             }
             if (unknownFriends.length > 0) {
-                excludedPeople.push(unknownFriends[unknownFriends.length - 1]);
+                excludedPeople.push(unknownFriends[unknownFriends.length - 1].toLowerCase());
             }
         } else if (['splitwise', 'split'].includes(name)) {
             // Noise
@@ -208,11 +251,12 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         }
     }
 
-    splitWith = splitWith.filter(p => !excludedPeople.includes(p));
+    splitWith = splitWith.filter(p => !excludedPeople.includes(p.toLowerCase()));
     if (unknownFriends.length > 0) {
-        unknownFriends = unknownFriends.filter(p => !excludedPeople.includes(p));
+        unknownFriends = unknownFriends.filter(p => !excludedPeople.includes(p.toLowerCase()));
     }
 
+    // Clean Description
     let description = text;
     if (amountMatch) description = description.replace(amountMatch[0], '');
 
@@ -228,6 +272,7 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         .replace(/not for \w+/gi, '')
         .replace(/in the split/gi, '')
         .replace(/split\s?wise/gi, '')
+        .replace(/yesterday|tomorrow|today|aaj|kal|cal|parso/gi, '') // Remove date words
         .replace(/on /gi, ' ')
         .replace(/for /gi, ' ')
         .trim();
@@ -235,6 +280,12 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     description = description.replace(/[^\w\s]/gi, '').trim();
     description = description.charAt(0).toUpperCase() + description.slice(1);
     if (description.length === 0) description = "Voice Entry";
+
+    // Format date as YYYY-MM-DD
+    const year = finalDate.getFullYear();
+    const month = String(finalDate.getMonth() + 1).padStart(2, '0');
+    const day = String(finalDate.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
 
     return {
         amount: amount === 0 ? '' : amount.toString(),
@@ -247,6 +298,6 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
             splitRatios,
             unknownFriends: unknownFriends.length > 0 ? unknownFriends : undefined
         },
-        originalDate: new Date().toISOString()
+        originalDate: formattedDate
     };
 };
