@@ -196,6 +196,12 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
         // Reset date to today
         setDate(new Date().toISOString().split('T')[0]);
 
+        // Voice Feedback
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(`Added expense of ${numAmount} for ${description}`);
+            window.speechSynthesis.speak(utterance);
+        }
+
         if (onClose) onClose();
     };
 
