@@ -19,7 +19,7 @@ function LoginForm() {
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        const phoneParam = searchParams.get('phone')
+        const phoneParam = searchParams?.get('phone')
         if (phoneParam) {
             setPhone(phoneParam)
             setIsLogin(false) // If phone is present, likely a simplified signup flow
