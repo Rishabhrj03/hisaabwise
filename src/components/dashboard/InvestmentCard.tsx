@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
@@ -62,6 +63,12 @@ export function InvestmentCard() {
                 const newInv = await res.json();
                 console.log("New investment added:", newInv); // Debug log
                 setInvestments(prev => [...prev, newInv]);
+
+                sendGTMEvent({
+                    event: 'investment_created',
+                    value: { type, amount: Number(amount) }
+                });
+
                 setShowAdd(false);
                 // Reset form
                 setName(''); setAmount(''); setSipAmount(''); setFrequency('monthly');
@@ -92,6 +99,7 @@ export function InvestmentCard() {
             if (res.ok) {
                 console.log("Delete success for ID:", deleteId);
                 setInvestments(prev => prev.filter(i => i._id !== deleteId));
+                sendGTMEvent({ event: 'investment_deleted' });
                 setShowDeleteModal(false);
                 setDeleteId(null);
             } else {

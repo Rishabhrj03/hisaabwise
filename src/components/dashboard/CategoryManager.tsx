@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useExpenses } from '@/context/ExpenseContext';
@@ -197,6 +198,15 @@ export function CategoryManager({ isOpen, onClose }: CategoryManagerProps) {
         } else {
             await addCategory(formData.name, formData.color, formData.icon);
         }
+
+        sendGTMEvent({
+            event: 'category_managed',
+            value: {
+                action: editingCategory ? 'updated' : 'created',
+                name: formData.name
+            }
+        });
+
         setLoading(false);
         resetForm();
     };
@@ -205,6 +215,7 @@ export function CategoryManager({ isOpen, onClose }: CategoryManagerProps) {
         if (name === 'Other') return;
         if (confirm(`Delete category "${name}"? This action cannot be undone.`)) {
             await deleteCategory(id);
+            sendGTMEvent({ event: 'category_deleted', value: { category_id: id } });
         }
     };
 

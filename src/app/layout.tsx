@@ -3,6 +3,7 @@ import "./globals.css";
 import { ExpenseProvider } from "@/context/ExpenseContext";
 import { FriendProvider } from "@/context/FriendContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeProvider } from "@/context/ThemeContext";
 
 import { GroupProvider } from "@/context/GroupContext";
@@ -54,6 +55,7 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
         <AuthProvider>
           <ThemeProvider>
 

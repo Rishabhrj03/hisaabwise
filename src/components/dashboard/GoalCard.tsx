@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 
 interface Goal {
@@ -53,6 +54,12 @@ export function GoalCard() {
             if (res.ok) {
                 const newGoal = await res.json();
                 setGoals(prev => [...prev, newGoal]);
+
+                sendGTMEvent({
+                    event: 'goal_created',
+                    value: { name: newName, target: Number(newTarget) }
+                });
+
                 setShowAdd(false);
                 setNewName('');
                 setNewTarget('');
@@ -77,6 +84,7 @@ export function GoalCard() {
             const res = await fetch(`/api/goals?id=${deleteId}`, { method: 'DELETE' });
             if (res.ok) {
                 setGoals(prev => prev.filter(g => g._id !== deleteId));
+                sendGTMEvent({ event: 'goal_deleted' });
                 setShowDeleteModal(false);
                 setDeleteId(null);
             }
@@ -238,6 +246,10 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
             });
             if (res.ok) {
                 onUpdate({ ...goal, currentAmount: newAmount });
+                sendGTMEvent({
+                    event: 'goal_fund_update',
+                    value: { amount_added: Number(amountToAdd) }
+                });
                 setAddingFunds(false);
                 setAmountToAdd('');
             }

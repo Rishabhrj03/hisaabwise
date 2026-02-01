@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 
 interface Loan {
@@ -67,6 +68,12 @@ export function LoanCard() {
             if (res.ok) {
                 const newLoan = await res.json();
                 setLoans(prev => [...prev, newLoan]);
+
+                sendGTMEvent({
+                    event: 'loan_created',
+                    value: { type, amount: Number(amount) }
+                });
+
                 setShowAdd(false);
                 // Reset
                 setName(''); setAmount(''); setInterest(''); setTenure('');
@@ -88,6 +95,7 @@ export function LoanCard() {
             const res = await fetch(`/api/loans?id=${deleteId}`, { method: 'DELETE' });
             if (res.ok) {
                 setLoans(prev => prev.filter(l => l._id !== deleteId));
+                sendGTMEvent({ event: 'loan_deleted' });
                 setShowDeleteModal(false);
                 setDeleteId(null);
             }
@@ -230,6 +238,10 @@ function LoanItem({ loan, onUpdate, onDelete }: { loan: Loan, onUpdate: (l: Loan
             if (res.ok) {
                 const updated = await res.json();
                 onUpdate(updated);
+                sendGTMEvent({
+                    event: 'loan_repayment',
+                    value: { amount: Number(payAmount) }
+                });
                 setPaying(false);
                 setPayAmount('');
             }

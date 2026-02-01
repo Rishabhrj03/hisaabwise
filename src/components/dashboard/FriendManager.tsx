@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useFriends } from '@/context/FriendContext';
@@ -40,6 +41,7 @@ export function FriendManager() {
 
         if (newFriendName.trim()) {
             await addFriend(newFriendName, newFriendPhone, newFriendUpi);
+            sendGTMEvent({ event: 'friend_added' });
             setNewFriendName('');
             setNewFriendPhone('');
             setNewFriendUpi('');
@@ -61,6 +63,7 @@ export function FriendManager() {
         // Use window.location.href instead of window.open
         // forcing a navigation is more reliable for triggering App Links/Deep Links
         // inside in-app browsers (like Instagram/Facebook) than opening a new popup.
+        sendGTMEvent({ event: 'friend_invited' });
         window.location.href = waLink;
     };
 

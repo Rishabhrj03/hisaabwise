@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
@@ -60,6 +61,12 @@ export function BankAccountCard() {
             if (res.ok) {
                 const newAcc = await res.json();
                 setAccounts(prev => [...prev, newAcc]);
+
+                sendGTMEvent({
+                    event: 'account_created',
+                    value: { type: newType }
+                });
+
                 setShowAdd(false);
                 setNewName(''); setNewBalance(''); setNewLimit(''); setNewBillDate('');
             }
@@ -80,6 +87,7 @@ export function BankAccountCard() {
             const res = await fetch(`/api/accounts?id=${deleteId}`, { method: 'DELETE' });
             if (res.ok) {
                 setAccounts(prev => prev.filter(a => a._id !== deleteId));
+                sendGTMEvent({ event: 'account_deleted' });
                 setShowDeleteModal(false);
                 setDeleteId(null);
             }

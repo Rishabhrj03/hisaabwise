@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -22,6 +23,12 @@ export function GroupManager() {
                     name: groupName,
                     memberIds: Array.from(selectedFriendIds)
                 });
+
+                sendGTMEvent({
+                    event: 'group_created',
+                    value: { member_count: selectedFriendIds.size }
+                });
+
                 setGroupName('');
                 setSelectedFriendIds(new Set());
                 setIsCreating(false);

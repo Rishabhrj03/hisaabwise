@@ -2,6 +2,7 @@ import { useFriends } from '@/context/FriendContext';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 import { parseVoiceInput } from '@/utils/voiceParser';
+import { sendGTMEvent } from '@next/third-parties/google';
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
@@ -56,6 +57,11 @@ export function VoiceInput({ }: VoiceInputProps) {
     const processTranscript = (text: string) => {
         const friendNames = friends.map(f => f.name);
         const result = parseVoiceInput(text, friendNames);
+
+        sendGTMEvent({
+            event: 'voice_command_processed',
+            value: { category: result.category }
+        });
 
         setParsedData({
             amount: result.amount,
@@ -181,6 +187,7 @@ export function VoiceInput({ }: VoiceInputProps) {
             setIsListening(true);
             try {
                 recognition.start();
+                sendGTMEvent({ event: 'voice_recording_started' });
             } catch (error) {
                 console.warn("Speech recognition already started:", error);
             }

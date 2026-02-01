@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 import { useExpenses } from '@/context/ExpenseContext';
 
@@ -74,6 +75,12 @@ export function BudgetCard() {
                     }
                     return [...prev, newBudget];
                 });
+
+                sendGTMEvent({
+                    event: 'budget_created',
+                    value: { category: catToUse, limit: limitToUse }
+                });
+
                 setShowAdd(false);
                 setNewCategory('');
                 setNewLimit('');
@@ -242,6 +249,10 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
             if (res.ok) {
                 const updated = await res.json();
                 onUpdate(updated);
+                sendGTMEvent({
+                    event: 'budget_updated',
+                    value: { category: budget.category, limit: Number(editAmount) }
+                });
                 setIsEditing(false);
             }
         } catch (err) { console.error(err); }

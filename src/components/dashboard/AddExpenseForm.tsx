@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 import confetti from 'canvas-confetti';
 import { useExpenses } from '@/context/ExpenseContext';
 import { useFriends } from '@/context/FriendContext';
@@ -106,6 +107,18 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             updateExpense(initialData.id, expenseData);
         } else {
             addExpense(expenseData);
+
+            // Track Event
+            sendGTMEvent({
+                event: 'transaction_added',
+                value: {
+                    type,
+                    amount: numAmount,
+                    category: category || 'General',
+                    has_splits: !!splitDetails
+                }
+            });
+
             // Trigger confetti if income is added
             if (type === 'income') {
                 confetti({

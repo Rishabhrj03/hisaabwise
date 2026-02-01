@@ -1,4 +1,5 @@
 import { utils, writeFile } from 'xlsx';
+import { sendGTMEvent } from '@next/third-parties/google';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Expense, Category } from '../types';
@@ -50,6 +51,7 @@ export const exportToExcel = (data: Expense[], totals: Totals) => {
 
     // 4. Save
     writeFile(wb, `Expense_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+    sendGTMEvent({ event: 'export_downloaded', value: { format: 'excel' } });
 };
 
 export const exportToPDF = (data: Expense[], totals: Totals, categories: Category[]) => {
@@ -154,4 +156,5 @@ export const exportToPDF = (data: Expense[], totals: Totals, categories: Categor
     doc.text(`Net: ₹${totals.income - totals.expense}`, 14, finalY + 30);
 
     doc.save(`Expense_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    sendGTMEvent({ event: 'export_downloaded', value: { format: 'pdf' } });
 };
