@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useExpenses } from '@/context/ExpenseContext';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 interface VoiceInputProps {
     onTranscript?: (text: string) => void;
@@ -34,6 +35,7 @@ export function VoiceInput({ }: VoiceInputProps) {
     const recognitionRef = useRef<any>(null);
     const [isSupported, setIsSupported] = useState(false);
     const [parsedData, setParsedData] = useState<ParsedData | null>(null);
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -77,7 +79,7 @@ export function VoiceInput({ }: VoiceInputProps) {
         if (parsedData && parsedData.amount) {
             const finalAmount = parseFloat(parsedData.amount);
             if (isNaN(finalAmount)) {
-                alert("Please enter a valid amount");
+                setAlertConfig({ isOpen: true, title: 'Invalid Amount', message: "Please enter a valid amount" });
                 return;
             }
 
@@ -122,7 +124,7 @@ export function VoiceInput({ }: VoiceInputProps) {
                         newIds.forEach(id => involvedIds.add(id));
                     } catch (error) {
                         console.error("Failed to add unknown friends", error);
-                        alert("Failed to add unknown friends. Please try again.");
+                        setAlertConfig({ isOpen: true, title: 'Error', message: "Failed to add unknown friends. Please try again." });
                         return;
                     }
                 }
@@ -171,7 +173,7 @@ export function VoiceInput({ }: VoiceInputProps) {
 
     const toggleListening = () => {
         if (!isSupported) {
-            alert("Voice input is not supported in this browser.");
+            setAlertConfig({ isOpen: true, title: 'Not Supported', message: "Voice input is not supported in this browser." });
             return;
         }
 
@@ -480,6 +482,13 @@ export function VoiceInput({ }: VoiceInputProps) {
                 </div>,
                 document.body
             )}
+
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
+            />
         </div>
     );
 }

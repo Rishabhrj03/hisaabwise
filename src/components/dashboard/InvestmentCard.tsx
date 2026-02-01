@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { sendGTMEvent } from '@next/third-parties/google';
 import { Card } from '@/components/ui/Card';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 interface Investment {
     _id: string;
@@ -16,6 +17,7 @@ interface Investment {
 export function InvestmentCard() {
     const [investments, setInvestments] = useState<Investment[]>([]);
     const [showAdd, setShowAdd] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
 
     // Form State
     const [name, setName] = useState('');
@@ -41,7 +43,7 @@ export function InvestmentCard() {
         if (isSubmitting) return;
 
         if (!name.trim()) {
-            alert('Please enter an investment name.');
+            setAlertConfig({ isOpen: true, title: 'Validation Error', message: 'Please enter an investment name.' });
             return;
         }
 
@@ -74,7 +76,7 @@ export function InvestmentCard() {
                 setName(''); setAmount(''); setSipAmount(''); setFrequency('monthly');
             } else {
                 const error = await res.json();
-                alert(`Failed to add: ${error.error || 'Unknown error'}`);
+                setAlertConfig({ isOpen: true, title: 'Error', message: `Failed to add: ${error.error || 'Unknown error'}` });
             }
         } catch (err) { console.error(err); }
         finally { setIsSubmitting(false); }
@@ -105,7 +107,7 @@ export function InvestmentCard() {
             } else {
                 const err = await res.json();
                 console.error("Delete failed:", err);
-                alert("Failed to delete. Check console for details.");
+                setAlertConfig({ isOpen: true, title: 'Error', message: "Failed to delete. Check console for details." });
             }
         } catch (err) { console.error(err); }
     };
@@ -225,6 +227,13 @@ export function InvestmentCard() {
                 onConfirm={confirmDelete}
                 title="Delete Investment"
                 message="Are you sure you want to delete this investment? This action cannot be undone."
+            />
+
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
             />
         </>
     );

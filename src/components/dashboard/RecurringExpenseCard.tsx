@@ -13,12 +13,14 @@ interface RecurringExpense {
 }
 
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 // ... (interface remains same)
 
 export function RecurringExpenseCard() {
     const [recurrings, setRecurrings] = useState<RecurringExpense[]>([]);
     const [showAdd, setShowAdd] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
 
     // Form
     const [name, setName] = useState('');
@@ -97,7 +99,7 @@ export function RecurringExpenseCard() {
                 const updated = await res.json();
                 setRecurrings(prev => prev.map(p => p._id === updated._id ? updated : p).sort((a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime()));
                 // Trigger expense refresh if context allows, or user will see it on refresh
-                alert('Payment recorded as expense!');
+                setAlertConfig({ isOpen: true, title: 'Success', message: 'Payment recorded as expense!' });
                 // We'd ideally call a global refresh here
                 window.location.reload(); // Quick fix to refresh expenses card too
             }
@@ -245,7 +247,19 @@ export function RecurringExpenseCard() {
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={confirmDelete}
                 title="Delete Recurring Expense"
+
                 message="Are you sure you want to stop tracking this recurring expense?"
+            />
+
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => {
+                    setAlertConfig(prev => ({ ...prev, isOpen: false }));
+                    // If we just paid and need reload, we could allow closing modal first?
+                    // But reload happens immediately in current code. 
+                }}
+                title={alertConfig.title}
+                message={alertConfig.message}
             />
         </>
     );

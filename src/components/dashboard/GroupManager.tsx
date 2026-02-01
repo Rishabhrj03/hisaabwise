@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input';
 import { useGroups } from '@/context/GroupContext';
 import { useFriends } from '@/context/FriendContext';
 import { Group } from '@/types';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 export function GroupManager() {
     const { groups, addGroup, updateGroup, deleteGroup } = useGroups();
@@ -16,6 +17,7 @@ export function GroupManager() {
     const [groupName, setGroupName] = useState('');
     const [selectedFriendIds, setSelectedFriendIds] = useState<Set<string>>(new Set());
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,7 +46,7 @@ export function GroupManager() {
                 setIsCreating(false);
             } catch (err) {
                 console.error("Failed to save group", err);
-                alert("Failed to save group");
+                setAlertConfig({ isOpen: true, title: 'Error', message: "Failed to save group" });
             }
         }
     };
@@ -79,7 +81,7 @@ export function GroupManager() {
             }
         } else {
             navigator.clipboard.writeText(link);
-            alert('Group link copied to clipboard!');
+            setAlertConfig({ isOpen: true, title: 'Success', message: 'Group link copied to clipboard!' });
         }
     };
 
@@ -228,6 +230,12 @@ export function GroupManager() {
                     ))
                 )}
             </div>
-        </Card>
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
+            />
+        </Card >
     );
 }

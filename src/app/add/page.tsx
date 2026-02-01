@@ -42,9 +42,9 @@ function QuickAddContent() {
                 {initialData ? (
                     <AddExpenseForm
                         initialData={initialData}
-                        onSuccess={() => {
+                        onClose={() => {
                             // Feedback handled in form
-                            setTimeout(() => router.push('/dashboard'), 2000);
+                            setTimeout(() => router.push('/'), 2000);
                         }}
                     />
                 ) : (

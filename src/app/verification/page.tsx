@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/context/AuthContext';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 export default function VerificationPage() {
     const router = useRouter();
@@ -13,6 +14,25 @@ export default function VerificationPage() {
     const [verifying, setVerifying] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
+    const [otpSent, setOtpSent] = useState(false); // Track if user clicked "Get OTP"
+
+    const handleResendEmail = async () => {
+        setVerifying(true);
+        try {
+            const res = await fetch('/api/auth/resend-email', { method: 'POST' });
+            if (res.ok) {
+                setAlertConfig({ isOpen: true, title: 'Email Sent', message: 'A new verification link has been sent to your email.' });
+            } else {
+                setAlertConfig({ isOpen: true, title: 'Error', message: 'Failed to resend email. Please try again later.' });
+            }
+        } catch (e) {
+            console.error(e);
+            setAlertConfig({ isOpen: true, title: 'Error', message: 'Something went wrong.' });
+        } finally {
+            setVerifying(false);
+        }
+    };
 
     if (!user) {
         return <div style={{ padding: '2rem' }}>Loading user details... (If stuck, please login again)</div>;
@@ -95,6 +115,8 @@ export default function VerificationPage() {
     // I checked `register` API return: it DOES NOT return `phoneVerificationCode`.
     // I should create an endpoint to "get my verification code".
 
+
+
     return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
             <Card style={{ padding: '2rem', maxWidth: '500px', width: '100%' }}>
@@ -104,14 +126,25 @@ export default function VerificationPage() {
                 <div style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)' }}>
                     <h3>Email Verification</h3>
                     <p style={{ marginBottom: '0.5rem' }}>
-                        Status: <strong style={{ color: user.isEmailVerified ? 'green' : 'orange' }}>
+                        Status: <strong style={{ color: user.isEmailVerified ? 'hsl(var(--color-income))' : 'orange' }}>
                             {user.isEmailVerified ? 'Verified' : 'Pending'}
                         </strong>
                     </p>
                     {!user.isEmailVerified && (
-                        <p style={{ fontSize: '0.9rem', color: 'gray' }}>
-                            We sent a verification link to <strong>{user.email}</strong>. Please check your inbox.
-                        </p>
+                        <div>
+                            <p style={{ fontSize: '0.9rem', color: 'hsl(var(--color-text-muted))', marginBottom: '1rem' }}>
+                                We sent a verification link to <strong>{user.email}</strong>. Please check your inbox (and spam folder).
+                            </p>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleResendEmail}
+                                disabled={verifying}
+                                style={{ fontSize: '0.8rem', textDecoration: 'underline' }}
+                            >
+                                {verifying ? 'Sending...' : 'Resend Verification Email'}
+                            </Button>
+                        </div>
                     )}
                 </div>
 
@@ -119,64 +152,87 @@ export default function VerificationPage() {
                 <div>
                     <h3>Phone Verification</h3>
                     <p style={{ marginBottom: '0.5rem' }}>
-                        Status: <strong style={{ color: user.isPhoneVerified ? 'green' : 'orange' }}>
+                        Status: <strong style={{ color: user.isPhoneVerified ? 'hsl(var(--color-income))' : 'orange' }}>
                             {user.isPhoneVerified ? 'Verified' : 'Pending'}
                         </strong>
                     </p>
 
                     {!user.isPhoneVerified && (
                         <div>
-                            <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
-                                To verify <strong>{user.phone}</strong>, please send a WhatsApp message from this number.
+                            <p style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'hsl(var(--color-text-muted))' }}>
+                                Verify <strong>{user.phone}</strong> via WhatsApp to enable notifications.
                             </p>
 
 
                             <Button onClick={() => {
-                                const code = user.phoneVerificationCode || 'ERROR';
+                                const code = user.phoneVerificationCode;
+                                if (!code) {
+                                    setAlertConfig({
+                                        isOpen: true,
+                                        title: 'Code Missing',
+                                        message: "Code not found. Please refresh the page to fetch it."
+                                    });
+                                    return;
+                                }
                                 const waLink = `https://wa.me/${user.phone}?text=Verify code: ${code}`;
                                 window.location.href = waLink;
-                            }} variant="secondary" style={{ width: '100%', marginBottom: '1rem' }}>
-                                Open WhatsApp
+                                setOtpSent(true); // Show input only after clicking
+                            }} variant="secondary" style={{
+                                width: '100%',
+                                marginBottom: '1rem',
+                                background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', // WhatsApp colors
+                                color: 'white',
+                                border: 'none',
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <span style={{ fontSize: '1.2rem' }}>📱</span> Get OTP on WhatsApp
                             </Button>
 
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <Input
-                                    placeholder="Enter Code"
-                                    value={verificationCode}
-                                    onChange={(e) => setVerificationCode(e.target.value)}
-                                />
+                            {otpSent && (
+                                <div style={{ display: 'flex', gap: '0.5rem', animation: 'fadeIn 0.5s ease-in-out' }}>
+                                    <Input
+                                        placeholder="Enter Code from WhatsApp"
+                                        value={verificationCode}
+                                        onChange={(e) => setVerificationCode(e.target.value)}
+                                        style={{ flex: 1 }}
+                                    />
 
-                                <Button onClick={async () => {
-                                    if (!verificationCode) {
-                                        setToast({ message: "Please enter the code", type: 'error' });
-                                        return;
-                                    }
-                                    setVerifying(true);
-                                    try {
-                                        const res = await fetch('/api/auth/verify-phone', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ code: verificationCode }),
-                                        });
-
-                                        if (res.ok) {
-                                            setToast({ message: "Verification successful! Redirecting...", type: 'success' });
-                                            setTimeout(() => window.location.reload(), 1500);
-                                        } else {
-                                            setToast({ message: "Invalid Code. Please try again.", type: 'error' });
+                                    <Button onClick={async () => {
+                                        if (!verificationCode) {
+                                            setToast({ message: "Please enter the code", type: 'error' });
+                                            return;
                                         }
-                                    } catch (e) { console.error(e); }
-                                    finally { setVerifying(false); }
-                                }}>
-                                    {verifying ? '...' : 'Verify'}
-                                </Button>
-                            </div>
+                                        setVerifying(true);
+                                        try {
+                                            const res = await fetch('/api/auth/verify-phone', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ code: verificationCode }),
+                                            });
+
+                                            if (res.ok) {
+                                                setToast({ message: "Verification successful! Redirecting...", type: 'success' });
+                                                setTimeout(() => window.location.reload(), 1500);
+                                            } else {
+                                                setToast({ message: "Invalid Code. Please try again.", type: 'error' });
+                                            }
+                                        } catch (e) { console.error(e); }
+                                        finally { setVerifying(false); }
+                                    }} style={{ minWidth: '80px' }}>
+                                        {verifying ? '...' : 'Verify'}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
 
                 <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-                    <Button variant="secondary" onClick={() => window.location.reload()}>
+                    <Button variant="ghost" onClick={() => window.location.reload()}>
                         Refresh Status
                     </Button>
                 </div>
@@ -188,7 +244,24 @@ export default function VerificationPage() {
                         onClose={() => setToast(null)}
                     />
                 )}
+                <AlertModal
+                    isOpen={alertConfig.isOpen}
+                    onClose={() => {
+                        setAlertConfig(prev => ({ ...prev, isOpen: false }));
+                        if (alertConfig.title === 'Code Missing') {
+                            window.location.reload();
+                        }
+                    }}
+                    title={alertConfig.title}
+                    message={alertConfig.message}
+                />
             </Card>
+            <style jsx global>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
         </div>
     );
 }

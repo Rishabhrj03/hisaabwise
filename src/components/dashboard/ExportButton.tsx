@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { AlertModal } from '@/components/ui/AlertModal';
 import { Expense, Category } from '@/types';
 import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
 
@@ -12,6 +13,7 @@ interface ExportButtonProps {
 
 export function ExportButton({ expenses, categories, compact = false, fullWidth = false }: ExportButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
 
     const calculateTotals = () => {
         return expenses.reduce((acc, curr) => {
@@ -22,13 +24,13 @@ export function ExportButton({ expenses, categories, compact = false, fullWidth 
     };
 
     const handleExcel = () => {
-        if (expenses.length === 0) return alert("No data to export.");
+        if (expenses.length === 0) return setAlertConfig({ isOpen: true, title: 'No Data', message: "No data to export." });
         exportToExcel(expenses, calculateTotals());
         setIsOpen(false);
     };
 
     const handlePDF = () => {
-        if (expenses.length === 0) return alert("No data to export.");
+        if (expenses.length === 0) return setAlertConfig({ isOpen: true, title: 'No Data', message: "No data to export." });
         exportToPDF(expenses, calculateTotals(), categories);
         setIsOpen(false);
     };
@@ -93,6 +95,12 @@ export function ExportButton({ expenses, categories, compact = false, fullWidth 
                     onClick={() => setIsOpen(false)}
                 />
             )}
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
+            />
         </div>
     );
 }

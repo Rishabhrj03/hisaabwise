@@ -15,6 +15,8 @@ interface AddExpenseFormProps {
     initialData?: Expense;
 }
 
+import { AlertModal } from '@/components/ui/AlertModal';
+
 export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const { addExpense, updateExpense, categories } = useExpenses();
     const { friends } = useFriends();
@@ -28,6 +30,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const [date, setDate] = useState(initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
     const [selectedGroupId, setSelectedGroupId] = useState<string>(initialData?.group_id || '');
     const [showCategoryManager, setShowCategoryManager] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
 
     // Splitwise Logic
     const [paidBy, setPaidBy] = useState(initialData?.splitDetails?.paidBy || 'me');
@@ -113,7 +116,11 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                 // Validation: Check sum matches total
                 const totalAssigned = shares.reduce((acc, curr) => acc + curr.amount, 0);
                 if (Math.abs(totalAssigned - numAmount) > 0.05) {
-                    alert(`Total split amount (${totalAssigned}) must equal expense amount (${numAmount})`);
+                    setAlertConfig({
+                        isOpen: true,
+                        title: 'Split Error',
+                        message: `Total split amount (${totalAssigned}) must equal expense amount (${numAmount})`
+                    });
                     return;
                 }
             } else if (splitMethod === 'percentage') {
@@ -135,7 +142,11 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                 // Validation: Check percentages sum to 100
                 const totalPct = splitWith.reduce((acc, id) => acc + parseFloat(customAmounts[id] || '0'), 0);
                 if (Math.abs(totalPct - 100) > 0.5) {
-                    alert(`Total percentages (${totalPct}%) must equal 100%`);
+                    setAlertConfig({
+                        isOpen: true,
+                        title: 'Split Error',
+                        message: `Total percentages (${totalPct}%) must equal 100%`
+                    });
                     return;
                 }
             }
@@ -595,6 +606,12 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                     <CategoryManager isOpen={showCategoryManager} onClose={() => setShowCategoryManager(false)} />
                 )
             }
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
+            />
         </form >
     );
 }

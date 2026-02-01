@@ -77,9 +77,9 @@ export async function POST(req: Request) {
         try {
             await sendEmail({
                 to: user.email,
-                subject: 'Expense Tracker - Verify your Email',
+                subject: 'HisaabWise - Verify your Email',
                 text: `Please verify your email by clicking: ${verifyUrl}`,
-                html: `<h1>Welcome to Expense Tracker!</h1><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`,
+                html: `<h1>Welcome to HisaabWise!</h1><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`,
             });
         } catch (emailError) {
             console.error("Failed to send verification email", emailError);
@@ -103,7 +103,8 @@ export async function POST(req: Request) {
                 name: user.name,
                 phone: user.phone,
                 isEmailVerified: user.isEmailVerified,
-                isPhoneVerified: user.isPhoneVerified
+                isPhoneVerified: user.isPhoneVerified,
+                phoneVerificationCode: user.phoneVerificationCode
             },
         });
 

@@ -7,6 +7,7 @@ import { useFriends } from '@/context/FriendContext';
 import { QRScannerModal } from '@/components/ui/QRScannerModal';
 import { PaymentQRModal } from '@/components/ui/PaymentQRModal';
 import { EditUpiModal } from '@/components/ui/EditUpiModal';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 export function BalanceList() {
     const { expenses, addExpense } = useExpenses();
@@ -25,6 +26,7 @@ export function BalanceList() {
         friendName: '',
         initialValue: ''
     });
+    const [alertConfig, setAlertConfig] = React.useState({ isOpen: false, title: '', message: '' });
 
     const handleSettleUp = (friendId: string, friendName: string, balance: number) => {
         const isOwed = balance > 0;
@@ -76,13 +78,13 @@ export function BalanceList() {
 
             if (upiId) {
                 await updateFriend(scanningFriendId, { upi_id: upiId });
-                alert(`UPI ID updated successfully: ${upiId}`);
+                setAlertConfig({ isOpen: true, title: 'Success', message: `UPI ID updated successfully: ${upiId}` });
             } else {
-                alert("Could not find a valid UPI ID in QR code.");
+                setAlertConfig({ isOpen: true, title: 'Error', message: "Could not find a valid UPI ID in QR code." });
             }
         } catch (error) {
             console.error("QR Parse error", error);
-            alert("Failed to parse QR code.");
+            setAlertConfig({ isOpen: true, title: 'Error', message: "Failed to parse QR code." });
         }
         setShowScanner(false);
         setScanningFriendId(null);
@@ -275,6 +277,13 @@ export function BalanceList() {
                 onSave={saveUpiId}
                 initialValue={editUpiState.initialValue}
                 friendName={editUpiState.friendName}
+            />
+
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
             />
         </>
     );
