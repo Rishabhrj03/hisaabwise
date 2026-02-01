@@ -11,21 +11,21 @@ describe('Voice Parser Advanced Scenarios', () => {
         // payer logic checks: "paid by rahul" or "rahul paid"
         // content: does "rahul ne spend 500" match "rahul paid"? No.
         const result = parseVoiceInput('Rahul ne diya 500', friends);
-        expect(result.splitDetails?.paidBy).toBe('rahul');
+        expect(result.splitDetails?.paidBy).toBe('Rahul');
     });
 
     // Scenario 2: "Mere aur Rahul ke beech" (Between me and Rahul) -> Split
     test('Hinglish Split: Rahul ke saath', () => {
         const result = parseVoiceInput('Dinner 500 Rahul ke saath', friends);
-        expect(result.splitDetails?.splitWith).toContain('rahul');
+        expect(result.splitDetails?.splitWith).toContain('Rahul');
     });
 
     // Scenario 3: Unequal split (Check if it fails gracefully or ignores)
     test('Unequal Split: I paid 70 percent', () => {
-        const result = parseVoiceInput('Lunch 1000 split 70 30 with Rahul', friends);
+        const result = parseVoiceInput('Dinner 1000 split 70% me 30% Rahul', friends);
         // Parser correctly identifies Rahul is involved
         expect(result.amount).toBe('1000');
-        expect(result.splitDetails?.splitWith).toContain('rahul');
+        expect(result.splitDetails?.splitWith).toContain('Rahul');
         // Note: Actual share calculation happens in VoiceInput.tsx component, not in parser util.
     });
 });

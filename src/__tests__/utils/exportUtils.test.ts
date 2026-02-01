@@ -1,5 +1,10 @@
+/** @jest-environment jsdom */
+import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
+import { sendGTMEvent } from '@next/third-parties/google';
 
-import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
+jest.mock('@next/third-parties/google', () => ({
+    sendGTMEvent: jest.fn(),
+}));
 import { utils, writeFile } from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
