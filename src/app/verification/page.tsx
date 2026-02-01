@@ -174,7 +174,15 @@ export default function VerificationPage() {
                                     });
                                     return;
                                 }
-                                const waLink = `https://wa.me/${user.phone}?text=Verify code: ${code}`;
+
+                                // Format phone number for WhatsApp
+                                const rawPhone = user.phone || '';
+                                let cleanPhone = rawPhone.replace(/\D/g, '');
+                                if (cleanPhone.length === 10) {
+                                    cleanPhone = '91' + cleanPhone;
+                                }
+
+                                const waLink = `https://wa.me/${cleanPhone}?text=Verify code: ${code}`;
                                 window.location.href = waLink;
                                 setOtpSent(true); // Show input only after clicking
                             }} variant="secondary" style={{
