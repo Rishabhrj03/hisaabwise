@@ -6,6 +6,12 @@ import { Button } from '@/components/ui/Button';
 import styles from './landing.module.css';
 
 export default function LandingPage() {
+    const [origin, setOrigin] = React.useState('');
+
+    React.useEffect(() => {
+        setOrigin(window.location.origin);
+    }, []);
+
     return (
         <div style={{
             minHeight: '100vh',
@@ -118,7 +124,12 @@ export default function LandingPage() {
             </section>
 
             {/* Siri Integration Section */}
-            <section style={{ padding: '4rem 2rem', background: 'rgba(255,255,255,0.05)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+            <section style={{
+                padding: '4rem 2rem',
+                background: 'linear-gradient(135deg, hsl(var(--hue-primary) 30% 90% / 0.3), hsl(var(--hue-primary) 30% 95% / 0.3))',
+                borderTop: '1px solid var(--color-border)',
+                borderBottom: '1px solid var(--color-border)'
+            }}>
                 <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔮</div>
                     <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>"Hey Siri, Quick Add..."</h2>
@@ -150,7 +161,7 @@ export default function LandingPage() {
                                 <li>Create new shortcut named <strong>"Quick Add"</strong></li>
                                 <li>Add Action: <strong>Dictate Text</strong></li>
                                 <li>Add Action: <strong>Open URL</strong></li>
-                                <li>Set URL: <code>{typeof window !== 'undefined' ? window.location.origin : 'https://hisaabwise.anewway.in'}/add?text=Dictated Text</code></li>
+                                <li>Set URL: <code>{origin ? `${origin}/add?text=Dictated Text` : 'https://hisaabwise.anewway.in/add?text=Dictated Text'}</code></li>
                             </ol>
                         </div>
                     </div>
