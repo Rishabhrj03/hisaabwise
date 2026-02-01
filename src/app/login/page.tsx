@@ -20,9 +20,13 @@ function LoginForm() {
 
     useEffect(() => {
         const phoneParam = searchParams?.get('phone')
+        const modeParam = searchParams?.get('mode')
+
         if (phoneParam) {
             setPhone(phoneParam)
-            setIsLogin(false) // If phone is present, likely a simplified signup flow
+            setIsLogin(false)
+        } else if (modeParam === 'signup' || modeParam === 'register') {
+            setIsLogin(false)
         }
     }, [searchParams])
 
