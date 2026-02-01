@@ -70,31 +70,49 @@ export default function LandingPage() {
                 </div>
 
                 {/* Hero Image Mockup Placeholder */}
+                {/* Hero Image Mockup */}
                 <div style={{
                     marginTop: '3rem',
                     width: '100%',
-                    maxWidth: '900px',
-                    aspectRatio: '16/9',
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)',
+                    maxWidth: '1000px',
+                    position: 'relative',
                     borderRadius: 'var(--radius-lg)',
-                    border: '1px solid rgba(255,255,255,0.5)',
-                    boxShadow: '0 20px 50px -10px rgba(0,0,0,0.1)',
-                    backdropFilter: 'blur(10px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
+                    boxShadow: '0 20px 50px -10px rgba(0,0,0,0.3)',
                 }}>
+                    {/* Desktop View */}
+                    <img
+                        src="/landing/desktop-dashboard.png"
+                        alt="HisaabWise Dashboard"
+                        style={{
+                            width: '100%',
+                            height: 'auto',
+                            borderRadius: 'var(--radius-lg)',
+                            border: '1px solid var(--color-border)',
+                        }}
+                    />
+
+                    {/* Mobile View - Floating Overlap */}
                     <div style={{
-                        fontSize: '1.5rem',
-                        color: 'hsl(var(--color-text-muted))',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '1rem'
+                        position: 'absolute',
+                        bottom: '-10%',
+                        right: '-5%',
+                        width: '25%',
+                        maxWidth: '280px',
+                        minWidth: '180px',
+                        borderRadius: '3rem',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                        border: '8px solid var(--color-surface)',
+                        overflow: 'hidden'
                     }}>
-                        <span style={{ fontSize: '3rem' }}>💻 📊 📱</span>
-                        <span>[Dashboard Dashboard Preview]</span>
+                        <img
+                            src="/landing/mobile-dashboard.png"
+                            alt="HisaabWise Mobile App"
+                            style={{
+                                width: '100%',
+                                height: 'auto',
+                                display: 'block'
+                            }}
+                        />
                     </div>
                 </div>
             </section>
