@@ -19,7 +19,7 @@ export const sendEmail = async (options: EmailOptions) => {
     });
 
     const message = {
-        from: `Expense Tracker <${process.env.EMAIL_USER}>`,
+        from: `HisaabWise <${process.env.EMAIL_USER}>`,
         to: options.to,
         subject: options.subject,
         text: options.text,

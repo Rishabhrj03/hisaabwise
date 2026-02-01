@@ -83,7 +83,7 @@ export function FriendManager() {
             cleanPhone = '91' + cleanPhone;
         }
         const appUrl = window.location.origin;
-        const text = encodeURIComponent(`Hey ${friend.name}, join me on Expense Tracker to split bills! ${appUrl}`);
+        const text = encodeURIComponent(`Hey ${friend.name}, join me on HisaabWise to split bills! ${appUrl}`);
         const waLink = `https://wa.me/${cleanPhone}?text=${text}`;
 
         // Use window.location.href instead of window.open

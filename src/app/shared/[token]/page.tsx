@@ -84,7 +84,7 @@ export default function SharedDashboard({ params }: { params: Promise<{ token: s
             flexDirection: 'column'
         }}>
             <header style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>{userData?.name}&apos;s Expense Tracker</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>{userData?.name}&apos;s HisaabWise</h1>
                 <span style={{
                     background: 'var(--color-primary)',
                     color: 'white',
@@ -150,7 +150,7 @@ export default function SharedDashboard({ params }: { params: Promise<{ token: s
                 color: 'hsl(var(--color-text-muted))',
                 fontSize: '0.875rem'
             }}>
-                <p>&copy; {new Date().getFullYear()} Expense Tracker</p>
+                <p>&copy; {new Date().getFullYear()} HisaabWise</p>
             </footer>
         </div>
     );

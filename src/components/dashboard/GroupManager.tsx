@@ -70,7 +70,7 @@ export function GroupManager() {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: `Join ${groupName} on Expense Tracker`,
+                    title: `Join ${groupName} on HisaabWise`,
                     text: `Join the group "${groupName}" to track shared expenses!`,
                     url: link,
                 });
