@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Expense from '@/models/Expense';
 import Friend from '@/models/Friend';
 import { getSessionUser } from '@/lib/auth';
+import { sendExpenseNotification } from '@/lib/notification';
 
 export async function GET() {
     try {
@@ -47,6 +48,9 @@ export async function POST(req: Request) {
             ...data,
             created_by: session.userId,
         });
+
+        // Trigger Notification Background Task (fire and forget to not block response)
+        sendExpenseNotification(expense, session.userId).catch(console.error);
 
         return NextResponse.json(expense);
     } catch (error) {

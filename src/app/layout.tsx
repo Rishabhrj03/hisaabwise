@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 
 import { GroupProvider } from "@/context/GroupContext";
 import { PWAInstallPrompt } from "@/components/ui/PWAInstallPrompt";
+import { NotificationManager } from "@/components/NotificationManager";
 
 
 /*
@@ -65,6 +66,7 @@ export default function RootLayout({
                 <ExpenseProvider>
                   {children}
                   <PWAInstallPrompt />
+                  <NotificationManager />
                 </ExpenseProvider>
               </GroupProvider>
             </FriendProvider>
