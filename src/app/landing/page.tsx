@@ -18,7 +18,7 @@ export default function LandingPage() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'linear-gradient(135deg, hsl(var(--color-background)) 0%, hsl(var(--hue-primary) 30% 95%) 100%)',
+            background: 'radial-gradient(circle at 50% 0%, hsl(var(--hue-primary) 80% 80% / 0.15), transparent 60%), hsl(var(--color-background))',
             color: 'hsl(var(--color-text-main))',
             fontFamily: 'var(--font-sans)',
             overflowX: 'hidden'
@@ -135,9 +135,10 @@ export default function LandingPage() {
             </section>
 
             {/* Siri Integration Section */}
+            {/* Siri Integration Section */}
             <section style={{
                 padding: '4rem 2rem',
-                background: 'linear-gradient(135deg, hsl(var(--hue-primary) 30% 90% / 0.3), hsl(var(--hue-primary) 30% 95% / 0.3))',
+                background: 'linear-gradient(180deg, var(--color-background) 0%, var(--color-surface) 100%)',
                 borderTop: '1px solid var(--color-border)',
                 borderBottom: '1px solid var(--color-border)'
             }}>
