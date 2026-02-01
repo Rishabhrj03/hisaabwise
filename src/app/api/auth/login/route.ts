@@ -18,17 +18,24 @@ export async function POST(req: Request) {
         }
 
         const user = await User.findOne({ email }).select('+password');
-        if (!user || !user.password) {
+        if (!user) {
             return NextResponse.json(
-                { error: 'Invalid credentials' },
-                { status: 401 }
+                { error: 'User not found. Please check your email or sign up.' },
+                { status: 404 }
+            );
+        }
+
+        if (!user.password) {
+            return NextResponse.json(
+                { error: 'Invalid account setup. Please reset your password.' },
+                { status: 400 }
             );
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return NextResponse.json(
-                { error: 'Invalid credentials' },
+                { error: 'Incorrect password. Please try again.' },
                 { status: 401 }
             );
         }

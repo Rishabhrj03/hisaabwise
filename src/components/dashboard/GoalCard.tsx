@@ -100,25 +100,93 @@ export function GoalCard() {
                     </button>
                 }
             >
+                {/* Total Savings Summary */}
+                {goals.length > 0 && (
+                    <div style={{
+                        marginBottom: '1rem',
+                        padding: '0.75rem 1rem',
+                        background: 'linear-gradient(135deg, hsl(160, 60%, 45%) 0%, hsl(160, 60%, 30%) 100%)', // Green gradient for savings
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: '0 4px 12px -3px rgba(16, 185, 129, 0.4)',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Saved</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+                                ₹{goals.reduce((acc, g) => acc + g.currentAmount, 0).toLocaleString()}
+                            </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 600, opacity: 0.9 }}>
+                                ₹{goals.reduce((acc, g) => acc + g.targetAmount, 0).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {showAdd && (
-                    <form onSubmit={handleAddGoal} style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                    <form onSubmit={handleAddGoal} style={{
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5rem',
+                        background: 'hsla(var(--color-surface), 0.5)',
+                        padding: '0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid hsl(var(--color-border))'
+                    }}>
                         <input
                             placeholder="Goal Name"
                             value={newName}
                             onChange={e => setNewName(e.target.value)}
-                            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '50%' }}
+                            style={{
+                                width: '100%',
+                                padding: '0.6rem',
+                                borderRadius: 'var(--radius-sm)',
+                                border: '1px solid hsl(var(--color-border))',
+                                background: 'hsl(var(--color-background))',
+                                color: 'hsl(var(--color-text-main))',
+                                outline: 'none',
+                                fontSize: '0.9rem'
+                            }}
                         />
-                        <input
-                            placeholder="Target Amount"
-                            type="number"
-                            value={newTarget}
-                            onChange={e => setNewTarget(e.target.value)}
-                            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '30%' }}
-                        />
-                        <button type="submit" disabled={isSubmitting} style={{ flex: 1, borderRadius: '8px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', opacity: isSubmitting ? 0.7 : 1 }}>
-                            {isSubmitting ? '...' : '✓'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                            <input
+                                placeholder="Target Amount"
+                                type="number"
+                                value={newTarget}
+                                onChange={e => setNewTarget(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.6rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid hsl(var(--color-border))',
+                                    background: 'hsl(var(--color-background))',
+                                    color: 'hsl(var(--color-text-main))',
+                                    outline: 'none',
+                                    fontSize: '0.9rem',
+                                    minWidth: 0
+                                }}
+                            />
+                            <button type="submit" disabled={isSubmitting} style={{
+                                padding: '0 1rem',
+                                borderRadius: 'var(--radius-sm)',
+                                background: 'hsl(var(--color-primary))',
+                                color: 'white',
+                                border: 'none',
+                                opacity: isSubmitting ? 0.7 : 1,
+                                cursor: 'pointer',
+                                fontWeight: 600,
+                                fontSize: '0.9rem',
+                                whiteSpace: 'nowrap'
+                            }}>
+                                {isSubmitting ? '...' : 'Add'}
+                            </button>
+                        </div>
                     </form>
                 )}
 

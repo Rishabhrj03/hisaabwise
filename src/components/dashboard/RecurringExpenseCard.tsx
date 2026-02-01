@@ -125,22 +125,75 @@ export function RecurringExpenseCard() {
                 }
             >
 
+                {/* Liabilities Summary - Gradient Card */}
+                {recurrings.length > 0 && (
+                    <div style={{
+                        marginBottom: '1rem',
+                        padding: '0.75rem 1rem',
+                        background: 'linear-gradient(135deg, hsl(200, 20%, 30%) 0%, hsl(200, 20%, 20%) 100%)', // Slate/Gray gradient
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: '0 4px 12px -3px rgba(0,0,0, 0.4)',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                        <div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Monthly To Pay</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+                                ₹{recurrings.reduce((acc, r) => r.frequency === 'monthly' ? acc + r.amount : acc, 0).toLocaleString()}
+                            </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upcoming (7 days)</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 600, opacity: 0.9, color: '#fca5a5' }}>
+                                ₹{recurrings.filter(r => {
+                                    const diff = new Date(r.nextDueDate).getTime() - new Date().getTime();
+                                    const days = Math.ceil(diff / (1000 * 3600 * 24));
+                                    return days >= 0 && days <= 7;
+                                }).reduce((acc, r) => acc + r.amount, 0).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {showAdd && (
-                    <form onSubmit={handleAdd} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
-                        <input placeholder="Name (e.g. Health Insurance)" value={name} onChange={e => setName(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <input type="number" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
-                            <select value={frequency} onChange={e => setFrequency(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
+                    <form onSubmit={handleAdd} style={{
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                        background: 'hsla(var(--color-surface), 0.5)',
+                        padding: '0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid hsl(var(--color-border))'
+                    }}>
+                        <input placeholder="Name (e.g. Health Insurance)" value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }} />
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                            <input type="number" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none', minWidth: 0 }} />
+                            <select value={frequency} onChange={e => setFrequency(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }}>
                                 <option value="monthly">Monthly</option>
                                 <option value="yearly">Yearly</option>
                             </select>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#888' }}>Next Due:</span>
-                            <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--color-text-muted))', minWidth: '70px' }}>Next Due:</span>
+                            <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }} />
                         </div>
-                        <button type="submit" disabled={isSubmitting} style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
-                            {isSubmitting ? 'Adding...' : 'Add'}
+                        <button type="submit" disabled={isSubmitting} style={{
+                            width: '100%',
+                            padding: '0.6rem',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'hsl(var(--color-primary))',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            opacity: isSubmitting ? 0.7 : 1,
+                            fontWeight: 600,
+                            fontSize: '0.9rem'
+                        }}>
+                            {isSubmitting ? 'Adding...' : 'Add Recurring'}
                         </button>
                     </form>
                 )}

@@ -110,31 +110,80 @@ export function LoanCard() {
                 }
             >
 
+                {/* Loan Summary - Gradient Card */}
+                {loans.length > 0 && (
+                    <div style={{
+                        marginBottom: '1rem',
+                        padding: '0.75rem 1rem',
+                        background: 'linear-gradient(135deg, hsl(0, 70%, 60%) 0%, hsl(30, 80%, 55%) 100%)', // Red-Orange gradient
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: '0 4px 12px -3px rgba(239, 68, 68, 0.4)',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>You Owe (Payable)</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+                                ₹{loans.reduce((acc, l) => l.type === 'borrowed' ? acc + (l.principalAmount - l.paidAmount) : acc, 0).toLocaleString()}
+                            </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owed to You (Receivable)</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 600, opacity: 0.9 }}>
+                                ₹{loans.reduce((acc, l) => l.type === 'lent' ? acc + (l.principalAmount - l.paidAmount) : acc, 0).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {showAdd && (
-                    <form onSubmit={handleAdd} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <select value={type} onChange={e => setType(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', flex: 1 }}>
+                    <form onSubmit={handleAdd} style={{
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                        background: 'hsla(var(--color-surface), 0.5)',
+                        padding: '0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid hsl(var(--color-border))'
+                    }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                            <select value={type} onChange={e => setType(e.target.value)} style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm)', flex: 1, border: '1px solid hsl(var(--color-border))', outline: 'none' }}>
                                 <option value="borrowed">I Borrowed (Loan)</option>
                                 <option value="lent">I Lent (Udhar Given)</option>
                             </select>
-                            <input placeholder="Name (e.g. Home Loan)" value={name} onChange={e => setName(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', flex: 2, border: '1px solid #ccc' }} />
                         </div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <input type="number" placeholder="Principal Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', flex: 1, border: '1px solid #ccc' }} />
-                            <input type="number" placeholder="Interest % (Yr)" value={interest} onChange={e => setInterest(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', flex: 1, border: '1px solid #ccc' }} />
+                        <input placeholder="Name (e.g. Home Loan)" value={name} onChange={e => setName(e.target.value)} style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm)', width: '100%', border: '1px solid hsl(var(--color-border))', outline: 'none' }} />
+
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                            <input type="number" placeholder="Principal Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm)', flex: 1, border: '1px solid hsl(var(--color-border))', outline: 'none', minWidth: 0 }} />
+                            <input type="number" placeholder="Int %" value={interest} onChange={e => setInterest(e.target.value)} style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm)', width: '80px', border: '1px solid hsl(var(--color-border))', outline: 'none' }} />
                         </div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <input type="number" placeholder="Tenure (Months)" value={tenure} onChange={e => setTenure(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', flex: 1, border: '1px solid #ccc' }} />
-                            <select value={repayment} onChange={e => setRepayment(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', flex: 1 }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                            <input type="number" placeholder="Tenure (Months)" value={tenure} onChange={e => setTenure(e.target.value)} style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm)', flex: 1, border: '1px solid hsl(var(--color-border))', outline: 'none', minWidth: 0 }} />
+                            <select value={repayment} onChange={e => setRepayment(e.target.value)} style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm)', flex: 1, border: '1px solid hsl(var(--color-border))', outline: 'none' }}>
                                 <option value="one-time">One Time</option>
                                 <option value="emi">EMI</option>
                             </select>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#888' }}>Start Date:</span>
-                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--color-text-muted))', minWidth: '70px' }}>Start Date:</span>
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }} />
                         </div>
-                        <button type="submit" disabled={isSubmitting} style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                        <button type="submit" disabled={isSubmitting} style={{
+                            width: '100%',
+                            padding: '0.6rem',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'hsl(var(--color-primary))',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            opacity: isSubmitting ? 0.7 : 1,
+                            fontWeight: 600,
+                            fontSize: '0.9rem'
+                        }}>
                             {isSubmitting ? 'Adding...' : 'Add Loan'}
                         </button>
                     </form>

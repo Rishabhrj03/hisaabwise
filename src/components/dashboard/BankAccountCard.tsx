@@ -109,19 +109,71 @@ export function BankAccountCard() {
                 }
             >
 
+                {/* Net Worth Summary - Gradient Card */}
+                {accounts.length > 0 && (
+                    <div style={{
+                        marginBottom: '1rem',
+                        padding: '0.75rem 1rem',
+                        background: 'linear-gradient(135deg, hsl(210, 80%, 50%) 0%, hsl(230, 80%, 40%) 100%)', // Blue gradient
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: '0 4px 12px -3px rgba(59, 130, 246, 0.4)',
+                        color: 'white'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Net Worth</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>₹{netWorth.toLocaleString()}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>Assets: ₹{totalAssetValue.toLocaleString()}</div>
+                                {totalLiabilities > 0 && (
+                                    <div style={{ fontSize: '0.75rem', color: '#ffcccb' }}>Debt: -₹{totalLiabilities.toLocaleString()}</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {showAdd && (
-                    <form onSubmit={handleAddAccount} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
+                    <form onSubmit={handleAddAccount} style={{
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                        background: 'hsla(var(--color-surface), 0.5)',
+                        padding: '0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid hsl(var(--color-border))'
+                    }}>
                         <input
                             placeholder="Name (e.g. HDFC, Amex)"
                             value={newName}
                             onChange={e => setNewName(e.target.value)}
-                            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                            style={{
+                                width: '100%',
+                                padding: '0.6rem',
+                                borderRadius: 'var(--radius-sm)',
+                                border: '1px solid hsl(var(--color-border))',
+                                background: 'hsl(var(--color-background))',
+                                color: 'hsl(var(--color-text-main))',
+                                outline: 'none',
+                                fontSize: '0.9rem'
+                            }}
                         />
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                             <select
                                 value={newType}
                                 onChange={e => setNewType(e.target.value)}
-                                style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.6rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid hsl(var(--color-border))',
+                                    background: 'hsl(var(--color-background))',
+                                    color: 'hsl(var(--color-text-main))',
+                                    outline: 'none',
+                                    fontSize: '0.9rem'
+                                }}
                             >
                                 <option value="bank">Bank</option>
                                 <option value="wallet">Wallet</option>
@@ -129,33 +181,73 @@ export function BankAccountCard() {
                                 <option value="cash">Cash</option>
                             </select>
                             <input
-                                placeholder={newType === 'card' ? "Outstanding Amt" : "Current Balance"}
+                                placeholder={newType === 'card' ? "Due Amt" : "Balance"}
                                 type="number"
                                 value={newBalance}
                                 onChange={e => setNewBalance(e.target.value)}
-                                style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.6rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid hsl(var(--color-border))',
+                                    background: 'hsl(var(--color-background))',
+                                    color: 'hsl(var(--color-text-main))',
+                                    outline: 'none',
+                                    fontSize: '0.9rem',
+                                    minWidth: 0
+                                }}
                             />
                         </div>
                         {newType === 'card' && (
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                                 <input
                                     placeholder="Total Limit"
                                     type="number"
                                     value={newLimit}
                                     onChange={e => setNewLimit(e.target.value)}
-                                    style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    style={{
+                                        flex: 1,
+                                        padding: '0.6rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid hsl(var(--color-border))',
+                                        background: 'hsl(var(--color-background))',
+                                        color: 'hsl(var(--color-text-main))',
+                                        outline: 'none',
+                                        fontSize: '0.9rem',
+                                        minWidth: 0
+                                    }}
                                 />
                                 <input
                                     placeholder="Bill Day (1-31)"
                                     type="number"
                                     value={newBillDate}
                                     onChange={e => setNewBillDate(e.target.value)}
-                                    style={{ width: '100px', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    style={{
+                                        width: '80px',
+                                        padding: '0.6rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid hsl(var(--color-border))',
+                                        background: 'hsl(var(--color-background))',
+                                        color: 'hsl(var(--color-text-main))',
+                                        outline: 'none',
+                                        fontSize: '0.9rem'
+                                    }}
                                 />
                             </div>
                         )}
-                        <button type="submit" disabled={isSubmitting} style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
-                            {isSubmitting ? 'Adding...' : 'Add'}
+                        <button type="submit" disabled={isSubmitting} style={{
+                            width: '100%',
+                            padding: '0.6rem',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'hsl(var(--color-primary))',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            opacity: isSubmitting ? 0.7 : 1,
+                            fontWeight: 600,
+                            fontSize: '0.9rem'
+                        }}>
+                            {isSubmitting ? 'Adding...' : 'Add Account'}
                         </button>
                     </form>
                 )}
@@ -167,7 +259,7 @@ export function BankAccountCard() {
                         {/* Liquid Assets Section */}
                         {assets.length > 0 && (
                             <div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Liquid Assets</div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'hsl(var(--color-text-muted))', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Liquid Assets</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                     {assets.map(acc => (
                                         <AccountItem
@@ -184,7 +276,7 @@ export function BankAccountCard() {
                         {/* Credit Cards Section */}
                         {cards.length > 0 && (
                             <div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Credit Cards</div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'hsl(var(--color-text-muted))', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Credit Cards</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                     {cards.map(acc => (
                                         <AccountItem
@@ -197,18 +289,6 @@ export function BankAccountCard() {
                                 </div>
                             </div>
                         )}
-
-                        {/* Net Worth Summary */}
-                        <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed hsl(var(--color-border))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ fontWeight: 700 }}>Net Worth</div>
-                                <div style={{ fontSize: '0.7rem', color: '#888' }}>(Assets - Liabilities)</div>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontWeight: 700, fontSize: '1.1rem', color: netWorth >= 0 ? 'var(--color-income)' : 'var(--color-expense)' }}>₹{netWorth}</div>
-                                {totalLiabilities > 0 && <div style={{ fontSize: '0.7rem', color: 'var(--color-expense)' }}>Debt: ₹{totalLiabilities}</div>}
-                            </div>
-                        </div>
                     </div>
                 )}
             </Card>

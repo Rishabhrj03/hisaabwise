@@ -120,26 +120,56 @@ export function InvestmentCard() {
                 }
             >
 
-                {showAdd && (
-                    <form onSubmit={handleAdd} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
-                        <input placeholder="Name (e.g. Nifty 50)" value={name} onChange={e => setName(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                {/* Total Portfolio Summary - Gradient Card */}
+                {investments.length > 0 && (
+                    <div style={{
+                        marginBottom: '1rem',
+                        padding: '0.75rem 1rem',
+                        background: 'linear-gradient(135deg, hsl(280, 80%, 60%) 0%, hsl(320, 80%, 60%) 100%)', // Purple-Pink gradient
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: '0 4px 12px -3px rgba(192, 38, 211, 0.4)',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Portfolio</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>₹{totalPortfolio.toLocaleString()}</div>
+                        </div>
+                        <div style={{ fontSize: '2rem', opacity: 0.2 }}>📈</div>
+                    </div>
+                )}
 
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <select value={type} onChange={e => setType(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
+                {showAdd && (
+                    <form onSubmit={handleAdd} style={{
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                        background: 'hsla(var(--color-surface), 0.5)',
+                        padding: '0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid hsl(var(--color-border))'
+                    }}>
+                        <input placeholder="Name (e.g. Nifty 50)" value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }} />
+
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                            <select value={type} onChange={e => setType(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }}>
                                 {['SIP', 'MutualFund', 'Stock', 'NPS', 'FD', 'Gold', 'Crypto', 'Other'].map(t => <option key={t} value={t}>{t}</option>)}
                             </select>
-                            <input type="number" placeholder="Current Value" value={amount} onChange={e => setAmount(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                            <input type="number" placeholder="Current Value" value={amount} onChange={e => setAmount(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none', minWidth: 0 }} />
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#888' }}>Start Date:</span>
-                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
+                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--color-text-muted))', minWidth: '70px' }}>Start Date:</span>
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }} />
                         </div>
 
                         {(type === 'SIP' || type === 'NPS' || type === 'MutualFund') && (
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input type="number" placeholder="Auto-Add Amount" value={sipAmount} onChange={e => setSipAmount(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }} />
-                                <select value={frequency} onChange={e => setFrequency(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                                <input type="number" placeholder="Auto-Add" value={sipAmount} onChange={e => setSipAmount(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none', minWidth: 0 }} />
+                                <select value={frequency} onChange={e => setFrequency(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid hsl(var(--color-border))', outline: 'none' }}>
                                     <option value="monthly">Monthly</option>
                                     <option value="quarterly">Quarterly</option>
                                     <option value="half-yearly">Half-Yearly</option>
@@ -148,7 +178,18 @@ export function InvestmentCard() {
                                 </select>
                             </div>
                         )}
-                        <button type="submit" disabled={isSubmitting} style={{ padding: '0.5rem', borderRadius: '4px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                        <button type="submit" disabled={isSubmitting} style={{
+                            width: '100%',
+                            padding: '0.6rem',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'hsl(var(--color-primary))',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            opacity: isSubmitting ? 0.7 : 1,
+                            fontWeight: 600,
+                            fontSize: '0.9rem'
+                        }}>
                             {isSubmitting ? 'Adding...' : 'Add Investment'}
                         </button>
                     </form>
@@ -166,10 +207,6 @@ export function InvestmentCard() {
                                 onDelete={(e) => handleDelete(e, inv._id)}
                             />
                         ))}
-                        <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed hsl(var(--color-border))', display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-                            <span>Total Portfolio</span>
-                            <span>₹{totalPortfolio}</span>
-                        </div>
                     </div>
                 )}
             </Card>
