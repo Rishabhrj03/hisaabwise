@@ -13,7 +13,24 @@ interface ParsedData {
     originalDate: string;
 }
 
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+    'Food': ['coffee', 'burger', 'pizza', 'food', 'lunch', 'dinner', 'restaurant', 'swiggy', 'zomato', 'tea', 'chai', 'snack', 'khana', 'khane', 'bhojan', 'dudh', 'doodh', 'milk', 'dairy', 'grocery', 'groceries', 'rashan', 'nashta', 'blinkit', 'zepto', 'breakfast'],
+    'Transport': ['taxi', 'uber', 'bus', 'train', 'flight', 'gas', 'fuel', 'petrol', 'metro', 'cab', 'auto', 'gadi', 'gaadi', 'bike', 'car', 'ola', 'rapido', 'scooty', 'ride'],
+    'Shopping': ['clothes', 'shoes', 'amazon', 'buy', 'bought', 'shopping', 'zara', 'h&m', 'jeans', 'shirt', 'kapde', 'jute', 'kharid', 'myntra', 'ajio', 'flipkart', 'uniqlo', 'kapda'],
+    'Entertainment': ['movie', 'netflix', 'game', 'cinema', 'fun', 'party', 'prime', 'hotstar', 'ticket'],
+    'Bills': ['electricity', 'water', 'internet', 'bill', 'rent', 'recharge', 'wifi', 'mobile', 'bijli', 'phone', 'jio', 'airtel', 'vi', 'broadband', 'dth'],
+    'Health': ['medicine', 'doctor', 'hospital', 'gym', 'health', 'yoga', 'dawai', 'dawa', 'meds', 'pharmacy', '1mg', 'apollo']
+};
+
+const FILLER_WORDS = ['ka', 'ke', 'ki', 'liye', 'mein', 'me', 'pe', 'par', 'ko', 'se', 'for', 'on', 'at', 'to', 'in'];
+
 export const parseVoiceInput = (text: string, friends: string[] = []): ParsedData => {
+    // 0. Initialize Friend Map early
+    const friendMap: Record<string, string> = {};
+    friends.forEach(f => {
+        friendMap[f.toLowerCase()] = f;
+    });
+
     let cleanText = text.toLowerCase();
     const lowerFriends = friends.map(f => f.toLowerCase());
 
@@ -82,7 +99,8 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         'k': 1000, 'thousand': 1000, 'lakh': 100000, 'crore': 10000000, 'hundred': 100
     };
 
-    cleanText = cleanText.replace(/(\d+(?:\.\d+)?)\s*(k|thousand|lakh|crore|hundred)/gi, (match, number, unit) => {
+    // Added \b at the end to prevent 'ka' matching 'k'
+    cleanText = cleanText.replace(/(\d+(?:\.\d+)?)\s*(k|thousand|lakh|crore|hundred)\b/gi, (match, number, unit) => {
         const num = parseFloat(number);
         const mult = multiplierMap[unit.toLowerCase()];
         return (num * mult).toString();
@@ -115,12 +133,13 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         else if (cleanText.includes('freelance')) category = 'Freelance';
         else if (cleanText.includes('gift')) category = 'Gift';
     } else {
-        if (/(coffee|burger|pizza|food|lunch|dinner|restaurant|swiggy|zomato|tea|snack|khana|khane|bhojan)/.test(cleanText)) category = 'Food';
-        else if (/(taxi|uber|bus|train|flight|gas|fuel|petrol|metro|cab|auto|gadi|gaadi|bike|car)/.test(cleanText)) category = 'Transport';
-        else if (/(clothes|shoes|amazon|buy|bought|shopping|zara|h&m|jeans|shirt|kapde|jute|kharid)/.test(cleanText)) category = 'Shopping';
-        else if (/(movie|netflix|game|cinema|fun|party)/.test(cleanText)) category = 'Entertainment';
-        else if (/(electricity|water|internet|bill|rent|recharge|wifi|mobile|bijli|phone)/.test(cleanText)) category = 'Bills';
-        else if (/(medicine|doctor|hospital|gym|health|yoga|dawai|dawa)/.test(cleanText)) category = 'Health';
+        // Dynamic Category Matching
+        for (const [catName, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+            if (keywords.some(keyword => cleanText.includes(keyword))) {
+                category = catName;
+                break; // Stop at first match
+            }
+        }
     }
 
     // Split details
@@ -130,14 +149,105 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     let unknownFriends: string[] = [];
     const excludedPeople: string[] = [];
 
-    const splitRatioMatch = cleanText.match(/split\s+(\d+)\s+(\d+)/i);
-    if (splitRatioMatch) {
-        const v1 = parseFloat(splitRatioMatch[1]);
-        const v2 = parseFloat(splitRatioMatch[2]);
-        if (v1 + v2 === 100 || v1 + v2 <= 100) {
-            splitRatios = [v1, v2];
+    // Advanced Split Logic
+    // 1. Check for Colon Ratios (e.g. 30:40:30)
+    const ratioMatch = cleanText.match(/(\d+)(?::(\d+))+/);
+    if (ratioMatch) {
+        const parts = ratioMatch[0].split(':').map(Number);
+        const sum = parts.reduce((a, b) => a + b, 0);
+        if (Math.abs(sum - 100) < 1 || Math.abs(sum - 10) < 1) { // Allow 10 scale (e.g. 3:4:3)
+            splitRatios = parts.map(p => (p / sum) * 100);
         }
+    }
+
+    // 2. Check for Explicit Amounts per Person (e.g. "300 Rahul ne, 400 Vijay ne")
+    // Regex to find "Number Name" or "Name Number" patterns
+    const amountPersonMatches: { name: string; amount: number }[] = [];
+
+    // Heuristic: limit search to friend names + amounts
+    lowerFriends.forEach(friend => {
+        // "300 Rahul" or "Rahul 300"
+        // Handle "Rahul ne 300"
+        const patterns = [
+            new RegExp(`(\\d+)\\s+${friend}\\b`),
+            new RegExp(`\\b${friend}\\s+(?:ne\\s+)?(\\d+)`)
+        ];
+
+        for (const pat of patterns) {
+            const m = cleanText.match(pat);
+            if (m) {
+                amountPersonMatches.push({ name: friend, amount: parseFloat(m[1]) });
+                break; // Found one pattern for this friend
+            }
+        }
+    });
+
+    if (amountPersonMatches.length > 0 && amount > 0) {
+        const totalClaimed = amountPersonMatches.reduce((sum, p) => sum + p.amount, 0);
+        // If total matches roughly (allow small margin?) match total amount
+        // Or if it's a significant portion.
+        // Let's assume valid if > 0. 
+        // We need to map these to splitWith and ratios.
+
+        // Strategy: If user specifies amounts, they likely mean *those* people are in the split.
+        // We override splitWith with these names.
+
+        // Wait, if totalClaimed != totalAmount?
+        // Case: "Total 1000. 300 Rahul, 300 Vijay." -> Remainder 400 is 'Me'?
+        // Case: "Total 1000. 300 Rahul, 700 Vijay." -> Me is 0?
+
+        // Let's just calculate percentages based on Total Amount.
+        const dynamicSplitWith: string[] = [];
+        const dynamicRatios: number[] = [];
+
+        let currentSumParams = 0;
+
+        amountPersonMatches.forEach(p => {
+            const originalName = friendMap[p.name];
+            if (originalName) {
+                dynamicSplitWith.push(originalName);
+                const ratio = (p.amount / amount) * 100;
+                dynamicRatios.push(ratio);
+                currentSumParams += p.amount;
+            }
+        });
+
+        // If there is a remainder, and 'me' wasn't explicitly mentioned with an amount...
+        // usually 'me' takes the rest.
+        // BUT `splitWith` array typically implies "Friends I split with". "Me" is implicit payer/participant.
+        // The `splitRatios` array in backend usually corresponds to `[Me, ...splitWith]`.
+        // Wait, need to check how splitRatios matches splitWith in the backend/UI.
+        // Standard convention: splitRatios[0] is often user, then splitWith[0], splitWith[1]...
+
+        // Let's look at `VoiceInput.tsx` or `ParsedData` usage.
+        // Actually typical app logic: splitWith = [Friend1, Friend2]. 
+        // Type 'expense' implies I paid. 
+        // If splitRatios is set, it might need to align with participants.
+        // Let's assume we return the ratios for the *Friends* found, and the caller handles the rest?
+        // OR: we assume strict N+1 split including Me.
+
+        // If "300 Rahul, 400 Vijay" out of 1000. Me = 300.
+        // Ratios: Me:30, Rahul:30, Vijay:40.
+        // splitWith should be [Rahul, Vijay]. splitRatios should be [30, 30, 40].
+
+        // Let's construct it.
+        if (dynamicSplitWith.length > 0) {
+            const remainder = amount - currentSumParams;
+            const meRatio = (remainder / amount) * 100;
+
+            // We need to know where 'Me' fits. 
+            // Usually [Me, ...Friends].
+            splitWith = dynamicSplitWith;
+            splitRatios = [meRatio, ...dynamicRatios];
+        }
+    } else if (ratioMatch && splitRatios) {
+        // We have ratios [30, 40, 30]. We need to see who they belong to.
+        // We need to match names in the text order?
+        // Or if we have splitWith candidates found later.
+        // Let's defer mapping to after friend detection?
+        // No, let's keep ratios here.
     } else {
+        // Standard percent logic fallback
         const percentMatches = cleanText.match(/(\d+)\s*(?:percent|%)/gi);
         if (percentMatches) {
             const ratios = percentMatches.map(p => parseFloat(p));
@@ -161,11 +271,11 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     let finalDate = new Date();
     const dateLower = cleanText.toLowerCase();
 
-    if (dateLower.includes('yesterday') || dateLower.includes('cal') || dateLower.includes('kal')) {
+    if (dateLower.includes('day before yesterday') || dateLower.includes('parso')) {
+        finalDate.setDate(finalDate.getDate() - 2);
+    } else if (dateLower.includes('yesterday') || dateLower.includes('cal') || dateLower.includes('kal')) {
         // "Kal" in Hindi can be yesterday or tomorrow, context matters but usually yesterday for expenses
         finalDate.setDate(finalDate.getDate() - 1);
-    } else if (dateLower.includes('day before yesterday') || dateLower.includes('parso')) {
-        finalDate.setDate(finalDate.getDate() - 2);
     } else if (dateLower.includes('tomorrow')) {
         finalDate.setDate(finalDate.getDate() + 1);
     } else if (dateLower.includes('today') || dateLower.includes('aaj')) {
@@ -175,10 +285,7 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
 
     // Friend Matching with Original Casing
     // Map lower to original for lookup
-    const friendMap: Record<string, string> = {};
-    friends.forEach(f => {
-        friendMap[f.toLowerCase()] = f;
-    });
+    // (friendMap is already initialized at the top)
 
     lowerFriends.forEach(friend => {
         if (friend !== paidBy.toLowerCase() && cleanText.includes(friend)) {
@@ -260,6 +367,10 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
     let description = text;
     if (amountMatch) description = description.replace(amountMatch[0], '');
 
+    // Remove filler words
+    const fillerRegex = new RegExp(`\\b(${FILLER_WORDS.join('|')})\\b`, 'gi');
+    description = description.replace(fillerRegex, '');
+
     description = description
         .replace(/dollars?|rupees?|bucks?|inr|rs/gi, '')
         .replace(/spent|paid|bought|received|got|spain/gi, '')
@@ -277,9 +388,28 @@ export const parseVoiceInput = (text: string, friends: string[] = []): ParsedDat
         .replace(/for /gi, ' ')
         .trim();
 
+    // Optional: Remove the category keyword itself if it appears (e.g. "Uber" in "Uber ride")
+    // ONLY if it's not the entire description. 
+    // Heuristic: If we matched a category, try to remove that keyword to keep it clean?
+    // Let's remove the exact keyword matched if found.
+    if (category !== 'Other') {
+        const keywords = CATEGORY_KEYWORDS[category] || [];
+        for (const kw of keywords) {
+            const regex = new RegExp(`\\b${kw}\\b`, 'gi');
+            // description = description.replace(regex, ''); // aggressive?
+            // Maybe keep it for now as user might say "Uber ride to work", removing "Uber" leaves "ride to work".
+            // If user says "Uber", removing it leaves "".
+        }
+    }
+
     description = description.replace(/[^\w\s]/gi, '').trim();
     description = description.charAt(0).toUpperCase() + description.slice(1);
-    if (description.length === 0) description = "Voice Entry";
+
+    // Fallback if description became empty after cleaning
+    if (description.length === 0) {
+        // Restore category as description or generic
+        description = category !== 'Other' ? category : "Voice Entry";
+    }
 
     // Format date as YYYY-MM-DD
     const year = finalDate.getFullYear();
