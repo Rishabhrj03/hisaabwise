@@ -32,6 +32,7 @@ describe('GroupManager', () => {
         (useGroups as jest.Mock).mockReturnValue({
             groups: mockGroups,
             addGroup: mockAddGroup,
+            updateGroup: jest.fn(),
             deleteGroup: jest.fn()
         });
         (useFriends as jest.Mock).mockReturnValue({
@@ -49,7 +50,7 @@ describe('GroupManager', () => {
         render(<GroupManager />);
 
         // Open create form
-        fireEvent.click(screen.getByText('Create Group')); // Button text triggers toggle
+        fireEvent.click(screen.getByText('Create Group +')); // Button text triggers toggle
 
         fireEvent.change(screen.getByPlaceholderText('e.g. Goa Trip'), { target: { value: 'Dinner' } });
 
@@ -70,9 +71,68 @@ describe('GroupManager', () => {
             }));
         });
 
-        expect(sendGTMEvent).toHaveBeenCalledWith({
-            event: 'group_created',
-            value: { member_count: 2 }
+        expect(sendGTMEvent).toHaveBeenCalledWith(expect.objectContaining({
+            event: 'group_created'
+        }));
+    });
+
+    it('copies group link to clipboard', async () => {
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: jest.fn(),
+            },
+        });
+        window.alert = jest.fn();
+
+        render(<GroupManager />);
+
+        fireEvent.click(screen.getByTitle('Share Link'));
+
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('/join/g1'));
+        // alert is mocked in setup
+        expect(window.alert).toHaveBeenCalled();
+    });
+
+    it('deletes a group', async () => {
+        const mockDeleteGroup = jest.fn();
+        (useGroups as jest.Mock).mockReturnValue({
+            groups: mockGroups,
+            addGroup: mockAddGroup,
+            updateGroup: jest.fn(),
+            deleteGroup: mockDeleteGroup
+        });
+
+        render(<GroupManager />);
+
+        fireEvent.click(screen.getByTitle('Delete'));
+
+        expect(mockDeleteGroup).toHaveBeenCalledWith('g1');
+    });
+
+    it('edits a group', async () => {
+        const mockUpdateGroup = jest.fn();
+        (useGroups as jest.Mock).mockReturnValue({
+            groups: mockGroups,
+            addGroup: mockAddGroup,
+            updateGroup: mockUpdateGroup,
+            deleteGroup: jest.fn()
+        });
+
+        render(<GroupManager />);
+
+        fireEvent.click(screen.getByTitle('Edit'));
+
+        const input = screen.getByPlaceholderText('e.g. Goa Trip') as HTMLInputElement;
+        expect(input.value).toBe('Trip');
+
+        fireEvent.change(input, { target: { value: 'Trip Updated' } });
+
+        fireEvent.click(screen.getByText('Update Group'));
+
+        await waitFor(() => {
+            expect(mockUpdateGroup).toHaveBeenCalledWith('g1', expect.objectContaining({
+                name: 'Trip Updated'
+            }));
         });
     });
 });

@@ -11,10 +11,11 @@ import { AlertModal } from '@/components/ui/AlertModal';
 import { Friend } from '@/types';
 
 export function FriendManager() {
-    const { friends, addFriend, deleteFriend } = useFriends();
+    const { friends, addFriend, updateFriend, deleteFriend } = useFriends();
     const [newFriendName, setNewFriendName] = useState('');
     const [newFriendPhone, setNewFriendPhone] = useState('');
     const [newFriendUpi, setNewFriendUpi] = useState('');
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     const [showPhoneModal, setShowPhoneModal] = useState(false);
     const [alertConfig, setAlertConfig] = useState<{ show: boolean, message: string }>({ show: false, message: '' });
@@ -40,12 +41,37 @@ export function FriendManager() {
         }
 
         if (newFriendName.trim()) {
-            await addFriend(newFriendName, newFriendPhone, newFriendUpi);
-            sendGTMEvent({ event: 'friend_added' });
+            if (editingId) {
+                await updateFriend(editingId, {
+                    name: newFriendName,
+                    phone: newFriendPhone,
+                    upi_id: newFriendUpi
+                });
+                sendGTMEvent({ event: 'friend_updated' });
+                setEditingId(null);
+            } else {
+                await addFriend(newFriendName, newFriendPhone, newFriendUpi);
+                sendGTMEvent({ event: 'friend_added' });
+            }
+
             setNewFriendName('');
             setNewFriendPhone('');
             setNewFriendUpi('');
         }
+    };
+
+    const handleEdit = (friend: Friend) => {
+        setNewFriendName(friend.name);
+        setNewFriendPhone(friend.phone || '');
+        setNewFriendUpi(friend.upi_id || '');
+        setEditingId(friend.id);
+    };
+
+    const handleCancelEdit = () => {
+        setNewFriendName('');
+        setNewFriendPhone('');
+        setNewFriendUpi('');
+        setEditingId(null);
     };
 
     const handleInvite = (friend: Friend) => {
@@ -100,7 +126,16 @@ export function FriendManager() {
                     onChange={(e) => setNewFriendUpi(e.target.value)}
                     style={{ width: '100%' }}
                 />
-                <Button type="submit" size="sm">Add</Button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Button type="submit" size="sm" style={{ flex: 1 }}>
+                        {editingId ? 'Update' : 'Add'}
+                    </Button>
+                    {editingId && (
+                        <Button type="button" variant="ghost" size="sm" onClick={handleCancelEdit}>
+                            Cancel
+                        </Button>
+                    )}
+                </div>
                 {/* </div> */}
                 <p style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>
                     * Add 10-digit phone number to enable WhatsApp invites.
@@ -132,6 +167,14 @@ export function FriendManager() {
                             </div>
 
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEdit(friend)}
+                                    style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}
+                                >
+                                    Edit
+                                </Button>
                                 {friend.phone && !friend.linked_user_id && (
                                     <Button
                                         variant="secondary"

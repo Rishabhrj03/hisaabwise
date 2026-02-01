@@ -29,6 +29,7 @@ describe('FriendManager', () => {
         (useFriends as jest.Mock).mockReturnValue({
             friends: mockFriends,
             addFriend: mockAddFriend,
+            updateFriend: jest.fn(),
             deleteFriend: jest.fn()
         });
         (useAuth as jest.Mock).mockReturnValue({
@@ -69,5 +70,41 @@ describe('FriendManager', () => {
         expect(sendGTMEvent).toHaveBeenCalledWith({ event: 'friend_invited' });
 
         consoleErrorSpy.mockRestore();
+    });
+
+    it('edits a friend', async () => {
+        const mockUpdateFriend = jest.fn();
+        (useFriends as jest.Mock).mockReturnValue({
+            friends: mockFriends,
+            addFriend: mockAddFriend,
+            updateFriend: mockUpdateFriend,
+            deleteFriend: jest.fn()
+        });
+
+        render(<FriendManager />);
+
+        // Click edit on the first friend (Alice)
+        fireEvent.click(screen.getByText('Edit'));
+
+        // Check if form is populated
+        const nameInput = screen.getByPlaceholderText("Friend's Name") as HTMLInputElement;
+        const phoneInput = screen.getByPlaceholderText("Phone (10 digits)") as HTMLInputElement;
+
+        expect(nameInput.value).toBe('Alice');
+        expect(phoneInput.value).toBe('9876543210');
+
+        // Change values
+        fireEvent.change(nameInput, { target: { value: 'Alice Updated' } });
+
+        // Click Update (Button text changes to 'Update Friend')
+        fireEvent.click(screen.getByText('Update Friend'));
+
+        await waitFor(() => {
+            expect(mockUpdateFriend).toHaveBeenCalledWith('f1', expect.objectContaining({
+                name: 'Alice Updated'
+            }));
+        });
+
+        expect(sendGTMEvent).toHaveBeenCalledWith({ event: 'friend_updated' });
     });
 });

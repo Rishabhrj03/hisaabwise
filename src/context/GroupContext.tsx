@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 interface GroupContextType {
     groups: Group[];
     addGroup: (input: GroupInput) => Promise<string>;
+    updateGroup: (id: string, updates: Partial<GroupInput>) => Promise<void>;
     deleteGroup: (id: string) => Promise<void>;
     loading: boolean;
 }
@@ -76,6 +77,29 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const updateGroup = async (id: string, updates: Partial<GroupInput>) => {
+        if (!user) return;
+
+        try {
+            const res = await fetch(`/api/groups/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates),
+            });
+
+            if (res.ok) {
+                const updatedDoc = await res.json();
+                const updatedGroup = mapToGroup(updatedDoc);
+                setGroups((prev) => prev.map(g => g.id === id ? updatedGroup : g));
+            } else {
+                console.error("Failed to update group");
+            }
+        } catch (error) {
+            console.error("Error updating group:", error);
+            throw error;
+        }
+    };
+
     const deleteGroup = async (id: string) => {
         if (!user) return;
 
@@ -96,7 +120,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <GroupContext.Provider value={{ groups, addGroup, deleteGroup, loading }}>
+        <GroupContext.Provider value={{ groups, addGroup, updateGroup, deleteGroup, loading }}>
             {children}
         </GroupContext.Provider>
     );
