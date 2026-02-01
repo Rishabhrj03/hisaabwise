@@ -46,11 +46,14 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                 <Card
                     key={expense.id}
                     variant="glass"
+                    onClick={() => onEdit(expense)}
                     style={{
                         padding: '1rem',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s, background-color 0.2s',
                         borderLeft: `4px solid ${expense.type === 'income'
                             ? 'hsl(var(--color-income))'
                             : expense.type === 'transfer'
@@ -58,6 +61,8 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                                 : 'hsl(var(--color-expense))'
                             }`
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.01)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, marginRight: '1rem' }}>
                         <Tooltip text={expense.description} position="top">
@@ -68,7 +73,6 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     display: 'block',
-                                    cursor: 'help'
                                 }}
                             >
                                 {expense.description}
@@ -100,7 +104,10 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => onEdit(expense)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(expense);
+                                }}
                                 style={{ color: 'hsl(var(--color-text-muted))', padding: '0.25rem' }}
                             >
                                 ✎
@@ -108,7 +115,10 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => onDelete(expense.id)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(expense.id);
+                                }}
                                 style={{ color: 'hsl(var(--color-text-muted))', padding: '0.25rem' }}
                             >
                                 ✕

@@ -172,7 +172,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             group_id: selectedGroupId || null
         };
 
-        if (initialData) {
+        if (initialData?.id) {
             updateExpense(initialData.id, expenseData);
         } else {
             addExpense(expenseData);
@@ -209,7 +209,8 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
 
         // Voice Feedback
         if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(`Added expense of ${numAmount} for ${description}`);
+            const action = initialData?.id ? 'Updated' : 'Added';
+            const utterance = new SpeechSynthesisUtterance(`${action} expense of ${numAmount} for ${description}`);
             window.speechSynthesis.speak(utterance);
         }
 
@@ -591,7 +592,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <Button type="submit" style={{ flex: 1 }}>
-                    {initialData ? 'Update Transaction' : 'Add Transaction'}
+                    {initialData?.id ? 'Update Transaction' : 'Add Transaction'}
                 </Button>
                 {onClose && (
                     <Button type="button" variant="ghost" onClick={onClose}>
