@@ -3,11 +3,11 @@ import Subscription from '@/models/Subscription';
 import Group from '@/models/Group';
 import Friend from '@/models/Friend';
 
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || 'BFvluXtvKeY71SjwUk6U3CGESI04IEypMV2DRDE-1q119CR2RBtNBAugjFGo6sP5zhfNQYiAovgXumWBqunHvck';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || 'IfkGn5e0rr8stgOtkZgVM6iyg-75kmxekD94O-y9OH8';
 
 webpush.setVapidDetails(
-    process.env.EMAIL_USER || '',
+    process.env.EMAIL_USER ? `mailto:${process.env.EMAIL_USER}` : 'mailto:test@example.com',
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
 );
