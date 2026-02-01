@@ -169,30 +169,64 @@ export default function LandingPage() {
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                         gap: '2rem',
                         width: '100%',
-                        textAlign: 'left'
+                        textAlign: 'left',
+                        alignItems: 'start'
                     }}>
-                        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'hsl(var(--color-primary))' }}>🗣️ Say It Naturally</h3>
-                            <p style={{ color: 'hsl(var(--color-text-muted))', marginBottom: '1rem' }}>Siri understands natural language. Try saying:</p>
-                            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Spent 500 on clothes"</li>
-                                <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Paid 200 for lunch"</li>
-                                <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Received 15000 salary"</li>
-                            </ul>
+                        {/* Say It Naturally Card */}
+                        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'hsl(var(--color-primary))' }}>🗣️ Say It Naturally</h3>
+                                <p style={{ color: 'hsl(var(--color-text-muted))', marginBottom: '1rem' }}>Siri understands natural language. Try saying:</p>
+                                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Hey Siri, Quick Add, Spent 500 on clothes"</li>
+                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Hey Siri, Quick Add, Paid 200 for lunch"</li>
+                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Hey Siri, Quick Add, Received 15000 salary"</li>
+                                </ul>
+                            </div>
+                            <img
+                                src="/landing/siri-example.png"
+                                alt="Siri Voice Command Example"
+                                style={{
+                                    width: '100%',
+                                    borderRadius: 'var(--radius-md)',
+                                    border: '1px solid var(--color-border)',
+                                    alignSelf: 'center',
+                                    maxHeight: '400px',
+                                    objectFit: 'contain'
+                                }}
+                            />
                         </div>
 
-                        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'hsl(var(--color-primary))' }}>⚙️ How to Setup</h3>
-                            <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'hsl(var(--color-text-main))' }}>
-                                <li>Open <strong>Shortcuts</strong> app on iOS</li>
-                                <li>Create new shortcut named <strong>"Quick Add"</strong></li>
-                                <li>Add Action: <strong>Dictate Text</strong></li>
-                                <li>Add Action: <strong>Open URL</strong></li>
-                                <li>Set URL: <code>{origin ? `${origin}/add?text=Dictated Text` : 'https://hisaabwise.anewway.in/add?text=Dictated Text'}</code></li>
-                            </ol>
+                        {/* Setup Card */}
+                        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'hsl(var(--color-primary))' }}>⚙️ How to Setup</h3>
+                                <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'hsl(var(--color-text-main))' }}>
+                                    <li>Open <strong>Shortcuts</strong> app on iOS</li>
+                                    <li>Create new shortcut named <strong>"Quick Add"</strong></li>
+                                    <li>Add Action: <strong>Dictate Text</strong></li>
+                                    <li>Add Action: <strong>URL</strong> (Set to your URL below)</li>
+                                    <li>Add Action: <strong>Open URL</strong></li>
+                                </ol>
+                                <code style={{ display: 'block', marginTop: '1rem', padding: '0.75rem', background: 'rgba(0,0,0,0.05)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', wordBreak: 'break-all' }}>
+                                    {origin ? `${origin}/add?text=Dictated Text` : 'https://hisaabwise.anewway.in/add?text=Dictated Text'}
+                                </code>
+                            </div>
+                            <img
+                                src="/landing/siri-shortcut.png"
+                                alt="iOS Shortcut Setup"
+                                style={{
+                                    width: '100%',
+                                    borderRadius: 'var(--radius-md)',
+                                    border: '1px solid var(--color-border)',
+                                    alignSelf: 'center',
+                                    maxHeight: '400px',
+                                    objectFit: 'contain'
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
@@ -205,18 +239,18 @@ export default function LandingPage() {
                     <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <div style={{ flex: 1, minWidth: '300px', background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
                             <h3 style={{ marginBottom: '1rem' }}>🍎 iOS (Safari)</h3>
-                            <p style={{ color: 'hsl(var(--color-text-muted))' }}>Tap the <strong>Share</strong> button <br /> and select <strong>"Add to Home Screen"</strong></p>
+                            <p style={{ color: 'hsl(var(--color-text-muted))' }}>Tap the <strong>Menu</strong> (...) button <br /> Then on <strong>Share</strong> button <br /> and select <strong>"Add to Home Screen"</strong></p>
                         </div>
                         <div style={{ flex: 1, minWidth: '300px', background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
                             <h3 style={{ marginBottom: '1rem' }}>🤖 Android (Chrome)</h3>
-                            <p style={{ color: 'hsl(var(--color-text-muted))' }}>Tap the <strong>Menu</strong> (⋮) button <br /> and select <strong>"Install App"</strong></p>
+                            <p style={{ color: 'hsl(var(--color-text-muted))' }}>Tap the <strong>Menu</strong> (⋮) button <br /> and select <strong>"Install App"</strong> <br /> or select <strong>"Add to Home Screen"</strong></p>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Additional Features (Mobile First, Secure & Private) - Moved outside PWA section for better structure */}
-            <section className={styles.featuresSection} style={{ paddingTop: '0' }}>
+            <section className={styles.featuresSection} style={{ marginTop: '4rem' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div className={styles.featuresGrid}>
                         <FeatureCard
