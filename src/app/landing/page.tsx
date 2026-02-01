@@ -4,9 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import styles from './landing.module.css';
+import { useTheme } from '@/context/ThemeContext';
+import { Moon, Sun } from 'lucide-react';
 
 export default function LandingPage() {
     const [origin, setOrigin] = React.useState('');
+    const { theme, toggleTheme } = useTheme();
 
     React.useEffect(() => {
         setOrigin(window.location.origin);
@@ -27,6 +30,14 @@ export default function LandingPage() {
                     <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.5px' }}>HISAABWISE</span>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
+                    <Button
+                        variant="ghost"
+                        onClick={toggleTheme}
+                        style={{ padding: '0.5rem' }}
+                        title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                    >
+                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                    </Button>
                     <Link href="/login?mode=signup">
                         <Button variant="ghost">Sign Up</Button>
                     </Link>
