@@ -46,7 +46,8 @@ function LoginForm() {
                 if (res.error) {
                     setError(res.error)
                 } else {
-                    router.push('/')
+                    const callbackUrl = searchParams?.get('callbackUrl');
+                    router.push(callbackUrl || '/');
                 }
             } else {
                 const res = await register(email, password, name, phone)
