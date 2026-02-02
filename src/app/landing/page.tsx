@@ -8,7 +8,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { Moon, Sun } from 'lucide-react';
 
 export default function LandingPage() {
-    const [origin, setOrigin] = React.useState('');
+    const [origin, setOrigin] = React.useState<string | null>(null);
     const { theme, toggleTheme } = useTheme();
 
     React.useEffect(() => {
@@ -71,39 +71,16 @@ export default function LandingPage() {
 
                 {/* Hero Image Mockup Placeholder */}
                 {/* Hero Image Mockup */}
-                <div style={{
-                    marginTop: '3rem',
-                    width: '100%',
-                    maxWidth: '1000px',
-                    position: 'relative',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: '0 20px 50px -10px rgba(0,0,0,0.3)',
-                }}>
+                <div className={styles.heroImageContainer}>
                     {/* Desktop View */}
                     <img
                         src="/landing/desktop-dashboard.png"
                         alt="HisaabWise Dashboard"
-                        style={{
-                            width: '100%',
-                            height: 'auto',
-                            borderRadius: 'var(--radius-lg)',
-                            border: '1px solid var(--color-border)',
-                        }}
+                        className={styles.desktopDashboard}
                     />
 
                     {/* Mobile View - Floating Overlap */}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '-10%',
-                        right: '-5%',
-                        width: '25%',
-                        maxWidth: '280px',
-                        minWidth: '180px',
-                        borderRadius: '3rem',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-                        border: '8px solid var(--color-surface)',
-                        overflow: 'hidden'
-                    }}>
+                    <div className={styles.mobileDashboardWrapper}>
                         <img
                             src="/landing/mobile-dashboard.png"
                             alt="HisaabWise Mobile App"
@@ -167,14 +144,7 @@ export default function LandingPage() {
                         Add expenses hands-free while driving or walking. Just set up a simple Siri Shortcut and speak naturally.
                     </p>
 
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '2rem',
-                        width: '100%',
-                        textAlign: 'left',
-                        alignItems: 'start'
-                    }}>
+                    <div className={styles.siriGrid}>
                         {/* Say It Naturally Card */}
                         <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div>
