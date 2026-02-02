@@ -144,8 +144,8 @@ h3 {
 /* Glassmorphism Panel */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-md);
@@ -222,6 +222,16 @@ h3 {
 
   .hide-on-mobile {
     display: none !important;
+  }
+
+  /* Performance: Reduce heavy effects on mobile */
+  .glass-panel {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: none;
+    /* Reduce shadow overhead */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Simpler border */
   }
 }
 
