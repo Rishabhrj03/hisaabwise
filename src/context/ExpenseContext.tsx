@@ -4,12 +4,14 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Expense, ExpenseContextType, Category } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
+import useSWR from 'swr';
+
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
+
+const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
-    const [expenses, setExpenses] = useState<Expense[]>([]);
-    const [loading, setLoading] = useState(true);
 
     const mapToExpense = (doc: { _id?: string; id?: string; description: string; amount: number; date: string; type: 'income' | 'expense' | 'transfer'; category: string; splitDetails?: { paidBy: string; shares: Array<{ userId: string; amount: number }> }; relatedTo?: string[]; group_id?: string | null }): Expense => {
         return {
@@ -25,61 +27,41 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         };
     };
 
-    const [categories, setCategories] = useState<Category[]>([]);
+    // SWR Hooks
+    const { data: rawExpenses, mutate: mutateExpenses, isLoading: expensesLoading } = useSWR(
+        user ? '/api/expenses' : null,
+        fetcher,
+        { refreshInterval: 10000, revalidateOnFocus: true }
+    );
 
-    useEffect(() => {
-        const fetchExpenses = async () => {
-            if (!user) {
-                setExpenses([]);
-                setCategories([]);
-                setLoading(false);
-                return;
-            }
+    const { data: rawCategories, mutate: mutateCategories, isLoading: categoriesLoading } = useSWR(
+        user ? '/api/categories' : null,
+        fetcher,
+        { refreshInterval: 10000, revalidateOnFocus: true }
+    );
 
-            setLoading(true);
-            try {
-                // Fetch Expenses
-                const res = await fetch('/api/expenses');
-                if (res.ok) {
-                    const data = await res.json();
-                    const mapped = data.map(mapToExpense);
-                    setExpenses(mapped);
-                } else {
-                    console.error("Failed to fetch expenses");
-                }
+    // Derived State
+    const expenses: Expense[] = React.useMemo(() => {
+        if (!rawExpenses) return [];
+        return Array.isArray(rawExpenses) ? rawExpenses.map(mapToExpense) : [];
+    }, [rawExpenses]);
 
-                // Fetch Categories
-                const catRes = await fetch('/api/categories');
-                if (catRes.ok) {
-                    const catData = await catRes.json();
-                    setCategories(catData);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-            setLoading(false);
-        };
+    const categories: Category[] = React.useMemo(() => {
+        if (!rawCategories) return [];
+        return Array.isArray(rawCategories) ? rawCategories : [];
+    }, [rawCategories]);
 
-        fetchExpenses();
-    }, [user]);
+    const loading = expensesLoading || categoriesLoading;
 
     const addExpense = async (data: Omit<Expense, 'id'>) => {
         if (!user) return;
-
         try {
-            const res = await fetch('/api/expenses', {
+            await fetch('/api/expenses', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
-            if (res.ok) {
-                const newDoc = await res.json();
-                const newExpense = mapToExpense(newDoc);
-                setExpenses((prev) => [newExpense, ...prev]);
-            } else {
-                console.error("Failed to add expense");
-            }
+            mutateExpenses(); // Trigger revalidation
         } catch (error) {
             console.error("Error adding expense:", error);
         }
@@ -87,39 +69,23 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
 
     const deleteExpense = async (id: string) => {
         if (!user) return;
-
-        // Optimistic UI
-        const prevExpenses = [...expenses];
-        setExpenses((prev) => prev.filter((exp) => exp.id !== id));
-
+        // Optimistic update could be done here with mutate, but keeping simple for now
         try {
-            const res = await fetch(`/api/expenses/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (!res.ok) {
-                console.error("Failed to delete expense");
-                setExpenses(prevExpenses);
-            }
+            await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+            mutateExpenses();
         } catch (error) {
             console.error("Error deleting expense:", error);
-            setExpenses(prevExpenses);
         }
     };
 
     const updateExpense = async (id: string, data: Omit<Expense, 'id'>) => {
         try {
-            const res = await fetch(`/api/expenses/${id}`, {
+            await fetch(`/api/expenses/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
-            if (res.ok) {
-                const updatedDoc = await res.json();
-                const updatedExpense = mapToExpense(updatedDoc);
-                setExpenses(prev => prev.map(e => e.id === id ? updatedExpense : e));
-            }
+            mutateExpenses();
         } catch (error) {
             console.error("Error updating expense", error);
         }
@@ -134,7 +100,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
             });
             if (res.ok) {
                 const newCat = await res.json();
-                setCategories(prev => [...prev, newCat]);
+                mutateCategories();
                 return newCat;
             }
         } catch (err) {
@@ -151,7 +117,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
             });
             if (res.ok) {
                 const updatedCat = await res.json();
-                setCategories(prev => prev.map(c => c._id === id ? updatedCat : c));
+                mutateCategories();
                 return updatedCat;
             }
         } catch (err) {
@@ -162,9 +128,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     const deleteCategory = async (id: string) => {
         try {
             const res = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                setCategories(prev => prev.filter(c => c._id !== id));
-            }
+            if (res.ok) mutateCategories();
         } catch (err) {
             console.error(err);
         }

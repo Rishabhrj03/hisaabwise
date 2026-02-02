@@ -19,6 +19,31 @@ function LoginForm() {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
+    // Persistence Logic (Issue 1 Fix)
+    useEffect(() => {
+        // Load from storage on mount
+        const storedName = sessionStorage.getItem('signup_name');
+        const storedPhone = sessionStorage.getItem('signup_phone');
+        const storedEmail = sessionStorage.getItem('signup_email');
+
+        if (storedName) setName(storedName);
+        if (storedPhone) setPhone(storedPhone);
+        if (storedEmail) setEmail(storedEmail);
+    }, []);
+
+    useEffect(() => {
+        // Save to storage on change
+        sessionStorage.setItem('signup_name', name);
+        sessionStorage.setItem('signup_phone', phone);
+        sessionStorage.setItem('signup_email', email);
+    }, [name, phone, email]);
+
+    useEffect(() => {
+        // Clear storage on successful cleanup if needed or manually cleared. 
+        // For now, we keep it to persist across navigation.
+        // We could clear it on successful registration in handleSubmit.
+    }, []);
+
     useEffect(() => {
         const phoneParam = searchParams?.get('phone')
         const modeParam = searchParams?.get('mode')
@@ -57,6 +82,10 @@ function LoginForm() {
                     setError(res.error)
                 } else {
                     const callbackUrl = searchParams?.get('callbackUrl');
+                    // Clear persistence on login too if desired, or just leave it.
+                    sessionStorage.removeItem('signup_name');
+                    sessionStorage.removeItem('signup_phone');
+                    sessionStorage.removeItem('signup_email');
                     router.push(callbackUrl || '/');
                 }
             } else {
@@ -64,6 +93,10 @@ function LoginForm() {
                 if (res.error) {
                     setError(res.error)
                 } else {
+                    // Clear persistence on success
+                    sessionStorage.removeItem('signup_name');
+                    sessionStorage.removeItem('signup_phone');
+                    sessionStorage.removeItem('signup_email');
                     router.push('/verification')
                 }
             }

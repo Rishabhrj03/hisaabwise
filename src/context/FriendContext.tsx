@@ -12,12 +12,14 @@ interface FriendContextType {
     loading: boolean;
 }
 
+import useSWR from 'swr';
+
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
+
+const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 export function FriendProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
-    const [friends, setFriends] = useState<Friend[]>([]);
-    const [loading, setLoading] = useState(true);
 
     const mapToFriend = (doc: { _id: string; name: string; phone?: string; linked_user_id?: string; upi_id?: string }): Friend => ({
         id: doc._id,
@@ -27,32 +29,16 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
         upi_id: doc.upi_id
     });
 
-    // Load from API
-    useEffect(() => {
-        if (!user) {
-            setFriends([]);
-            setLoading(false);
-            return;
-        }
+    const { data: rawFriends, mutate, isLoading } = useSWR(
+        user ? '/api/friends' : null,
+        fetcher,
+        { refreshInterval: 10000, revalidateOnFocus: true }
+    );
 
-        const fetchFriends = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch('/api/friends');
-                if (res.ok) {
-                    const data = await res.json();
-                    setFriends(data.map(mapToFriend));
-                } else {
-                    console.error("Error fetching friends");
-                }
-            } catch (error) {
-                console.error("Error fetching friends:", error);
-            }
-            setLoading(false);
-        };
-
-        fetchFriends();
-    }, [user]);
+    const friends = React.useMemo(() => {
+        if (!rawFriends) return [];
+        return Array.isArray(rawFriends) ? rawFriends.map(mapToFriend) : [];
+    }, [rawFriends]);
 
     const addFriend = async (name: string, phone?: string, upi_id?: string) => {
         if (!user) throw new Error("User must be logged in to add friends");
@@ -65,10 +51,9 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
             });
 
             if (res.ok) {
+                mutate(); // Trigger revalidation
                 const newDoc = await res.json();
-                const newFriend = mapToFriend(newDoc);
-                setFriends((prev) => [...prev, newFriend]);
-                return newFriend.id;
+                return newDoc._id; // Return ID based on API response structure
             } else {
                 throw new Error("Failed to add friend");
             }
@@ -80,21 +65,13 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
 
     const updateFriend = async (id: string, updates: Partial<{ name: string; phone: string; upi_id: string }>) => {
         if (!user) return;
-
         try {
             const res = await fetch(`/api/friends/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates),
             });
-
-            if (res.ok) {
-                const updatedDoc = await res.json();
-                const updatedFriend = mapToFriend(updatedDoc);
-                setFriends((prev) => prev.map(f => f.id === id ? updatedFriend : f));
-            } else {
-                console.error("Failed to update friend");
-            }
+            if (res.ok) mutate();
         } catch (error) {
             console.error("Error updating friend:", error);
             throw error;
@@ -103,27 +80,16 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
 
     const deleteFriend = async (id: string) => {
         if (!user) return;
-
-        // Optimistic Update
-        const previousFriends = [...friends];
-        setFriends((prev) => prev.filter((f) => f.id !== id));
-
         try {
-            const res = await fetch(`/api/friends/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (!res.ok) {
-                console.error("Error deleting friend");
-                setFriends(previousFriends);
-            }
+            const res = await fetch(`/api/friends/${id}`, { method: 'DELETE' });
+            if (res.ok) mutate();
         } catch (error) {
             throw error;
         }
     };
 
     return (
-        <FriendContext.Provider value={{ friends, addFriend, updateFriend, deleteFriend, loading }}>
+        <FriendContext.Provider value={{ friends, addFriend, updateFriend, deleteFriend, loading: isLoading }}>
             {children}
         </FriendContext.Provider>
     );

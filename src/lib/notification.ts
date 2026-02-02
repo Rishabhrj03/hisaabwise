@@ -12,6 +12,31 @@ webpush.setVapidDetails(
     VAPID_PRIVATE_KEY
 );
 
+export async function sendNotificationToUser(userId: string, title: string, body: string) {
+    try {
+        const subscriptions = await Subscription.find({ user_id: userId });
+        if (!subscriptions || subscriptions.length === 0) return;
+
+        const payload = JSON.stringify({ title, body });
+
+        const promises = subscriptions.map(sub => {
+            return webpush.sendNotification({
+                endpoint: sub.endpoint,
+                keys: sub.keys
+            }, payload).catch(err => {
+                console.error('Error sending push:', err);
+                if (err.statusCode === 410 || err.statusCode === 404) {
+                    return Subscription.deleteOne({ _id: sub._id });
+                }
+            });
+        });
+
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('Error sending notification to user:', error);
+    }
+}
+
 export async function sendExpenseNotification(expense: any, currentUserId: string) {
     const userIdsToNotify = new Set<string>();
 
@@ -29,8 +54,6 @@ export async function sendExpenseNotification(expense: any, currentUserId: strin
         }
 
         // 2. If Split/Friend Expense -> Notify Related Friends
-        // Note: expense.relatedTo contains Friend IDs, not User IDs.
-        // We need to find the User ID linked to that Friend ID.
         if (expense.relatedTo && expense.relatedTo.length > 0) {
             const friends = await Friend.find({ _id: { $in: expense.relatedTo } });
             friends.forEach(friend => {
@@ -43,36 +66,29 @@ export async function sendExpenseNotification(expense: any, currentUserId: strin
             });
         }
 
-        // Remove current user just in case
         userIdsToNotify.delete(currentUserId);
 
         if (userIdsToNotify.size === 0) return;
 
-        // 3. Find Subscriptions
-        const subscriptions = await Subscription.find({ user_id: { $in: Array.from(userIdsToNotify) } });
-
-        // 4. Send Notifications
-        const payload = JSON.stringify({
-            title: 'New Expense Added',
-            body: `${expense.description} - ${expense.amount}`,
-        });
-
-        const promises = subscriptions.map(sub => {
-            return webpush.sendNotification({
-                endpoint: sub.endpoint,
-                keys: sub.keys
-            }, payload).catch(err => {
-                console.error('Error sending push:', err);
-                // Optional: Delete invalid subscription
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    return Subscription.deleteOne({ _id: sub._id });
-                }
-            });
-        });
+        // Use the generic function for each user
+        const promises = Array.from(userIdsToNotify).map(userId =>
+            sendNotificationToUser(userId, 'New Expense Added', `${expense.description} - ${expense.amount}`)
+        );
 
         await Promise.all(promises);
 
     } catch (error) {
         console.error('Error in sendExpenseNotification:', error);
     }
+}
+
+export async function sendFriendNotification(userId: string, addedByName: string) {
+    await sendNotificationToUser(userId, 'New Friend Connection', `${addedByName} added you as a friend.`);
+}
+
+export async function sendGroupNotification(userIds: string[], groupName: string, addedByName: string) {
+    const promises = userIds.map(id =>
+        sendNotificationToUser(id, 'Added to Group', `${addedByName} added you to group "${groupName}".`)
+    );
+    await Promise.all(promises);
 }

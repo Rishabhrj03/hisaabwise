@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Group from '@/models/Group';
+import User from '@/models/User';
 import { getSessionUser } from '@/lib/auth';
+import { sendGroupNotification } from '@/lib/notification';
 
 export async function GET() {
     try {
@@ -11,7 +13,14 @@ export async function GET() {
         }
 
         await dbConnect();
-        const groups = await Group.find({ created_by: session.userId }).sort({ created_at: -1 });
+        await dbConnect();
+        // Visibility Logic (Issue 4 Fix): Show groups created by user OR where user is a member
+        const groups = await Group.find({
+            $or: [
+                { created_by: session.userId },
+                { members: session.userId }
+            ]
+        }).sort({ created_at: -1 });
 
         return NextResponse.json(groups);
     } catch (error) {
@@ -35,6 +44,16 @@ export async function POST(req: Request) {
             members: memberIds || [],
             created_by: session.userId,
         });
+
+        // Trigger Notification
+        if (memberIds && memberIds.length > 0) {
+            const creator = await User.findById(session.userId);
+            await sendGroupNotification(
+                memberIds,
+                name,
+                creator ? creator.name || "A user" : "A user"
+            );
+        }
 
         return NextResponse.json(group);
     } catch (error) {

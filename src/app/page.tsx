@@ -106,14 +106,27 @@ export default function Home() {
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+  // Helper to get my share of an expense (Issue 3 Fix)
+  const getEffectiveAmount = (expense: Expense) => {
+    if (!expense.splitDetails || !expense.splitDetails.shares || expense.splitDetails.shares.length === 0) {
+      return expense.amount;
+    }
+    // If split exists, find my share
+    const myShare = expense.splitDetails.shares.find(s => s.userId === 'me');
+    return myShare ? myShare.amount : 0; // If I'm not involved (should be filtered out, but safety), 0.
+  };
+
   // Calculate Totals for Filtered View
   const income = filteredExpenses
     .filter(e => e.type === 'income')
-    .reduce((sum, item) => sum + item.amount, 0);
+    .reduce((sum, item) => sum + getEffectiveAmount(item), 0);
 
   const expense = filteredExpenses
     .filter(e => e.type === 'expense')
-    .reduce((sum, item) => sum + item.amount, 0);
+    .reduce((sum, item) => sum + getEffectiveAmount(item), 0);
+
+  // Note: Transfers typically don't affect "Expense" totals in simple views, or they net out.
+  // For now keeping it simple as per original logic which only took 'expense' type.
 
   const balance = income - expense;
 

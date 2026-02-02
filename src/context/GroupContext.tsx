@@ -12,12 +12,14 @@ interface GroupContextType {
     loading: boolean;
 }
 
+import useSWR from 'swr';
+
 const GroupContext = createContext<GroupContextType | undefined>(undefined);
+
+const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 export function GroupProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
-    const [groups, setGroups] = useState<Group[]>([]);
-    const [loading, setLoading] = useState(true);
 
     const mapToGroup = (doc: { _id: string; name: string; created_by: string; created_at: string; members?: string[] }): Group => ({
         id: doc._id,
@@ -27,31 +29,16 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
         members: doc.members || []
     });
 
-    const fetchGroups = async () => {
-        if (!user) {
-            setGroups([]);
-            setLoading(false);
-            return;
-        }
+    const { data: rawGroups, mutate, isLoading } = useSWR(
+        user ? '/api/groups' : null,
+        fetcher,
+        { refreshInterval: 10000, revalidateOnFocus: true }
+    );
 
-        setLoading(true);
-        try {
-            const res = await fetch('/api/groups');
-            if (res.ok) {
-                const data = await res.json();
-                setGroups(data.map(mapToGroup));
-            } else {
-                console.error("Error fetching groups");
-            }
-        } catch (error) {
-            console.error("Error fetching groups:", error);
-        }
-        setLoading(false);
-    };
-
-    useEffect(() => {
-        fetchGroups();
-    }, [user]);
+    const groups = React.useMemo(() => {
+        if (!rawGroups) return [];
+        return Array.isArray(rawGroups) ? rawGroups.map(mapToGroup) : [];
+    }, [rawGroups]);
 
     const addGroup = async (input: GroupInput) => {
         if (!user) throw new Error("User must be logged in");
@@ -64,10 +51,9 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
             });
 
             if (res.ok) {
+                mutate(); // Trigger revalidation
                 const newDoc = await res.json();
-                const newGroup = mapToGroup(newDoc);
-                setGroups(prev => [newGroup, ...prev]);
-                return newGroup.id;
+                return newDoc._id; // Use _id from newDoc
             } else {
                 throw new Error("Failed to add group");
             }
@@ -88,9 +74,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
             });
 
             if (res.ok) {
-                const updatedDoc = await res.json();
-                const updatedGroup = mapToGroup(updatedDoc);
-                setGroups((prev) => prev.map(g => g.id === id ? updatedGroup : g));
+                mutate();
             } else {
                 console.error("Failed to update group");
             }
@@ -102,17 +86,9 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
 
     const deleteGroup = async (id: string) => {
         if (!user) return;
-
         try {
-            const res = await fetch(`/api/groups/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (res.ok) {
-                setGroups(prev => prev.filter(g => g.id !== id));
-            } else {
-                console.error("Error deleting group");
-            }
+            const res = await fetch(`/api/groups/${id}`, { method: 'DELETE' });
+            if (res.ok) mutate();
         } catch (error) {
             console.error("Error deleting group:", error);
             throw error;
@@ -120,7 +96,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <GroupContext.Provider value={{ groups, addGroup, updateGroup, deleteGroup, loading }}>
+        <GroupContext.Provider value={{ groups, addGroup, updateGroup, deleteGroup, loading: isLoading }}>
             {children}
         </GroupContext.Provider>
     );
