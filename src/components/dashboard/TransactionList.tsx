@@ -119,7 +119,7 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                                 size="sm"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onDelete(expense.id); // Replaced by confirm:
+                                    // onDelete(expense.id); // REMOVED: Wait for confirmation
                                     setDeleteId(expense.id);
                                 }}
                                 style={{ color: 'hsl(var(--color-text-muted))', padding: '0.25rem' }}
