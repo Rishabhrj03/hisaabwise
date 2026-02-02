@@ -29,7 +29,7 @@ export default function LandingPage() {
                     <img src="/logo.svg" alt="HisaabWise Logo" style={{ width: '42px', height: '42px' }} />
                     <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.5px' }}>HISAABWISE</span>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className={styles.headerActions}>
                     <Button
                         variant="ghost"
                         onClick={toggleTheme}
@@ -39,13 +39,13 @@ export default function LandingPage() {
                         {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                     </Button>
                     <Link href="/login?mode=signup">
-                        <Button variant="ghost">Sign Up</Button>
+                        <Button variant="ghost" className={`${styles.navBtn}`}>Sign Up</Button>
                     </Link>
                     <Link href="/login">
-                        <Button variant="ghost">Sign In</Button>
+                        <Button variant="ghost" className={`${styles.navBtn} ${styles.mobileHidden}`}>Sign In</Button>
                     </Link>
                     <Link href="/login">
-                        <Button>Get Started</Button>
+                        <Button className={styles.navBtn}>Get Started</Button>
                     </Link>
                 </div>
             </header>
