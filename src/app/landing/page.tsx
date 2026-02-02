@@ -9,6 +9,7 @@ import { Moon, Sun } from 'lucide-react';
 
 export default function LandingPage() {
     const [origin, setOrigin] = React.useState<string | null>(null);
+    const [voicePlatform, setVoicePlatform] = React.useState<'ios' | 'android'>('ios');
     const { theme, toggleTheme } = useTheme();
 
     React.useEffect(() => {
@@ -139,33 +140,72 @@ export default function LandingPage() {
             }}>
                 <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔮</div>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>"Hey Siri, Quick Add..."</h2>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Voice Quick Add</h2>
                     <p style={{ fontSize: '1.2rem', color: 'hsl(var(--color-text-muted))', maxWidth: '700px', marginBottom: '3rem', lineHeight: 1.6 }}>
-                        Add expenses hands-free while driving or walking. Just set up a simple Siri Shortcut and speak naturally.
+                        Add expenses hands-free. Works with <strong>Siri</strong> on iOS and <strong>Google Assistant</strong> on Android.
                     </p>
+
+                    <div style={{ marginBottom: '2rem', display: 'inline-flex', background: 'var(--color-surface)', padding: '0.25rem', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-border)' }}>
+                        <button
+                            onClick={() => setVoicePlatform('ios')}
+                            style={{
+                                padding: '0.5rem 1.5rem',
+                                borderRadius: 'var(--radius-full)',
+                                background: voicePlatform === 'ios' ? 'hsl(var(--color-primary))' : 'transparent',
+                                color: voicePlatform === 'ios' ? '#fff' : 'hsl(var(--color-text-muted))',
+                                border: 'none',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            🍎 iOS (Siri)
+                        </button>
+                        <button
+                            onClick={() => setVoicePlatform('android')}
+                            style={{
+                                padding: '0.5rem 1.5rem',
+                                borderRadius: 'var(--radius-full)',
+                                background: voicePlatform === 'android' ? 'hsl(var(--color-primary))' : 'transparent',
+                                color: voicePlatform === 'android' ? '#fff' : 'hsl(var(--color-text-muted))',
+                                border: 'none',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            🤖 Android
+                        </button>
+                    </div>
 
                     <div className={styles.siriGrid}>
                         {/* Say It Naturally Card */}
                         <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'hsl(var(--color-primary))' }}>🗣️ Say It Naturally</h3>
-                                <p style={{ color: 'hsl(var(--color-text-muted))', marginBottom: '1rem' }}>Siri understands natural language. Try saying:</p>
+                                <p style={{ color: 'hsl(var(--color-text-muted))', marginBottom: '1rem' }}>
+                                    {voicePlatform === 'ios' ? 'Siri understands natural language. Try saying:' : 'Use Google Assistant or Voice Typing:'}
+                                </p>
                                 <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Hey Siri, Quick Add, Spent 500 on clothes"</li>
-                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Hey Siri, Quick Add, Paid 200 for lunch"</li>
-                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>"Hey Siri, Quick Add, Received 15000 salary"</li>
+                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>
+                                        {voicePlatform === 'ios' ? '"Hey Siri, Quick Add, Spent 500 on clothes"' : '"Hey Google, Open Quick Add"'}
+                                    </li>
+                                    <li style={{ background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', fontSize: '0.95rem' }}>
+                                        {voicePlatform === 'ios' ? '"Hey Siri, Quick Add, Paid 200 for lunch"' : 'Then tap Mic: "Paid 200 for lunch"'}
+                                    </li>
                                 </ul>
                             </div>
                             <img
                                 src="/landing/siri-example.png"
-                                alt="Siri Voice Command Example"
+                                alt="Voice Command Example"
                                 style={{
                                     width: '100%',
                                     borderRadius: 'var(--radius-md)',
                                     border: '1px solid var(--color-border)',
                                     alignSelf: 'center',
                                     maxHeight: '400px',
-                                    objectFit: 'contain'
+                                    objectFit: 'contain',
+                                    opacity: voicePlatform === 'ios' ? 1 : 0.5 // Dim image for Android as we don't have a specific Android screenshot yet
                                 }}
                             />
                         </div>
@@ -174,27 +214,38 @@ export default function LandingPage() {
                         <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'hsl(var(--color-primary))' }}>⚙️ How to Setup</h3>
-                                <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'hsl(var(--color-text-main))' }}>
-                                    <li>Open <strong>Shortcuts</strong> app on iOS</li>
-                                    <li>Create new shortcut named <strong>"Quick Add"</strong></li>
-                                    <li>Add Action: <strong>Dictate Text</strong></li>
-                                    <li>Add Action: <strong>URL</strong> (Set to your URL below)</li>
-                                    <li>Add Action: <strong>Open URL</strong></li>
-                                </ol>
+                                {voicePlatform === 'ios' ? (
+                                    <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'hsl(var(--color-text-main))' }}>
+                                        <li>Open <strong>Shortcuts</strong> app on iOS</li>
+                                        <li>Create new shortcut named <strong>"Quick Add"</strong></li>
+                                        <li>Add Action: <strong>Dictate Text</strong></li>
+                                        <li>Add Action: <strong>URL</strong> (Set to your URL below)</li>
+                                        <li>Add Action: <strong>Open URL</strong></li>
+                                    </ol>
+                                ) : (
+                                    <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'hsl(var(--color-text-main))' }}>
+                                        <li>Open this page in <strong>Chrome</strong></li>
+                                        <li>Tap Menu (⋮) &gt; <strong>Add to Home Screen</strong></li>
+                                        <li>Tap the new <strong>Quick Add</strong> icon on your launcher</li>
+                                        <li>Tap the Microphone button to speak!</li>
+                                    </ol>
+                                )}
+
                                 <code style={{ display: 'block', marginTop: '1rem', padding: '0.75rem', background: 'rgba(0,0,0,0.05)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', wordBreak: 'break-all' }}>
-                                    {origin ? `${origin}/add?text=Dictated Text` : 'https://hisaabwise.anewway.in/add?text=Dictated Text'}
+                                    {origin ? `${origin}/add?text=${voicePlatform === 'ios' ? 'Dictated Text' : '...'}` : 'https://hisaabwise.anewway.in/add'}
                                 </code>
                             </div>
                             <img
                                 src="/landing/siri-shortcut.png"
-                                alt="iOS Shortcut Setup"
+                                alt="Setup Guide"
                                 style={{
                                     width: '100%',
                                     borderRadius: 'var(--radius-md)',
                                     border: '1px solid var(--color-border)',
                                     alignSelf: 'center',
                                     maxHeight: '400px',
-                                    objectFit: 'contain'
+                                    objectFit: 'contain',
+                                    opacity: voicePlatform === 'ios' ? 1 : 0.5
                                 }}
                             />
                         </div>
