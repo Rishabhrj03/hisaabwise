@@ -63,7 +63,13 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose,
         return () => {
             clearTimeout(timeoutId);
             if (scannerRef.current) {
-                scannerRef.current.stop().catch(console.error);
+                // Determine if scanner is running is hard synchronously, so we just catch the specific error
+                scannerRef.current.stop().catch(err => {
+                    // Ignore "not running" errors as they are expected during cleanup of failed starts
+                    if (!err.toString().includes('not running')) {
+                        console.error("Error stopping scanner during cleanup", err);
+                    }
+                });
             }
         };
     }, [isOpen, onClose, onScanSuccess]);
@@ -106,12 +112,14 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose,
 
                 <Button variant="secondary" onClick={() => {
                     if (scannerRef.current) {
-                        try {
-                            scannerRef.current.stop().then(() => {
-                                scannerRef.current = null;
-                                onClose();
-                            });
-                        } catch (e) { onClose(); }
+                        scannerRef.current.stop().then(() => {
+                            scannerRef.current = null;
+                            onClose();
+                        }).catch(() => {
+                            // If stop fails (not running), just close
+                            scannerRef.current = null;
+                            onClose();
+                        });
                     } else {
                         onClose();
                     }
