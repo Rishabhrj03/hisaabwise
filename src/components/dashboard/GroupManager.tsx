@@ -126,28 +126,68 @@ export function GroupManager() {
                     </div>
 
                     <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))' }}>Add Members</label>
+                        <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))' }}>
+                            Group Members ({Array.from(selectedFriendIds).length})
+                        </label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                            {friends.filter(f => selectedFriendIds.has(f.id)).length === 0 && (
+                                <p style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))', fontStyle: 'italic' }}>No members added yet.</p>
+                            )}
+                            {friends.filter(f => selectedFriendIds.has(f.id)).map(friend => (
+                                <div
+                                    key={friend.id}
+                                    onClick={() => toggleFriend(friend.id)}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        background: 'hsl(var(--color-primary) / 0.1)',
+                                        border: '1px solid hsl(var(--color-primary) / 0.2)',
+                                        borderRadius: '999px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500,
+                                        color: 'hsl(var(--color-primary))',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    {friend.name}
+                                    <span style={{ fontSize: '1rem', lineHeight: 1 }}>×</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))' }}>
+                            Add People
+                        </label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '0.75rem' }}>
-                            {friends.map(friend => (
+                            {friends.filter(f => !selectedFriendIds.has(f.id)).map(friend => (
                                 <div
                                     key={friend.id}
                                     onClick={() => toggleFriend(friend.id)}
                                     style={{
                                         padding: '0.6rem 0.75rem',
-                                        border: `1px solid ${selectedFriendIds.has(friend.id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-border))'}`,
+                                        border: '1px solid hsl(var(--color-border))',
                                         borderRadius: 'var(--radius-md)',
                                         cursor: 'pointer',
-                                        background: selectedFriendIds.has(friend.id) ? 'hsl(var(--color-primary) / 0.1)' : 'hsl(var(--color-background))',
+                                        background: 'hsl(var(--color-surface))',
                                         fontSize: '0.875rem',
-                                        fontWeight: selectedFriendIds.has(friend.id) ? 500 : 400,
-                                        color: selectedFriendIds.has(friend.id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-text-main))',
+                                        color: 'hsl(var(--color-text-main))',
                                         transition: 'all 0.2s ease',
-                                        textAlign: 'center'
+                                        textAlign: 'center',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.25rem'
                                     }}
                                 >
-                                    {friend.name}
+                                    <span style={{ color: 'hsl(var(--color-primary))', fontWeight: 600 }}>+</span> {friend.name}
                                 </div>
                             ))}
+                            {friends.filter(f => !selectedFriendIds.has(f.id)).length === 0 && (
+                                <p style={{ gridColumn: '1 / -1', fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))', textAlign: 'center', padding: '1rem' }}>All friends added.</p>
+                            )}
                         </div>
                     </div>
 
@@ -192,9 +232,12 @@ export function GroupManager() {
                                 </div>
                                 <div>
                                     <span style={{ fontWeight: 600, display: 'block', fontSize: '1rem' }}>{group.name}</span>
-                                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                        {group.members.length} members
-                                    </span>
+                                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>
+                                        <span style={{ marginRight: '0.5rem' }}>{group.members.length} members</span>
+                                        <span style={{ opacity: 0.8 }}>
+                                            • {group.members.map(mid => friends.find(f => f.id === mid)?.name).filter(Boolean).join(', ') || 'No members'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
