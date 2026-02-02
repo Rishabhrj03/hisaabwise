@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Input } from '@/components/ui/Input';
 import { PhoneUpdateModal } from './PhoneUpdateModal';
 import { AlertModal } from '@/components/ui/AlertModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 import { Friend } from '@/types';
 
@@ -19,6 +20,7 @@ export function FriendManager() {
 
     const [showPhoneModal, setShowPhoneModal] = useState(false);
     const [alertConfig, setAlertConfig] = useState<{ show: boolean, message: string }>({ show: false, message: '' });
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
     const { user } = useAuth();
 
     const handleAdd = async (e: React.FormEvent) => {
@@ -189,7 +191,7 @@ export function FriendManager() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => deleteFriend(friend.id)}
+                                    onClick={() => setDeleteConfirmation({ id: friend.id, name: friend.name })}
                                     style={{ color: 'hsl(var(--color-expense))', padding: '0.25rem' }}
                                     tooltip="Remove friend"
                                 >
@@ -213,6 +215,17 @@ export function FriendManager() {
                 onClose={() => setAlertConfig(prev => ({ ...prev, show: false }))}
                 message={alertConfig.message}
                 title="Invalid Phone Number"
+            />
+            <ConfirmModal
+                isOpen={!!deleteConfirmation.id}
+                onClose={() => setDeleteConfirmation({ id: null, name: '' })}
+                onConfirm={() => {
+                    if (deleteConfirmation.id) deleteFriend(deleteConfirmation.id);
+                }}
+                title="Delete Friend?"
+                message={`Are you sure you want to remove "${deleteConfirmation.name}"? This will limit your ability to split expenses with them.`}
+                confirmText="Remove"
+                variant="danger"
             />
         </Card>
     );

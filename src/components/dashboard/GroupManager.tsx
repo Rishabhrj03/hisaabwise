@@ -7,6 +7,7 @@ import { useGroups } from '@/context/GroupContext';
 import { useFriends } from '@/context/FriendContext';
 import { Group } from '@/types';
 import { AlertModal } from '@/components/ui/AlertModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export function GroupManager() {
     const { groups, addGroup, updateGroup, deleteGroup } = useGroups();
@@ -18,6 +19,7 @@ export function GroupManager() {
     const [selectedFriendIds, setSelectedFriendIds] = useState<Set<string>>(new Set());
     const [editingId, setEditingId] = useState<string | null>(null);
     const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -262,7 +264,7 @@ export function GroupManager() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => deleteGroup(group.id)}
+                                    onClick={() => setDeleteConfirmation({ id: group.id, name: group.name })}
                                     title="Delete"
                                     style={{ width: '36px', height: '36px', padding: 0, borderRadius: '50%', color: 'hsl(var(--color-danger))' }}
                                 >
@@ -278,6 +280,17 @@ export function GroupManager() {
                 onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
                 title={alertConfig.title}
                 message={alertConfig.message}
+            />
+            <ConfirmModal
+                isOpen={!!deleteConfirmation.id}
+                onClose={() => setDeleteConfirmation({ id: null, name: '' })}
+                onConfirm={() => {
+                    if (deleteConfirmation.id) deleteGroup(deleteConfirmation.id);
+                }}
+                title="Delete Group?"
+                message={`Are you sure you want to delete "${deleteConfirmation.name}"? This action cannot be undone.`}
+                confirmText="Delete"
+                variant="danger"
             />
         </Card >
     );

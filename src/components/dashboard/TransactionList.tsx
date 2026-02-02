@@ -5,6 +5,7 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { Expense } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface TransactionListProps {
     expenses: Expense[];
@@ -14,6 +15,7 @@ interface TransactionListProps {
 }
 
 export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }: TransactionListProps) {
+    const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const { friends } = useFriends();
     const { categories } = useExpenses();
     const formatDate = (dateStr: string) => {
@@ -117,7 +119,8 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                                 size="sm"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onDelete(expense.id);
+                                    onDelete(expense.id); // Replaced by confirm:
+                                    setDeleteId(expense.id);
                                 }}
                                 style={{ color: 'hsl(var(--color-text-muted))', padding: '0.25rem' }}
                             >
@@ -127,6 +130,18 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                     </div>
                 </Card>
             ))}
-        </div>
+
+            <ConfirmModal
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={() => {
+                    if (deleteId) onDelete(deleteId);
+                }}
+                title="Delete Transaction?"
+                message="Are you sure you want to delete this transaction? This cannot be undone."
+                confirmText="Delete"
+                variant="danger"
+            />
+        </div >
     );
 }
