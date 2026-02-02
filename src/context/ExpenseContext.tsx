@@ -68,11 +68,20 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     };
 
     const deleteExpense = async (id: string) => {
-        if (!user) return;
+        console.log("Deleting expense:", id);
+        if (!user) {
+            console.warn("User not authenticated");
+            return;
+        }
         // Optimistic update could be done here with mutate, but keeping simple for now
         try {
-            await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
-            mutateExpenses();
+            const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+            console.log("Delete response status:", res.status);
+            if (res.ok) {
+                mutateExpenses();
+            } else {
+                console.error("Failed to delete expense");
+            }
         } catch (error) {
             console.error("Error deleting expense:", error);
         }

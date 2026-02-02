@@ -133,9 +133,17 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
 
             <ConfirmModal
                 isOpen={!!deleteId}
-                onClose={() => setDeleteId(null)}
+                onClose={() => {
+                    console.log("Modal closing");
+                    setDeleteId(null);
+                }}
                 onConfirm={() => {
-                    if (deleteId) onDelete(deleteId);
+                    console.log("Confirm clicked, deleteId:", deleteId);
+                    if (deleteId) {
+                        onDelete(deleteId);
+                    } else {
+                        console.error("deleteId is null!");
+                    }
                 }}
                 title="Delete Transaction?"
                 message="Are you sure you want to delete this transaction? This cannot be undone."
