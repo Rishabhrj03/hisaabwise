@@ -310,24 +310,32 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             </div>
 
             {/* Group Selection */}
-            {type === 'expense' && groups.length > 0 && (
+            {type === 'expense' && (
                 <div style={{ marginBottom: '0.5rem' }}>
-                    <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.5rem' }}>
-                        Group (Optional)
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))' }}>
+                            Group (Optional)
+                        </label>
+                        {/* Placeholder for future Group Management Modal */}
+                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>
+                            {groups.length === 0 ? "Add groups on dashboard" : ""}
+                        </span>
+                    </div>
                     <select
                         value={selectedGroupId}
                         onChange={(e) => handleGroupChange(e.target.value)}
+                        disabled={groups.length === 0}
                         style={{
                             width: '100%',
                             padding: '0.5rem',
                             borderRadius: 'var(--radius-sm)',
                             border: '1px solid hsl(var(--color-border))',
                             background: 'hsl(var(--color-background))',
-                            color: 'hsl(var(--color-text-main))'
+                            color: 'hsl(var(--color-text-main))',
+                            opacity: groups.length === 0 ? 0.7 : 1
                         }}
                     >
-                        <option value="">No Group</option>
+                        <option value="">{groups.length === 0 ? "No groups available" : "No Group"}</option>
                         {groups.map(g => (
                             <option key={g.id} value={g.id}>{g.name}</option>
                         ))}
@@ -335,197 +343,205 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                 </div>
             )}
 
-            {type === 'expense' && friends.length > 0 && (
+            {type === 'expense' && (
                 <Card variant="glass" style={{ padding: '1.25rem', border: '1px solid hsl(var(--color-border))', borderRadius: 'var(--radius-lg)' }}>
-
-                    {/* Paid By Section */}
-                    <div style={{ marginBottom: '1.25rem' }}>
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.75rem' }}>
-                            Paid By
-                        </label>
-                        <select
-                            value={paidBy}
-                            onChange={(e) => {
-                                const newPayer = e.target.value;
-                                setPaidBy(newPayer);
-                                if (!splitWith.includes(newPayer)) {
-                                    setSplitWith(prev => [...prev, newPayer]);
-                                }
-                            }}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem 1rem',
-                                borderRadius: 'var(--radius-md)',
-                                border: '1px solid hsl(var(--color-border))',
-                                background: 'hsl(var(--color-surface))',
-                                color: 'hsl(var(--color-text-main))',
-                                fontSize: '0.95rem',
-                                outline: 'none',
-                                appearance: 'none',
-                                backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M287%2069.4L146.2%20210.2c-5.3%205.3-13.8%205.3-19.1%200L11.5%2069.4c-5.3-5.3-5.3-13.8%200-19.1l8.5-8.5c5.3-5.3%2013.8-5.3%2019.1%200L136%20136l96-94.2c5.3-5.3%2013.8-5.3%2019.1%200l8.5%208.5c5.3%205.3%205.3%2013.8%200%2019.1z%22%2F%3E%3C%2Fsvg%3E")`,
-                                backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'right 1rem top 50%',
-                                backgroundSize: '0.65rem auto',
-                            }}
-                        >
-                            <option value="me">You</option>
-                            {friends
-                                .filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id)))
-                                .map(f => (
-                                    <option key={f.id} value={f.id}>{f.name}</option>
-                                ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.75rem' }}>
-                            Split Method
-                        </label>
-                        <div style={{ display: 'flex', background: 'hsl(var(--color-surface))', padding: '0.25rem', borderRadius: 'var(--radius-lg)', marginBottom: '1.5rem', border: '1px solid hsl(var(--color-border))' }}>
-                            {(['equal', 'amount', 'percentage'] as const).map(m => (
-                                <button
-                                    key={m}
-                                    type="button"
-                                    onClick={() => handleSplitMethodChange(m)}
+                    {friends.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '1rem', color: 'hsl(var(--color-text-muted))' }}>
+                            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Add friends to split expenses!</p>
+                            <p style={{ fontSize: '0.8rem' }}>Go to dashboard to add friends.</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Paid By Section */}
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.75rem' }}>
+                                    Paid By
+                                </label>
+                                <select
+                                    value={paidBy}
+                                    onChange={(e) => {
+                                        const newPayer = e.target.value;
+                                        setPaidBy(newPayer);
+                                        if (!splitWith.includes(newPayer)) {
+                                            setSplitWith(prev => [...prev, newPayer]);
+                                        }
+                                    }}
                                     style={{
-                                        flex: 1,
-                                        padding: '0.5rem',
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
                                         borderRadius: 'var(--radius-md)',
-                                        background: splitMethod === m ? 'hsl(var(--color-primary))' : 'transparent',
-                                        color: splitMethod === m ? '#fff' : 'hsl(var(--color-text-muted))',
-                                        border: 'none',
-                                        fontSize: '0.875rem',
-                                        fontWeight: 500,
-                                        textTransform: 'capitalize',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        boxShadow: splitMethod === m ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
+                                        border: '1px solid hsl(var(--color-border))',
+                                        background: 'hsl(var(--color-surface))',
+                                        color: 'hsl(var(--color-text-main))',
+                                        fontSize: '0.95rem',
+                                        outline: 'none',
+                                        appearance: 'none',
+                                        backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M287%2069.4L146.2%20210.2c-5.3%205.3-13.8%205.3-19.1%200L11.5%2069.4c-5.3-5.3-5.3-13.8%200-19.1l8.5-8.5c5.3-5.3%2013.8-5.3%2019.1%200L136%20136l96-94.2c5.3-5.3%2013.8-5.3%2019.1%200l8.5%208.5c5.3%205.3%205.3%2013.8%200%2019.1z%22%2F%3E%3C%2Fsvg%3E")`,
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'right 1rem top 50%',
+                                        backgroundSize: '0.65rem auto',
                                     }}
                                 >
-                                    {m}
-                                </button>
-                            ))}
-                        </div>
-
-                        {splitMethod === 'equal' ? (
-                            <>
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: 'hsl(var(--color-text-main))' }}>
-                                        <div style={{
-                                            width: '1.25rem',
-                                            height: '1.25rem',
-                                            borderRadius: '4px',
-                                            border: '2px solid hsl(var(--color-primary))',
-                                            background: splitWith.includes(paidBy) ? 'hsl(var(--color-primary))' : 'transparent',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            transition: 'background 0.2s'
-                                        }}>
-                                            {splitWith.includes(paidBy) && <span style={{ color: '#fff', fontSize: '0.75rem' }}>✓</span>}
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={splitWith.includes(paidBy)}
-                                            onChange={() => toggleSplitWith(paidBy)}
-                                            style={{ display: 'none' }}
-                                        />
-                                        Include {paidBy === 'me' ? 'You' : friends.find(f => f.id === paidBy)?.name} in split
-                                    </label>
-                                </div>
-
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                                    {paidBy !== 'me' && (
-                                        <button
-                                            type="button"
-                                            onClick={() => toggleSplitWith('me')}
-                                            style={{
-                                                padding: '0.5rem 1rem',
-                                                borderRadius: '999px',
-                                                fontSize: '0.875rem',
-                                                fontWeight: 500,
-                                                background: splitWith.includes('me') ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
-                                                color: splitWith.includes('me') ? '#fff' : 'hsl(var(--color-text-main))',
-                                                border: splitWith.includes('me') ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s ease'
-                                            }}
-                                        >
-                                            You {splitWith.includes('me') ? '✓' : '+'}
-                                        </button>
-                                    )}
-
+                                    <option value="me">You</option>
                                     {friends
-                                        .filter(f => f.id !== paidBy)
                                         .filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id)))
                                         .map(f => (
-                                            <button
-                                                key={f.id}
-                                                type="button"
-                                                onClick={() => toggleSplitWith(f.id)}
-                                                style={{
-                                                    padding: '0.5rem 1rem',
-                                                    borderRadius: '999px',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: 500,
-                                                    background: splitWith.includes(f.id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
-                                                    color: splitWith.includes(f.id) ? '#fff' : 'hsl(var(--color-text-main))',
-                                                    border: splitWith.includes(f.id) ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.2s ease'
-                                                }}
-                                            >
-                                                {f.name} {splitWith.includes(f.id) ? '✓' : '+'}
-                                            </button>
+                                            <option key={f.id} value={f.id}>{f.name}</option>
                                         ))}
-                                </div>
-                            </>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--color-text-muted))', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    <span>User</span>
-                                    <span>{splitMethod === 'amount' ? 'Amount' : 'Percent (%)'}</span>
-                                </div>
-
-                                {['me', ...friends.filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id))).map(f => f.id)].map(id => {
-                                    const name = id === 'me' ? 'You' : friends.find(f => f.id === id)?.name;
-
-                                    return (
-                                        <div key={id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            <span style={{ fontSize: '1rem', fontWeight: 500 }}>{name}</span>
-                                            <div style={{ position: 'relative' }}>
-                                                <input
-                                                    type="number"
-                                                    placeholder="0"
-                                                    value={customAmounts[id] || ''}
-                                                    onChange={(e) => {
-                                                        handleCustomAmountChange(id, e.target.value);
-                                                        if (parseFloat(e.target.value) > 0 && !splitWith.includes(id)) {
-                                                            setSplitWith(prev => [...prev, id]);
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        width: '120px',
-                                                        padding: '0.5rem 1rem',
-                                                        borderRadius: 'var(--radius-md)',
-                                                        background: 'hsl(var(--color-surface))',
-                                                        border: '1px solid hsl(var(--color-border))',
-                                                        color: 'hsl(var(--color-text-main))',
-                                                        fontSize: '1rem',
-                                                        textAlign: 'right',
-                                                        outline: 'none',
-                                                        transition: 'border-color 0.2s'
-                                                    }}
-                                                    onFocus={(e) => e.target.style.borderColor = 'hsl(var(--color-primary))'}
-                                                    onBlur={(e) => e.target.style.borderColor = 'hsl(var(--color-border))'}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                </select>
                             </div>
-                        )}
-                    </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'hsl(var(--color-text-muted))', display: 'block', marginBottom: '0.75rem' }}>
+                                    Split Method
+                                </label>
+                                <div style={{ display: 'flex', background: 'hsl(var(--color-surface))', padding: '0.25rem', borderRadius: 'var(--radius-lg)', marginBottom: '1.5rem', border: '1px solid hsl(var(--color-border))' }}>
+                                    {(['equal', 'amount', 'percentage'] as const).map(m => (
+                                        <button
+                                            key={m}
+                                            type="button"
+                                            onClick={() => handleSplitMethodChange(m)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '0.5rem',
+                                                borderRadius: 'var(--radius-md)',
+                                                background: splitMethod === m ? 'hsl(var(--color-primary))' : 'transparent',
+                                                color: splitMethod === m ? '#fff' : 'hsl(var(--color-text-muted))',
+                                                border: 'none',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500,
+                                                textTransform: 'capitalize',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease',
+                                                boxShadow: splitMethod === m ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
+                                            }}
+                                        >
+                                            {m}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {splitMethod === 'equal' ? (
+                                    <>
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: 'hsl(var(--color-text-main))' }}>
+                                                <div style={{
+                                                    width: '1.25rem',
+                                                    height: '1.25rem',
+                                                    borderRadius: '4px',
+                                                    border: '2px solid hsl(var(--color-primary))',
+                                                    background: splitWith.includes(paidBy) ? 'hsl(var(--color-primary))' : 'transparent',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transition: 'background 0.2s'
+                                                }}>
+                                                    {splitWith.includes(paidBy) && <span style={{ color: '#fff', fontSize: '0.75rem' }}>✓</span>}
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={splitWith.includes(paidBy)}
+                                                    onChange={() => toggleSplitWith(paidBy)}
+                                                    style={{ display: 'none' }}
+                                                />
+                                                Include {paidBy === 'me' ? 'You' : friends.find(f => f.id === paidBy)?.name} in split
+                                            </label>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                                            {paidBy !== 'me' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleSplitWith('me')}
+                                                    style={{
+                                                        padding: '0.5rem 1rem',
+                                                        borderRadius: '999px',
+                                                        fontSize: '0.875rem',
+                                                        fontWeight: 500,
+                                                        background: splitWith.includes('me') ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
+                                                        color: splitWith.includes('me') ? '#fff' : 'hsl(var(--color-text-main))',
+                                                        border: splitWith.includes('me') ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                >
+                                                    You {splitWith.includes('me') ? '✓' : '+'}
+                                                </button>
+                                            )}
+
+                                            {friends
+                                                .filter(f => f.id !== paidBy)
+                                                .filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id)))
+                                                .map(f => (
+                                                    <button
+                                                        key={f.id}
+                                                        type="button"
+                                                        onClick={() => toggleSplitWith(f.id)}
+                                                        style={{
+                                                            padding: '0.5rem 1rem',
+                                                            borderRadius: '999px',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: 500,
+                                                            background: splitWith.includes(f.id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
+                                                            color: splitWith.includes(f.id) ? '#fff' : 'hsl(var(--color-text-main))',
+                                                            border: splitWith.includes(f.id) ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
+                                                    >
+                                                        {f.name} {splitWith.includes(f.id) ? '✓' : '+'}
+                                                    </button>
+                                                ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--color-text-muted))', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                            <span>User</span>
+                                            <span>{splitMethod === 'amount' ? 'Amount' : 'Percent (%)'}</span>
+                                        </div>
+
+                                        {['me', ...friends.filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id))).map(f => f.id)].map(id => {
+                                            const name = id === 'me' ? 'You' : friends.find(f => f.id === id)?.name;
+
+                                            return (
+                                                <div key={id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                    <span style={{ fontSize: '1rem', fontWeight: 500 }}>{name}</span>
+                                                    <div style={{ position: 'relative' }}>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="0"
+                                                            value={customAmounts[id] || ''}
+                                                            onChange={(e) => {
+                                                                handleCustomAmountChange(id, e.target.value);
+                                                                if (parseFloat(e.target.value) > 0 && !splitWith.includes(id)) {
+                                                                    setSplitWith(prev => [...prev, id]);
+                                                                }
+                                                            }}
+                                                            style={{
+                                                                width: '120px',
+                                                                padding: '0.5rem 1rem',
+                                                                borderRadius: 'var(--radius-md)',
+                                                                background: 'hsl(var(--color-surface))',
+                                                                border: '1px solid hsl(var(--color-border))',
+                                                                color: 'hsl(var(--color-text-main))',
+                                                                fontSize: '1rem',
+                                                                textAlign: 'right',
+                                                                outline: 'none',
+                                                                transition: 'border-color 0.2s'
+                                                            }}
+                                                            onFocus={(e) => e.target.style.borderColor = 'hsl(var(--color-primary))'}
+                                                            onBlur={(e) => e.target.style.borderColor = 'hsl(var(--color-border))'}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </Card>
             )}
 
