@@ -18,7 +18,7 @@ type AuthContextType = {
     user: User | null
     loading: boolean
     login: (email: string, password: string) => Promise<{ error?: string }>
-    register: (email: string, password: string, name?: string, phone?: string) => Promise<{ error?: string }>
+    register: (email: string, password: string, name?: string, phone?: string, termsAccepted?: boolean) => Promise<{ error?: string }>
     logout: () => Promise<void>
     updateProfile: (phone: string) => Promise<{ error?: string }>
 }

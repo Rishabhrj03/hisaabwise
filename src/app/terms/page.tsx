@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 
 function TermsContent() {
     const searchParams = useSearchParams();
-    const fromSignup = searchParams.get('from') === 'signup';
+    const fromSignup = searchParams?.get('from') === 'signup';
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
