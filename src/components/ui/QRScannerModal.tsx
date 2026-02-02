@@ -51,10 +51,14 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose,
                 }
             ).catch(err => {
                 console.error("Error starting scanner", err);
-                setError("Camera access needed or not supported.");
+                if (err?.name === 'NotAllowedError' || err?.message?.includes('Permission')) {
+                    setError("Camera permission denied. Please enable camera access in your browser settings.");
+                } else {
+                    setError("Camera access needed. Please ensure your device has a camera and permissions are granted.");
+                }
             });
 
-        }, 100);
+        }, 300); // Increased delay slightly for stability
 
         return () => {
             clearTimeout(timeoutId);
