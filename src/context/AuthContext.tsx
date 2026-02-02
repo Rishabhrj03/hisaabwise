@@ -79,12 +79,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    const register = async (email: string, password: string, name?: string, phone?: string) => {
+    const register = async (email: string, password: string, name?: string, phone?: string, termsAccepted?: boolean) => {
         try {
             const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, name, phone }),
+                body: JSON.stringify({ email, password, name, phone, termsAccepted }),
             });
             const data = await res.json();
             if (!res.ok) {

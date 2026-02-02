@@ -12,11 +12,18 @@ import { sendEmail } from '@/lib/sendEmail';
 export async function POST(req: Request) {
     try {
         await dbConnect();
-        const { email, password, name, phone } = await req.json();
+        const { email, password, name, phone, termsAccepted } = await req.json();
 
         if (!email || !password) {
             return NextResponse.json(
                 { error: 'Email and password are required' },
+                { status: 400 }
+            );
+        }
+
+        if (termsAccepted !== true) {
+            return NextResponse.json(
+                { error: 'You must agree to the Terms & Conditions' },
                 { status: 400 }
             );
         }
@@ -45,6 +52,8 @@ export async function POST(req: Request) {
             emailVerificationExpire: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
             isPhoneVerified: false, // Default false until WhatsApp verification
             phoneVerificationCode: phoneCode,
+            termsAccepted: true,
+            termsAcceptedAt: new Date()
         });
 
         // Link pending friends

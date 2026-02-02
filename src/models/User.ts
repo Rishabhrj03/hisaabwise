@@ -31,6 +31,10 @@ export interface IUser extends Document {
 
     resetPasswordToken?: string;
     resetPasswordExpire?: Date;
+
+    // Terms
+    termsAccepted: boolean;
+    termsAcceptedAt?: Date;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -97,6 +101,16 @@ const UserSchema: Schema<IUser> = new Schema(
 
         resetPasswordToken: String,
         resetPasswordExpire: Date,
+
+        // Terms
+        termsAccepted: {
+            type: Boolean,
+            required: [true, 'You must agree to the Terms & Conditions'],
+            default: false
+        },
+        termsAcceptedAt: {
+            type: Date
+        }
     },
     {
         timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },

@@ -130,8 +130,48 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Siri Integration Section */}
-            {/* Siri Integration Section */}
+            {/* Why HisaabWise Section */}
+            <section style={{ padding: '6rem 2rem' }}>
+                <div className={styles.container} style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Why HisaabWise?</h2>
+                        <p style={{ fontSize: '1.2rem', color: 'hsl(var(--color-text-muted))', maxWidth: '700px', margin: '0 auto' }}>
+                            A professional financial organizer that puts privacy first. No bank connections, no data mining—just pure, manual control over your wealth.
+                        </p>
+                    </div>
+
+                    <div className={styles.featuresGrid}>
+                        {/* Privacy Card */}
+                        <div className={styles.featureCard}>
+                            <span className={styles.cardIcon}>🛡️</span>
+                            <h3 className={styles.cardTitle}>No Bank Linking Needed</h3>
+                            <p className={styles.cardText}>
+                                Unlike payment apps (CRED, GPay), we <strong>never</strong> ask for your bank passwords. We use your email and phone to provide <strong>AI insights</strong> and updates, keeping your banking credentials strictly with you.
+                            </p>
+                        </div>
+
+                        {/* All-in-One Card */}
+                        <div className={styles.featureCard}>
+                            <span className={styles.cardIcon}>💎</span>
+                            <h3 className={styles.cardTitle}>All-In-One Suite</h3>
+                            <p className={styles.cardText}>
+                                Why use 5 apps? Track <strong>Budgets & Goals</strong>, Manage <strong>SIPs</strong>, use <strong>Finance Calculators</strong>, and Analyze Returns—all in one premium dashboard.
+                            </p>
+                        </div>
+
+                        {/* Social Finance Card */}
+                        <div className={styles.featureCard}>
+                            <span className={styles.cardIcon}>🤝</span>
+                            <h3 className={styles.cardTitle}>Better Than Splitwise</h3>
+                            <p className={styles.cardText}>
+                                Split expenses with friends, manage groups, and share your dashboard with family. Import/Export statements effortlessly for total transparency.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Voice Command Section */}
             <section style={{
                 padding: '4rem 2rem',
                 background: 'linear-gradient(180deg, var(--color-background) 0%, var(--color-surface) 100%)',
@@ -290,12 +330,25 @@ export default function LandingPage() {
 
             {/* Footer */}
             <footer style={{
-                padding: '3rem 2rem',
-                textAlign: 'center',
-                borderTop: '1px solid var(--color-border)',
-                color: 'hsl(var(--color-text-muted))'
+                padding: '2rem',
+                borderTop: '1px solid var(--glass-border)',
+                background: 'var(--color-surface)',
+                marginTop: 'auto'
             }}>
-                <p>&copy; {new Date().getFullYear()} HISAABWISE. Built for simplicity.</p>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <img src="/logo.svg" alt="Logo" style={{ width: '24px', height: '24px', opacity: 0.8 }} />
+                        <span style={{ fontSize: '0.9rem', color: 'hsl(var(--color-text-muted))' }}>© 2026 HisaabWise</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '2rem' }}>
+                        <Link href="/terms" style={{ fontSize: '0.9rem', color: 'hsl(var(--color-text-muted))', textDecoration: 'none' }}>
+                            Terms & Conditions
+                        </Link>
+                        <Link href="/login" style={{ fontSize: '0.9rem', color: 'hsl(var(--color-text-muted))', textDecoration: 'none' }}>
+                            Login
+                        </Link>
+                    </div>
+                </div>
             </footer>
         </div>
     );

@@ -15,6 +15,7 @@ function LoginForm() {
     const [password, setPassword] = useState('')
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
+    const [terms, setTerms] = useState(false)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
@@ -42,6 +43,11 @@ function LoginForm() {
                 setLoading(false)
                 return
             }
+            if (!terms) {
+                setError('You must agree to the Terms & Conditions.')
+                setLoading(false)
+                return
+            }
         }
 
         try {
@@ -54,7 +60,7 @@ function LoginForm() {
                     router.push(callbackUrl || '/');
                 }
             } else {
-                const res = await register(email, password, name, phone)
+                const res = await register(email, password, name, phone, terms)
                 if (res.error) {
                     setError(res.error)
                 } else {
@@ -80,13 +86,6 @@ function LoginForm() {
         transition: 'border-color 0.2s, box-shadow 0.2s',
         outline: 'none',
     } as React.CSSProperties;
-
-    // Helper for focus state would require state or css class, strict inline is hard for :focus.
-    // Adding a simple className 'auth-input' if we could adds global css, but let's stick to simple inline for now.
-    // We can simulate focus color via border in inline style? No. 
-    // We will rely on default outline or add a small class if needed, but let's try to stick to what we have.
-    // Actually, we can add a <style> block or just rely on the 'input' styling if global. 
-    // Let's assume global input styling is minimal and provide good defaults.
 
     return (
         <div className="glass-panel" style={{
@@ -204,10 +203,25 @@ function LoginForm() {
                     )}
                 </div>
 
+                {!isLogin && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                        <input
+                            type="checkbox"
+                            id="terms"
+                            checked={terms}
+                            onChange={(e) => setTerms(e.target.checked)}
+                            style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                        />
+                        <label htmlFor="terms" style={{ fontSize: '0.85rem', color: 'hsl(var(--color-text-muted))', cursor: 'pointer' }}>
+                            I agree to the <a href="/terms?from=signup" target="_blank" style={{ color: 'hsl(var(--color-primary))', textDecoration: 'none' }}>Terms & Conditions</a>
+                        </label>
+                    </div>
+                )}
+
                 <Button
                     type="submit"
-                    disabled={loading}
-                    style={{ width: '100%', marginTop: '1rem' }}
+                    disabled={loading || (!isLogin && !terms)}
+                    style={{ width: '100%', marginTop: '1rem', opacity: (loading || (!isLogin && !terms)) ? 0.7 : 1 }}
                     size="lg"
                 >
                     {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
