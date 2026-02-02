@@ -80,7 +80,9 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
             if (res.ok) {
                 mutateExpenses();
             } else {
-                console.error("Failed to delete expense");
+                const errData = await res.json();
+                console.error("Failed to delete expense. Status:", res.status, "Message:", errData.error || errData.message);
+                alert(`Error: ${errData.error || "Failed to delete"}`);
             }
         } catch (error) {
             console.error("Error deleting expense:", error);
