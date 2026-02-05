@@ -43,6 +43,14 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const [splitMethod, setSplitMethod] = useState<'equal' | 'amount' | 'percentage'>('equal');
     const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
 
+    // Update state when user loads to replace 'me' with actual ID
+    React.useEffect(() => {
+        if (user?.id) {
+            setPaidBy(prev => prev === 'me' ? user.id : prev);
+            setSplitWith(prev => prev.map(id => id === 'me' ? user.id : id));
+        }
+    }, [user]);
+
     const handleSplitMethodChange = (method: 'equal' | 'amount' | 'percentage') => {
         setSplitMethod(method);
         // Reset custom amounts when switching
@@ -59,16 +67,14 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             // If group selected, auto-select all members in splitWith
             const group = groups.find(g => g.id === groupId);
             if (group) {
-                // Filter splitWith to only include group members + me
-                // Convert group members (IDs) to array including 'me' and ensure uniqueness
-                // Filter out the current user's ID if present in group.members to avoid "me" + "userId" duplicate
-                const otherMembers = group.members.filter(id => id !== user?.id);
-                const newSplitWith = ['me', ...otherMembers];
-                setSplitWith(newSplitWith);
+                // Filter splitWith to only include group members
+                // Ensure unique IDs
+                const uniqueMembers = Array.from(new Set([...group.members, user?.id || 'me']));
+                setSplitWith(uniqueMembers);
 
-                // Also reset paidBy if the current payer is not in the group (and not me)
-                if (paidBy !== 'me' && !group.members.includes(paidBy)) {
-                    setPaidBy('me');
+                // Also reset paidBy if the current payer is not in the group
+                if (paidBy !== (user?.id || 'me') && !group.members.includes(paidBy)) {
+                    setPaidBy(user?.id || 'me');
                 }
             }
         } else {
@@ -162,7 +168,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             };
 
             const peopleInvolved = new Set([...splitWith, paidBy]);
-            peopleInvolved.delete('me');
+            peopleInvolved.delete(user?.id || 'me'); // Remove current user from relatedTo
             relatedTo = Array.from(peopleInvolved);
         }
 
@@ -207,8 +213,8 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
         setDescription('');
         setAmount('');
         setCategory('');
-        setPaidBy('me');
-        setSplitWith(['me']);
+        setPaidBy(user?.id || 'me');
+        setSplitWith([user?.id || 'me']);
         // Reset date to today
         setDate(new Date().toISOString().split('T')[0]);
 
@@ -229,6 +235,9 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                 : [...prev, friendId]
         );
     };
+
+    const currentUserId = user?.id || 'me';
+    const currentUserName = user?.name || 'You';
 
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -387,7 +396,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                                         backgroundSize: '0.65rem auto',
                                     }}
                                 >
-                                    <option value="me">You</option>
+                                    <option value={currentUserId}>{currentUserName}</option>
                                     {friends
                                         .filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id)))
                                         .map(f => (
@@ -449,28 +458,28 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                                                     onChange={() => toggleSplitWith(paidBy)}
                                                     style={{ display: 'none' }}
                                                 />
-                                                Include {paidBy === 'me' ? 'You' : friends.find(f => f.id === paidBy)?.name} in split
+                                                Include {paidBy === currentUserId ? currentUserName : friends.find(f => f.id === paidBy)?.name} in split
                                             </label>
                                         </div>
 
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                                            {paidBy !== 'me' && (
+                                            {paidBy !== currentUserId && (
                                                 <button
                                                     type="button"
-                                                    onClick={() => toggleSplitWith('me')}
+                                                    onClick={() => toggleSplitWith(currentUserId)}
                                                     style={{
                                                         padding: '0.5rem 1rem',
                                                         borderRadius: '999px',
                                                         fontSize: '0.875rem',
                                                         fontWeight: 500,
-                                                        background: splitWith.includes('me') ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
-                                                        color: splitWith.includes('me') ? '#fff' : 'hsl(var(--color-text-main))',
-                                                        border: splitWith.includes('me') ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
+                                                        background: splitWith.includes(currentUserId) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
+                                                        color: splitWith.includes(currentUserId) ? '#fff' : 'hsl(var(--color-text-main))',
+                                                        border: splitWith.includes(currentUserId) ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.2s ease'
                                                     }}
                                                 >
-                                                    You {splitWith.includes('me') ? '✓' : '+'}
+                                                    {currentUserName} {splitWith.includes(currentUserId) ? '✓' : '+'}
                                                 </button>
                                             )}
 
@@ -506,8 +515,8 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                                             <span>{splitMethod === 'amount' ? 'Amount' : 'Percent (%)'}</span>
                                         </div>
 
-                                        {['me', ...friends.filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id))).map(f => f.id)].map(id => {
-                                            const name = id === 'me' ? 'You' : friends.find(f => f.id === id)?.name;
+                                        {[currentUserId, ...friends.filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id))).map(f => f.id)].map(id => {
+                                            const name = id === currentUserId ? currentUserName : friends.find(f => f.id === id)?.name;
 
                                             return (
                                                 <div key={id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
