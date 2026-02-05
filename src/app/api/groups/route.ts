@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
         const group = await Group.create({
             name,
-            members: memberIds || [],
+            members: memberIds ? Array.from(new Set([...memberIds, session.userId])) : [session.userId],
             created_by: session.userId,
         });
 

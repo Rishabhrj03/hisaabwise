@@ -1,0 +1,158 @@
+erDiagram
+    User ||--o{ Expense : "creates"
+    User ||--o{ Group : "admin"
+    User ||--o{ Friend : "adds"
+    User ||--o{ Budget : "sets"
+    User ||--o{ Goal : "defines"
+    User ||--o{ Investment : "tracks"
+    User ||--o{ Loan : "manages"
+    User ||--o{ RecurringExpense : "schedules"
+    User ||--o{ Category : "customizes"
+    User ||--o{ Subscription : "subscribes"
+    
+    User }|..|{ Group : "member"
+    Group ||--o{ Expense : "contains"
+    
+    User {
+        ObjectId _id
+        String name
+        String email
+        String password
+        String phone
+        String image
+        Boolean isPublic
+        String shareToken
+        Object[] bankAccounts "name, type, balance, creditLimit, billingDate"
+        String user_upi_id
+        Boolean isEmailVerified
+        String emailVerificationToken
+        Date emailVerificationExpire
+        Boolean isPhoneVerified
+        String phoneVerificationCode
+        String resetPasswordToken
+        Date resetPasswordExpire
+        Boolean termsAccepted
+        Date termsAcceptedAt
+        Date created_at
+        Date updated_at
+    }
+
+    Expense {
+        ObjectId _id
+        String description
+        Number amount
+        Date date
+        String type "income, expense, transfer"
+        String category
+        ObjectId created_by
+        ObjectId group_id
+        Object splitDetails "paidBy, shares[{userId, amount}]"
+        String[] relatedTo
+        Date created_at
+        Date updated_at
+    }
+
+    Group {
+        ObjectId _id
+        String name
+        ObjectId created_by
+        String[] members
+        Date created_at
+        Date updated_at
+    }
+
+    Friend {
+        ObjectId _id
+        ObjectId user_id
+        String name
+        String phone
+        ObjectId linked_user_id
+        String upi_id
+        Date created_at
+        Date updated_at
+    }
+
+    Budget {
+        ObjectId _id
+        ObjectId user_id
+        String category
+        Number amount
+        String period "monthly, yearly"
+        Date created_at
+        Date updated_at
+    }
+
+    Category {
+        ObjectId _id
+        ObjectId user_id
+        String name
+        String color
+        String icon
+        Boolean is_default
+        Date created_at
+        Date updated_at
+    }
+
+    Goal {
+        ObjectId _id
+        ObjectId user_id
+        String name
+        Number targetAmount
+        Number currentAmount
+        Date deadline
+        String color
+        Date created_at
+        Date updated_at
+    }
+
+    Investment {
+        ObjectId _id
+        ObjectId user_id
+        String name
+        String type "SIP, MutualFund, Stock, etc"
+        Number currentAmount
+        Date startDate
+        Number autoIncreaseAmount
+        String autoIncreaseFrequency
+        Date lastAutoUpdate
+        Date created_at
+        Date updated_at
+    }
+
+    Loan {
+        ObjectId _id
+        ObjectId user_id
+        String name
+        String type "borrowed, lent"
+        Number principalAmount
+        Number interestRate
+        Date startDate
+        Number tenureMonths
+        String repaymentType "emi, one-time"
+        Number paidAmount
+        Number emiAmount
+        Date created_at
+        Date updated_at
+    }
+
+    RecurringExpense {
+        ObjectId _id
+        ObjectId user_id
+        String name
+        Number amount
+        String category
+        String frequency "monthly, yearly"
+        Date nextDueDate
+        Boolean isAutoDebit
+        Date created_at
+        Date updated_at
+    }
+
+    Subscription {
+        ObjectId _id
+        ObjectId user_id
+        String endpoint
+        Object keys "p256dh, auth"
+        Date created_at
+        Date updated_at
+    }
