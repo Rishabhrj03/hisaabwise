@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Loader2, Bell, X } from 'lucide-react';
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BFvluXtvKeY71SjwUk6U3CGESI04IEypMV2DRDE-1q119CR2RBtNBAugjFGo6sP5zhfNQYiAovgXumWBqunHvck';
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BLWBlzbRgaUG0yfbALwbHRCUr9qRWgbpODV9mhXn2f6t9i_l-Lmmh3WfITpAGBo9OH3wR_3rSxJhnbz5ck6CD-Y';
 
 function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);

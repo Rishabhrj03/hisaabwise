@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/Input';
 import { Expense } from '@/types';
 import { CategoryManager } from './CategoryManager';
 
+import { useAuth } from '@/context/AuthContext';
+
 interface AddExpenseFormProps {
     onClose?: () => void;
     initialData?: Expense;
@@ -21,6 +23,7 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
     const { addExpense, updateExpense, categories } = useExpenses();
     const { friends } = useFriends();
     const { groups } = useGroups();
+    const { user } = useAuth(); // Get current user
 
     // Form State
     const [description, setDescription] = useState(initialData?.description || '');
@@ -57,8 +60,10 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             const group = groups.find(g => g.id === groupId);
             if (group) {
                 // Filter splitWith to only include group members + me
-                // Convert group members (IDs) to array including 'me'
-                const newSplitWith = ['me', ...group.members];
+                // Convert group members (IDs) to array including 'me' and ensure uniqueness
+                // Filter out the current user's ID if present in group.members to avoid "me" + "userId" duplicate
+                const otherMembers = group.members.filter(id => id !== user?.id);
+                const newSplitWith = ['me', ...otherMembers];
                 setSplitWith(newSplitWith);
 
                 // Also reset paidBy if the current payer is not in the group (and not me)
