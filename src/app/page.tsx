@@ -90,8 +90,11 @@ export default function Home() {
     .filter((expense) => {
       // Splitwise Filter: Hide if not involved
       if (expense.splitDetails && expense.splitDetails.shares && expense.splitDetails.shares.length > 0) {
-        const isPayer = expense.splitDetails.paidBy === 'me';
-        const isInvolved = expense.splitDetails.shares.some(s => s.userId === 'me');
+        // Fix: Check against 'me' OR the actual user ID
+        const currentUserId = user.id;
+        const isPayer = expense.splitDetails.paidBy === 'me' || expense.splitDetails.paidBy === currentUserId;
+        const isInvolved = expense.splitDetails.shares.some(s => s.userId === 'me' || s.userId === currentUserId);
+
         if (!isPayer && !isInvolved) return false;
       }
 
@@ -112,7 +115,8 @@ export default function Home() {
       return expense.amount;
     }
     // If split exists, find my share
-    const myShare = expense.splitDetails.shares.find(s => s.userId === 'me');
+    const currentUserId = user.id;
+    const myShare = expense.splitDetails.shares.find(s => s.userId === 'me' || s.userId === currentUserId);
     return myShare ? myShare.amount : 0; // If I'm not involved (should be filtered out, but safety), 0.
   };
 

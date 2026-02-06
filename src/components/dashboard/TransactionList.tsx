@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFriends } from '@/context/FriendContext';
+import { useGroups } from '@/context/GroupContext';
 import { useExpenses } from '@/context/ExpenseContext';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { Expense } from '@/types';
@@ -17,6 +18,7 @@ interface TransactionListProps {
 export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }: TransactionListProps) {
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const { friends } = useFriends();
+    const { groups } = useGroups();
     const { categories } = useExpenses();
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('en-US', {
@@ -85,8 +87,22 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                                 )}
                             </span>
                         </Tooltip>
-                        <span style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))' }}>
-                            {formatDate(expense.date)} • {categories.find(c => c.name === expense.category)?.icon || '🏷️'} {expense.category}
+                        <span style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span>{formatDate(expense.date)} • {categories.find(c => c.name === expense.category)?.icon || '🏷️'} {expense.category}</span>
+                            {expense.group_id && (
+                                <span style={{
+                                    fontSize: '0.7rem',
+                                    background: 'hsl(var(--color-surface))',
+                                    border: '1px solid hsl(var(--color-border))',
+                                    padding: '0 0.4rem',
+                                    borderRadius: '999px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem'
+                                }}>
+                                    👥 {groups.find(g => g.id === expense.group_id)?.name || 'Group'}
+                                </span>
+                            )}
                         </span>
                     </div>
 

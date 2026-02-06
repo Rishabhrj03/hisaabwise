@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Expense from '@/models/Expense';
+import Group from '@/models/Group';
 import { getSessionUser } from '@/lib/auth';
 
 export async function DELETE(
@@ -25,19 +26,39 @@ export async function DELETE(
         const existing = await Expense.findOne({ _id: id });
         if (!existing) {
             console.log("Expense not found with ID:", id);
+            return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
         } else {
             console.log("Expense found. Created by:", existing.created_by);
             console.log("Session User ID:", session.userId);
         }
 
-        const expense = await Expense.findOneAndDelete({
-            _id: id,
-            created_by: session.userId
-        });
+        // Check permissions: Creator OR Group Member
+        const isCreator = existing.created_by.toString() === session.userId;
+        let isGroupMember = false;
+
+        if (existing.group_id) {
+            // Scalable check: Let the database check membership without fetching the whole group
+            // index on members field ensures this is O(1) or O(log n)
+            const isMember = await Group.exists({
+                _id: existing.group_id,
+                members: session.userId
+            });
+
+            if (isMember) {
+                isGroupMember = true;
+            }
+        }
+
+        if (!isCreator && !isGroupMember) {
+            console.log("Deletion failed: Unauthorized. User is neither creator nor group member.");
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
+
+        const expense = await Expense.findOneAndDelete({ _id: id });
 
         if (!expense) {
-            console.log("Deletion failed: Expense not found or unauthorized");
-            return NextResponse.json({ error: 'Expense not found or unauthorized' }, { status: 404 });
+            console.log("Deletion failed: Expense not found");
+            return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
         }
 
         console.log("Expense deleted successfully");
@@ -62,14 +83,38 @@ export async function PUT(
         const data = await req.json();
 
         await dbConnect();
-        const expense = await Expense.findOneAndUpdate(
-            { _id: id, created_by: session.userId },
+        const existing = await Expense.findById(id);
+        if (!existing) {
+            return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
+        }
+
+        // Check permissions
+        const isCreator = existing.created_by.toString() === session.userId;
+        let isGroupMember = false;
+
+        if (existing.group_id) {
+            // Scalable check
+            const isMember = await Group.exists({
+                _id: existing.group_id,
+                members: session.userId
+            });
+            if (isMember) {
+                isGroupMember = true;
+            }
+        }
+
+        if (!isCreator && !isGroupMember) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
+
+        const expense = await Expense.findByIdAndUpdate(
+            id,
             data,
             { new: true, runValidators: true }
         );
 
         if (!expense) {
-            return NextResponse.json({ error: 'Expense not found or unauthorized' }, { status: 404 });
+            return NextResponse.json({ error: 'Update failed' }, { status: 500 });
         }
 
         return NextResponse.json(expense);

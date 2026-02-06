@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Expense from '@/models/Expense';
 import Friend from '@/models/Friend';
+import Group from '@/models/Group';
 import { getSessionUser } from '@/lib/auth';
 import { sendExpenseNotification } from '@/lib/notification';
+import mongoose from 'mongoose';
 
 export async function GET() {
     try {
@@ -17,13 +19,27 @@ export async function GET() {
         const myFriendIdentities = await Friend.find({ linked_user_id: session.userId }).select('_id');
         const myFriendIds = myFriendIdentities.map(f => f._id.toString());
 
-        // 2. Query expenses: Created by me OR where I am a "related friend"
-        const expenses = await Expense.find({
+        // 2. Find all Groups I am a member of (to show group expenses added by others)
+        // Handle mixed data: Query for BOTH String ID and ObjectId
+        const userIdObj = new mongoose.Types.ObjectId(session.userId);
+        const myGroups = await Group.find({
+            members: { $in: [session.userId, userIdObj] }
+        }).select('_id');
+        const myGroupIds = myGroups.map(g => g._id);
+
+        console.log("Groups found for user:", myGroupIds.length, myGroupIds);
+
+        // 3. Query expenses: Created by me OR where I am a "related friend" OR in my groups
+        const query = {
             $or: [
                 { created_by: session.userId },
-                { relatedTo: { $in: myFriendIds } }
+                { relatedTo: { $in: myFriendIds } },
+                { group_id: { $in: myGroupIds } }
             ]
-        }).sort({ date: -1 });
+        };
+        const expenses = await Expense.find(query).sort({ date: -1 });
+        console.log("Expenses query:", JSON.stringify(query));
+        console.log("Expenses found:", expenses.length);
 
         return NextResponse.json(expenses);
     } catch (error) {

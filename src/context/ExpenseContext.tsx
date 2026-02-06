@@ -43,7 +43,11 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     // Derived State
     const expenses: Expense[] = React.useMemo(() => {
         if (!rawExpenses) return [];
-        return Array.isArray(rawExpenses) ? rawExpenses.map(mapToExpense) : [];
+        console.log("ExpenseContext: Received raw expenses:", rawExpenses.length);
+        const mapped = Array.isArray(rawExpenses) ? rawExpenses.map(mapToExpense) : [];
+        console.log("ExpenseContext: Mapped expenses:", mapped.length);
+        console.log("ExpenseContext: Group expenses:", mapped.filter(e => e.group_id).length);
+        return mapped;
     }, [rawExpenses]);
 
     const categories: Category[] = React.useMemo(() => {

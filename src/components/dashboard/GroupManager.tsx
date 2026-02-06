@@ -55,8 +55,8 @@ export function GroupManager() {
 
     const handleEdit = (group: Group) => {
         setGroupName(group.name);
-        // Map members (which are friend IDs per types) into Set
-        setSelectedFriendIds(new Set(group.members));
+        // Map members (which are GroupMember objects) into Set of IDs
+        setSelectedFriendIds(new Set(group.members.map(m => m._id)));
         setEditingId(group.id);
         setIsCreating(true);
     };
@@ -237,7 +237,7 @@ export function GroupManager() {
                                     <div style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>
                                         <span style={{ marginRight: '0.5rem' }}>{group.members.length} members</span>
                                         <span style={{ opacity: 0.8 }}>
-                                            • {group.members.map(mid => friends.find(f => f.id === mid)?.name).filter(Boolean).join(', ') || 'No members'}
+                                            • {group.members.map(m => m.name).join(', ') || 'No members'}
                                         </span>
                                     </div>
                                 </div>

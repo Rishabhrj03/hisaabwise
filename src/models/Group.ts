@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IGroup extends Document {
     name: string;
     created_by: mongoose.Types.ObjectId;
-    members: string[]; // Friend IDs or User IDs? Sticking to strings to match frontend "Friend" concept for now.
+    members: mongoose.Types.ObjectId[];
     created_at: Date;
 }
 
@@ -17,14 +17,24 @@ const GroupSchema: Schema<IGroup> = new Schema(
         created_by: {
             type: Schema.Types.ObjectId,
             ref: 'User',
-            required: true
+            required: true,
+            index: true
         },
-        members: [String] // Array of friend/user IDs
+        members: [{
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            index: true
+        }]
     },
     {
         timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
     }
 );
+
+// Prevent overwrite on model compile
+if (process.env.NODE_ENV === 'development') {
+    delete mongoose.models.Group;
+}
 
 const Group: Model<IGroup> = mongoose.models.Group || mongoose.model<IGroup>('Group', GroupSchema);
 

@@ -27,12 +27,18 @@ export interface SplitShare {
     amount: number;
 }
 
+export interface GroupMember {
+    _id: string;
+    name: string;
+    email?: string;
+}
+
 export interface Group {
     id: string;
     name: string;
     created_by: string;
     created_at: string;
-    members: string[]; // Array of Friend IDs
+    members: GroupMember[]; // Now fully populated
 }
 
 export interface GroupInput {

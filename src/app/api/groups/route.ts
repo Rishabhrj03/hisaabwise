@@ -4,6 +4,7 @@ import Group from '@/models/Group';
 import User from '@/models/User';
 import { getSessionUser } from '@/lib/auth';
 import { sendGroupNotification } from '@/lib/notification';
+import mongoose from 'mongoose';
 
 export async function GET() {
     try {
@@ -13,14 +14,18 @@ export async function GET() {
         }
 
         await dbConnect();
-        await dbConnect();
-        // Visibility Logic (Issue 4 Fix): Show groups created by user OR where user is a member
+
+        const userIdObj = new mongoose.Types.ObjectId(session.userId);
+
+        // Visibility Logic: Show groups created by user OR where user is a member
         const groups = await Group.find({
             $or: [
-                { created_by: session.userId },
-                { members: session.userId }
+                { created_by: userIdObj },
+                { members: userIdObj }
             ]
-        }).sort({ created_at: -1 });
+        })
+            .populate('members', 'name email') // Populate member details
+            .sort({ created_at: -1 });
 
         return NextResponse.json(groups);
     } catch (error) {

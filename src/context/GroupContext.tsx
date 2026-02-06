@@ -21,12 +21,16 @@ const fetcher = (url: string) => fetch(url).then(r => r.json());
 export function GroupProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
 
-    const mapToGroup = (doc: { _id: string; name: string; created_by: string; created_at: string; members?: string[] }): Group => ({
+    const mapToGroup = (doc: { _id: string; name: string; created_by: string; created_at: string; members?: any[] }): Group => ({
         id: doc._id,
         name: doc.name,
         created_by: doc.created_by,
         created_at: doc.created_at,
-        members: doc.members || []
+        members: (doc.members || []).map(m => {
+            // Handle if members are just strings (e.g. during optimistic updates or if api fails to populate)
+            if (typeof m === 'string') return { _id: m, name: 'Unknown Member' };
+            return { _id: m._id, name: m.name, email: m.email };
+        })
     });
 
     const { data: rawGroups, mutate, isLoading } = useSWR(

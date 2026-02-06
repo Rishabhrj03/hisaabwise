@@ -45,7 +45,8 @@ export async function sendExpenseNotification(expense: any, currentUserId: strin
         if (expense.group_id) {
             const group = await Group.findById(expense.group_id);
             if (group && group.members) {
-                group.members.forEach((memberId: string) => {
+                group.members.forEach((member: any) => {
+                    const memberId = member.toString();
                     if (memberId !== currentUserId) {
                         userIdsToNotify.add(memberId);
                     }

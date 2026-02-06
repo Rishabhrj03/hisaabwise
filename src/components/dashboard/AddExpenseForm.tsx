@@ -69,11 +69,11 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
             if (group) {
                 // Filter splitWith to only include group members
                 // Ensure unique IDs
-                const uniqueMembers = Array.from(new Set([...group.members, user?.id || 'me']));
+                const uniqueMembers = Array.from(new Set([...group.members.map(m => m._id), user?.id || 'me']));
                 setSplitWith(uniqueMembers);
 
                 // Also reset paidBy if the current payer is not in the group
-                if (paidBy !== (user?.id || 'me') && !group.members.includes(paidBy)) {
+                if (paidBy !== (user?.id || 'me') && !group.members.some(m => m._id === paidBy)) {
                     setPaidBy(user?.id || 'me');
                 }
             }
@@ -397,11 +397,15 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                                     }}
                                 >
                                     <option value={currentUserId}>{currentUserName}</option>
-                                    {friends
-                                        .filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id)))
-                                        .map(f => (
+                                    {/* Show friends normally, OR show group members if group selected */}
+                                    {selectedGroupId
+                                        ? groups.find(g => g.id === selectedGroupId)?.members.map(m => (
+                                            <option key={m._id} value={m._id}>{m.name}</option>
+                                        ))
+                                        : friends.map(f => (
                                             <option key={f.id} value={f.id}>{f.name}</option>
-                                        ))}
+                                        ))
+                                    }
                                 </select>
                             </div>
 
@@ -458,7 +462,11 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                                                     onChange={() => toggleSplitWith(paidBy)}
                                                     style={{ display: 'none' }}
                                                 />
-                                                Include {paidBy === currentUserId ? currentUserName : friends.find(f => f.id === paidBy)?.name} in split
+                                                Include {paidBy === currentUserId
+                                                    ? currentUserName
+                                                    : (selectedGroupId
+                                                        ? groups.find(g => g.id === selectedGroupId)?.members.find(m => m._id === paidBy)?.name
+                                                        : friends.find(f => f.id === paidBy)?.name)} in split
                                             </label>
                                         </div>
 
@@ -483,29 +491,53 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                                                 </button>
                                             )}
 
-                                            {friends
-                                                .filter(f => f.id !== paidBy)
-                                                .filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id)))
-                                                .map(f => (
-                                                    <button
-                                                        key={f.id}
-                                                        type="button"
-                                                        onClick={() => toggleSplitWith(f.id)}
-                                                        style={{
-                                                            padding: '0.5rem 1rem',
-                                                            borderRadius: '999px',
-                                                            fontSize: '0.875rem',
-                                                            fontWeight: 500,
-                                                            background: splitWith.includes(f.id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
-                                                            color: splitWith.includes(f.id) ? '#fff' : 'hsl(var(--color-text-main))',
-                                                            border: splitWith.includes(f.id) ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
-                                                            cursor: 'pointer',
-                                                            transition: 'all 0.2s ease'
-                                                        }}
-                                                    >
-                                                        {f.name} {splitWith.includes(f.id) ? '✓' : '+'}
-                                                    </button>
-                                                ))}
+                                            {/* Logic for Split With Buttons: Show friends or Group Members */}
+                                            {selectedGroupId
+                                                ? groups.find(g => g.id === selectedGroupId)?.members
+                                                    .filter(m => m._id !== paidBy)
+                                                    .map(m => (
+                                                        <button
+                                                            key={m._id}
+                                                            type="button"
+                                                            onClick={() => toggleSplitWith(m._id)}
+                                                            style={{
+                                                                padding: '0.5rem 1rem',
+                                                                borderRadius: '999px',
+                                                                fontSize: '0.875rem',
+                                                                fontWeight: 500,
+                                                                background: splitWith.includes(m._id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
+                                                                color: splitWith.includes(m._id) ? '#fff' : 'hsl(var(--color-text-main))',
+                                                                border: splitWith.includes(m._id) ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.2s ease'
+                                                            }}
+                                                        >
+                                                            {m.name} {splitWith.includes(m._id) ? '✓' : '+'}
+                                                        </button>
+                                                    ))
+                                                : friends
+                                                    .filter(f => f.id !== paidBy)
+                                                    .map(f => (
+                                                        <button
+                                                            key={f.id}
+                                                            type="button"
+                                                            onClick={() => toggleSplitWith(f.id)}
+                                                            style={{
+                                                                padding: '0.5rem 1rem',
+                                                                borderRadius: '999px',
+                                                                fontSize: '0.875rem',
+                                                                fontWeight: 500,
+                                                                background: splitWith.includes(f.id) ? 'hsl(var(--color-primary))' : 'hsl(var(--color-surface))',
+                                                                color: splitWith.includes(f.id) ? '#fff' : 'hsl(var(--color-text-main))',
+                                                                border: splitWith.includes(f.id) ? '1px solid transparent' : '1px solid hsl(var(--color-border))',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.2s ease'
+                                                            }}
+                                                        >
+                                                            {f.name} {splitWith.includes(f.id) ? '✓' : '+'}
+                                                        </button>
+                                                    ))
+                                            }
                                         </div>
                                     </>
                                 ) : (
@@ -515,42 +547,61 @@ export function AddExpenseForm({ onClose, initialData }: AddExpenseFormProps) {
                                             <span>{splitMethod === 'amount' ? 'Amount' : 'Percent (%)'}</span>
                                         </div>
 
-                                        {[currentUserId, ...friends.filter(f => !selectedGroupId || (groups.find(g => g.id === selectedGroupId)?.members.includes(f.id))).map(f => f.id)].map(id => {
-                                            const name = id === currentUserId ? currentUserName : friends.find(f => f.id === id)?.name;
+                                        {(() => {
+                                            const people = selectedGroupId
+                                                ? groups.find(g => g.id === selectedGroupId)?.members.map(m => ({ id: m._id, name: m.name }))
+                                                : friends.map(f => ({ id: f.id, name: f.name }));
 
-                                            return (
-                                                <div key={id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                    <span style={{ fontSize: '1rem', fontWeight: 500 }}>{name}</span>
-                                                    <div style={{ position: 'relative' }}>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="0"
-                                                            value={customAmounts[id] || ''}
-                                                            onChange={(e) => {
-                                                                handleCustomAmountChange(id, e.target.value);
-                                                                if (parseFloat(e.target.value) > 0 && !splitWith.includes(id)) {
-                                                                    setSplitWith(prev => [...prev, id]);
-                                                                }
-                                                            }}
-                                                            style={{
-                                                                width: '120px',
-                                                                padding: '0.5rem 1rem',
-                                                                borderRadius: 'var(--radius-md)',
-                                                                background: 'hsl(var(--color-surface))',
-                                                                border: '1px solid hsl(var(--color-border))',
-                                                                color: 'hsl(var(--color-text-main))',
-                                                                fontSize: '1rem',
-                                                                textAlign: 'right',
-                                                                outline: 'none',
-                                                                transition: 'border-color 0.2s'
-                                                            }}
-                                                            onFocus={(e) => e.target.style.borderColor = 'hsl(var(--color-primary))'}
-                                                            onBlur={(e) => e.target.style.borderColor = 'hsl(var(--color-border))'}
-                                                        />
+                                            const allIds = [currentUserId, ...(people || []).map(p => p.id)];
+
+                                            // Ensure we only showing relevant people. For manual amounts, usually we show splitWith list or all potential?
+                                            // The original code mapped friends + filtered by group.
+                                            // We will iterate `allIds` but realistically we should iterate `splitWith` + potential others? 
+                                            // The UI shows a list of rows.
+
+                                            return allIds.map(id => {
+                                                const name = id === currentUserId
+                                                    ? currentUserName
+                                                    : (selectedGroupId
+                                                        ? groups.find(g => g.id === selectedGroupId)?.members.find(m => m._id === id)?.name
+                                                        : friends.find(f => f.id === id)?.name);
+
+                                                // If name is undefined (e.g. user id not in group list/friends list), skip or show ID
+                                                if (!name) return null;
+                                                return (
+                                                    <div key={id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                        <span style={{ fontSize: '1rem', fontWeight: 500 }}>{name}</span>
+                                                        <div style={{ position: 'relative' }}>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="0"
+                                                                value={customAmounts[id] || ''}
+                                                                onChange={(e) => {
+                                                                    handleCustomAmountChange(id, e.target.value);
+                                                                    if (parseFloat(e.target.value) > 0 && !splitWith.includes(id)) {
+                                                                        setSplitWith(prev => [...prev, id]);
+                                                                    }
+                                                                }}
+                                                                style={{
+                                                                    width: '120px',
+                                                                    padding: '0.5rem 1rem',
+                                                                    borderRadius: 'var(--radius-md)',
+                                                                    background: 'hsl(var(--color-surface))',
+                                                                    border: '1px solid hsl(var(--color-border))',
+                                                                    color: 'hsl(var(--color-text-main))',
+                                                                    fontSize: '1rem',
+                                                                    textAlign: 'right',
+                                                                    outline: 'none',
+                                                                    transition: 'border-color 0.2s'
+                                                                }}
+                                                                onFocus={(e) => e.target.style.borderColor = 'hsl(var(--color-primary))'}
+                                                                onBlur={(e) => e.target.style.borderColor = 'hsl(var(--color-border))'}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            });
+                                        })()}
                                     </div>
                                 )}
                             </div>
