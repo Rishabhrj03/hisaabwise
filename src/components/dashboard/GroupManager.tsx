@@ -8,6 +8,8 @@ import { useFriends } from '@/context/FriendContext';
 import { Group } from '@/types';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { GroupAnalytics } from './GroupAnalytics';
+import { BarChart3, ArrowLeft } from 'lucide-react';
 
 export function GroupManager() {
     const { groups, addGroup, updateGroup, deleteGroup } = useGroups();
@@ -20,6 +22,10 @@ export function GroupManager() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
+
+    // Analytics State
+    const [viewMode, setViewMode] = useState<'list' | 'analytics'>('list');
+    const [selectedGroup, setSelectedGroup] = useState<{ id: string, name: string } | null>(null);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -97,6 +103,29 @@ export function GroupManager() {
         setSelectedFriendIds(newSet);
     };
 
+    const openAnalytics = (group: Group) => {
+        setSelectedGroup({ id: group.id, name: group.name });
+        setViewMode('analytics');
+    };
+
+    // --- RENDER ANALYTICS VIEW ---
+    if (viewMode === 'analytics' && selectedGroup) {
+        return (
+            <Card variant="default" className="overflow-hidden">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <Button variant="ghost" size="sm" onClick={() => setViewMode('list')} style={{ padding: '0.5rem' }}>
+                        <ArrowLeft size={20} />
+                    </Button>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
+                        {selectedGroup.name} Stats
+                    </h3>
+                </div>
+                <GroupAnalytics groupId={selectedGroup.id} groupName={selectedGroup.name} />
+            </Card>
+        );
+    }
+
+    // --- RENDER LIST VIEW ---
     return (
         <Card variant="default" className="overflow-hidden">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -252,6 +281,15 @@ export function GroupManager() {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => openAnalytics(group)}
+                                    title="Analytics"
+                                    style={{ width: '36px', height: '36px', padding: 0, borderRadius: '50%' }}
+                                >
+                                    <BarChart3 size={18} />
+                                </Button>
                                 <Button
                                     variant="ghost"
                                     size="sm"
