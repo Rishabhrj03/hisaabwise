@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
+import { useSWRConfig } from 'swr';
 
 export default function JoinGroupPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -11,6 +12,7 @@ export default function JoinGroupPage({ params }: { params: Promise<{ id: string
     const [group, setGroup] = useState<{ name: string } | null>(null);
     const [error, setError] = useState('');
     const [joining, setJoining] = useState(false);
+    const { mutate } = useSWRConfig();
 
     // Unwrap params
     const resolvedParams = use(params);
@@ -42,6 +44,8 @@ export default function JoinGroupPage({ params }: { params: Promise<{ id: string
             });
 
             if (res.ok) {
+                // Force revalidation of groups list
+                await mutate('/api/groups');
                 router.push('/');
             } else {
                 const data = await res.json();

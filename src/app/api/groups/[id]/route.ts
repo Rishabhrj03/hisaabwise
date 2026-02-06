@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Group from '@/models/Group';
+import { getSessionUser } from '@/lib/auth';
+import mongoose from 'mongoose';
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
     try {
@@ -35,7 +37,18 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
 
         // Map memberIds to members if present (frontend sends memberIds, DB uses members)
         if (body.memberIds) {
-            body.members = body.memberIds;
+            const session = await getSessionUser();
+            if (session) {
+                // Ensure current user is not removed during edit
+                // Use Set to prevent duplicates and ensure ObjectId/String compatibility
+                const updatedMembers = new Set([
+                    ...body.memberIds,
+                    session.userId
+                ]);
+                body.members = Array.from(updatedMembers).map(id => new mongoose.Types.ObjectId(id as string));
+            } else {
+                body.members = body.memberIds.map((id: string) => new mongoose.Types.ObjectId(id));
+            }
             delete body.memberIds;
         }
 
