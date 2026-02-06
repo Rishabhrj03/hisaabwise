@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Group from '@/models/Group';
 import { getSessionUser } from '@/lib/auth';
+import mongoose from 'mongoose';
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
     try {
@@ -19,11 +20,11 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
             return NextResponse.json({ error: 'Group not found' }, { status: 404 });
         }
 
-        if (group.members.includes(session.userId)) {
+        if (group.members.some((m: any) => m.toString() === session.userId)) {
             return NextResponse.json({ message: 'Already a member' });
         }
 
-        group.members.push(session.userId);
+        group.members.push(new mongoose.Types.ObjectId(session.userId));
         await group.save();
 
         return NextResponse.json({ message: 'Joined successfully', group });
