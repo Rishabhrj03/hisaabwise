@@ -5,6 +5,7 @@ import User from '@/models/User';
 import { getSessionUser } from '@/lib/auth';
 import { sendGroupNotification } from '@/lib/notification';
 import mongoose from 'mongoose';
+import { resolveMemberIds } from '@/lib/groupUtils';
 
 export async function GET() {
     try {

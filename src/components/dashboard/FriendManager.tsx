@@ -219,8 +219,21 @@ export function FriendManager() {
             <ConfirmModal
                 isOpen={!!deleteConfirmation.id}
                 onClose={() => setDeleteConfirmation({ id: null, name: '' })}
-                onConfirm={() => {
-                    if (deleteConfirmation.id) deleteFriend(deleteConfirmation.id);
+                onConfirm={async () => {
+                    if (deleteConfirmation.id) {
+                        try {
+                            await deleteFriend(deleteConfirmation.id);
+                            setDeleteConfirmation({ id: null, name: '' });
+                        } catch (err: any) {
+                            // Show error in AlertModal
+                            setAlertConfig({
+                                show: true,
+                                message: err.message || "Failed to delete friend"
+                            });
+                            // Close confirm modal
+                            setDeleteConfirmation({ id: null, name: '' });
+                        }
+                    }
                 }}
                 title="Delete Friend?"
                 message={`Are you sure you want to remove "${deleteConfirmation.name}"? This will limit your ability to split expenses with them.`}

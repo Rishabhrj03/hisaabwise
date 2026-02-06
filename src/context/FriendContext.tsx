@@ -82,8 +82,16 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
         if (!user) return;
         try {
             const res = await fetch(`/api/friends/${id}`, { method: 'DELETE' });
-            if (res.ok) mutate();
+            if (res.ok) {
+                mutate();
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                const errorMessage = errorData.error || 'Failed to delete friend';
+                throw new Error(errorMessage);
+            }
         } catch (error) {
+            // console.error("Error deleting friend:", error); 
+            // Don't log to console to avoid Dev Overlay obscuring the UI Modal
             throw error;
         }
     };

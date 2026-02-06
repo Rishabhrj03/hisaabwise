@@ -4,6 +4,7 @@ import dbConnect from '@/lib/db';
 import Group from '@/models/Group';
 import { getSessionUser } from '@/lib/auth';
 import mongoose from 'mongoose';
+import { resolveMemberIds } from '@/lib/groupUtils';
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
     try {
@@ -36,19 +37,22 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
         delete body.id;
 
         // Map memberIds to members if present (frontend sends memberIds, DB uses members)
+        // Map memberIds to members if present (frontend sends memberIds, DB uses members)
         if (body.memberIds) {
             const session = await getSessionUser();
+
+            // Resolve any Friend IDs to User IDs
+            const resolvedMembers = await resolveMemberIds(body.memberIds);
+
             if (session) {
                 // Ensure current user is not removed during edit
-                // Use Set to prevent duplicates and ensure ObjectId/String compatibility
-                const updatedMembers = new Set([
-                    ...body.memberIds,
-                    session.userId
-                ]);
-                body.members = Array.from(updatedMembers).map(id => new mongoose.Types.ObjectId(id as string));
-            } else {
-                body.members = body.memberIds.map((id: string) => new mongoose.Types.ObjectId(id));
+                const sessionUserId = new mongoose.Types.ObjectId(session.userId);
+                if (!resolvedMembers.some(m => m.equals(sessionUserId))) {
+                    resolvedMembers.push(sessionUserId);
+                }
             }
+
+            body.members = resolvedMembers;
             delete body.memberIds;
         }
 

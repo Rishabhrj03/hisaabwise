@@ -132,32 +132,41 @@ export function GroupManager() {
                             Group Members ({Array.from(selectedFriendIds).length})
                         </label>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                            {friends.filter(f => selectedFriendIds.has(f.id)).length === 0 && (
+                            {Array.from(selectedFriendIds).length === 0 && (
                                 <p style={{ fontSize: '0.875rem', color: 'hsl(var(--color-text-muted))', fontStyle: 'italic' }}>No members added yet.</p>
                             )}
-                            {friends.filter(f => selectedFriendIds.has(f.id)).map(friend => (
-                                <div
-                                    key={friend.id}
-                                    onClick={() => toggleFriend(friend.id)}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        background: 'hsl(var(--color-primary) / 0.1)',
-                                        border: '1px solid hsl(var(--color-primary) / 0.2)',
-                                        borderRadius: '999px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.875rem',
-                                        fontWeight: 500,
-                                        color: 'hsl(var(--color-primary))',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        transition: 'all 0.2s ease'
-                                    }}
-                                >
-                                    {friend.name}
-                                    <span style={{ fontSize: '1rem', lineHeight: 1 }}>×</span>
-                                </div>
-                            ))}
+                            {Array.from(selectedFriendIds).map(id => {
+                                // Try to find in friends list first
+                                const friend = friends.find(f => f.id === id);
+                                // If not friend, try to find in the original group members (if we are editing)
+                                const originalMember = groups.flatMap(g => g.members).find((m: any) => m._id === id || m.id === id);
+
+                                const name = friend?.name || originalMember?.name || 'Unknown Member';
+
+                                return (
+                                    <div
+                                        key={id}
+                                        onClick={() => toggleFriend(id)}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            background: 'hsl(var(--color-primary) / 0.1)',
+                                            border: '1px solid hsl(var(--color-primary) / 0.2)',
+                                            borderRadius: '999px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.875rem',
+                                            fontWeight: 500,
+                                            color: 'hsl(var(--color-primary))',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            transition: 'all 0.2s ease'
+                                        }}
+                                    >
+                                        {name}
+                                        <span style={{ fontSize: '1rem', lineHeight: 1 }}>×</span>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--color-text-muted))' }}>
