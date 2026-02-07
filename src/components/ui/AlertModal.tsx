@@ -16,6 +16,7 @@ export function AlertModal({ isOpen, onClose, title = "Alert", message }: AlertM
             onClose={onClose}
             title={title}
             size="sm"
+            zIndex={50000}
         >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <p style={{ color: 'hsl(var(--color-text-muted))', lineHeight: '1.5' }}>

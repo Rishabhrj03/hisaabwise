@@ -9,7 +9,8 @@ import { Group } from '@/types';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { GroupAnalytics } from './GroupAnalytics';
-import { BarChart3, ArrowLeft } from 'lucide-react';
+import { GroupBalances } from './GroupBalances';
+import { BarChart3, ArrowLeft, Scale } from 'lucide-react';
 
 export function GroupManager() {
     const { groups, addGroup, updateGroup, deleteGroup } = useGroups();
@@ -24,7 +25,7 @@ export function GroupManager() {
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
 
     // Analytics State
-    const [viewMode, setViewMode] = useState<'list' | 'analytics'>('list');
+    const [viewMode, setViewMode] = useState<'list' | 'analytics' | 'balances'>('list');
     const [selectedGroup, setSelectedGroup] = useState<{ id: string, name: string } | null>(null);
 
     const handleCreate = async (e: React.FormEvent) => {
@@ -108,19 +109,59 @@ export function GroupManager() {
         setViewMode('analytics');
     };
 
-    // --- RENDER ANALYTICS VIEW ---
-    if (viewMode === 'analytics' && selectedGroup) {
+    // --- RENDER GROUP DETAIL VIEW (Analytics or Balances) ---
+    if ((viewMode === 'analytics' || viewMode === 'balances') && selectedGroup) {
         return (
             <Card variant="default" className="overflow-hidden">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                    <Button variant="ghost" size="sm" onClick={() => setViewMode('list')} style={{ padding: '0.5rem' }}>
-                        <ArrowLeft size={20} />
-                    </Button>
-                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
-                        {selectedGroup.name} Stats
-                    </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <Button variant="ghost" size="sm" onClick={() => setViewMode('list')} style={{ padding: '0.5rem' }}>
+                            <ArrowLeft size={20} />
+                        </Button>
+                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
+                            {selectedGroup.name}
+                        </h3>
+                    </div>
                 </div>
-                <GroupAnalytics groupId={selectedGroup.id} groupName={selectedGroup.name} />
+
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid hsl(var(--color-border))' }}>
+                    <button
+                        onClick={() => setViewMode('analytics')}
+                        style={{
+                            padding: '0.75rem 1rem',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: viewMode === 'analytics' ? '2px solid hsl(var(--color-primary))' : '2px solid transparent',
+                            color: viewMode === 'analytics' ? 'hsl(var(--color-primary))' : 'hsl(var(--color-text-muted))',
+                            fontWeight: viewMode === 'analytics' ? 600 : 400,
+                            cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem'
+                        }}
+                    >
+                        <BarChart3 size={18} /> Analytics
+                    </button>
+                    <button
+                        onClick={() => setViewMode('balances')}
+                        style={{
+                            padding: '0.75rem 1rem',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: viewMode === 'balances' ? '2px solid hsl(var(--color-primary))' : '2px solid transparent',
+                            color: viewMode === 'balances' ? 'hsl(var(--color-primary))' : 'hsl(var(--color-text-muted))',
+                            fontWeight: viewMode === 'balances' ? 600 : 400,
+                            cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem'
+                        }}
+                    >
+                        <Scale size={18} /> Balances
+                    </button>
+                </div>
+
+                {viewMode === 'analytics' ? (
+                    <GroupAnalytics groupId={selectedGroup.id} groupName={selectedGroup.name} />
+                ) : (
+                    <GroupBalances groupId={selectedGroup.id} />
+                )}
             </Card>
         );
     }

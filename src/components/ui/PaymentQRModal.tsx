@@ -32,7 +32,7 @@ export const PaymentQRModal: React.FC<PaymentQRModalProps> = ({ isOpen, onClose,
             right: 0,
             bottom: 0,
             backgroundColor: 'rgba(0,0,0,0.85)',
-            zIndex: 10000,
+            zIndex: 40000,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -63,9 +63,28 @@ export const PaymentQRModal: React.FC<PaymentQRModalProps> = ({ isOpen, onClose,
                     <div style={{ width: '250px', height: '250px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading QR...</div>
                 )}
 
-                <p style={{ fontSize: '0.8rem', color: '#888', textAlign: 'center' }}>
-                    On mobile? <a href={upiUrl} style={{ color: 'hsl(var(--color-primary))', textDecoration: 'underline' }}>Click here to open app</a>
-                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', width: '100%' }}>
+                    <a href={upiUrl.replace('upi://', 'tez://upi/')} style={{ textDecoration: 'none' }}>
+                        <Button variant="secondary" style={{ width: '100%', fontSize: '0.85rem' }}>
+                            GPay
+                        </Button>
+                    </a>
+                    <a href={upiUrl.replace('upi://', 'phonepe://')} style={{ textDecoration: 'none' }}>
+                        <Button variant="secondary" style={{ width: '100%', fontSize: '0.85rem' }}>
+                            PhonePe
+                        </Button>
+                    </a>
+                    <a href={upiUrl.replace('upi://', 'paytmmp://')} style={{ textDecoration: 'none' }}>
+                        <Button variant="secondary" style={{ width: '100%', fontSize: '0.85rem' }}>
+                            Paytm
+                        </Button>
+                    </a>
+                    <a href={upiUrl} style={{ textDecoration: 'none' }}>
+                        <Button variant="secondary" style={{ width: '100%', fontSize: '0.85rem' }}>
+                            Other UPI
+                        </Button>
+                    </a>
+                </div>
 
                 <Button variant="secondary" onClick={onClose} style={{ width: '100%' }}>
                     Close
