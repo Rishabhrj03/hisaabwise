@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useExpenses } from '@/context/ExpenseContext';
 import { useFriends } from '@/context/FriendContext';
+import { useAuth } from '@/context/AuthContext';
+import { calculateBalances } from '@/utils/balanceUtils';
 
 import { QRScannerModal } from '@/components/ui/QRScannerModal';
 import { PaymentQRModal } from '@/components/ui/PaymentQRModal';
@@ -12,6 +14,8 @@ import { AlertModal } from '@/components/ui/AlertModal';
 export function BalanceList() {
     const { expenses, addExpense } = useExpenses();
     const { friends, updateFriend } = useFriends();
+    const { user } = useAuth();
+
     const [showScanner, setShowScanner] = React.useState(false);
     const [scanningFriendId, setScanningFriendId] = React.useState<string | null>(null);
 
@@ -29,6 +33,7 @@ export function BalanceList() {
     const [alertConfig, setAlertConfig] = React.useState({ isOpen: false, title: '', message: '' });
 
     const handleSettleUp = (friendId: string, friendName: string, balance: number) => {
+        if (!user) return;
         const isOwed = balance > 0;
         const absAmount = Math.abs(balance);
 
@@ -37,11 +42,11 @@ export function BalanceList() {
                 description: `Settlement with ${friendName}`,
                 amount: absAmount,
                 type: 'expense',
-                category: 'Other',
+                category: 'Other', // or 'Settlement'
                 date: new Date().toISOString(),
                 splitDetails: {
-                    paidBy: friendId,
-                    shares: [{ userId: 'me', amount: absAmount }]
+                    paidBy: friendId, // They paid
+                    shares: [{ userId: user.id, amount: absAmount }] // For me
                 },
                 relatedTo: [friendId]
             });
@@ -50,11 +55,11 @@ export function BalanceList() {
                 description: `Settlement with ${friendName}`,
                 amount: absAmount,
                 type: 'expense',
-                category: 'Other',
+                category: 'Other', // or 'Settlement'
                 date: new Date().toISOString(),
                 splitDetails: {
-                    paidBy: 'me',
-                    shares: [{ userId: friendId, amount: absAmount }]
+                    paidBy: user.id, // I paid
+                    shares: [{ userId: friendId, amount: absAmount }] // For them
                 },
                 relatedTo: [friendId]
             });
@@ -65,14 +70,12 @@ export function BalanceList() {
         if (!scanningFriendId) return;
 
         // Parse UPI URL
-        // Format: upi://pay?pa=address@upi&pn=Name...
         try {
             let upiId = '';
             if (decodedText.startsWith('upi://')) {
                 const url = new URL(decodedText);
                 upiId = url.searchParams.get('pa') || '';
             } else if (decodedText.includes('@')) {
-                // If scanned text is just the VPA
                 upiId = decodedText;
             }
 
@@ -105,32 +108,10 @@ export function BalanceList() {
         }
     };
 
-    if (friends.length === 0) return null;
+    if (friends.length === 0 || !user) return null;
 
-    // Calculate balances
-    const balances: Record<string, number> = {};
-    friends.forEach(f => {
-        balances[f.id] = 0;
-    });
-
-    expenses.forEach(expense => {
-        if (!expense.splitDetails) return;
-        const { paidBy, shares } = expense.splitDetails;
-
-        if (paidBy === 'me') {
-            shares.forEach(share => {
-                if (share.userId !== 'me') {
-                    balances[share.userId] = (balances[share.userId] || 0) + share.amount;
-                }
-            });
-        } else {
-            const payerId = paidBy;
-            const myShare = shares.find(s => s.userId === 'me');
-            if (myShare) {
-                balances[payerId] = (balances[payerId] || 0) - myShare.amount;
-            }
-        }
-    });
+    // Use the utility function for consistent calculation
+    const balances = calculateBalances(expenses, friends, user.id);
 
     const hasBalances = Object.values(balances).some(amount => Math.abs(amount) > 0.01);
 
@@ -171,11 +152,10 @@ export function BalanceList() {
                                         fontSize: '0.9rem',
                                         marginRight: '0.25rem'
                                     }}>
-                                        {isOwed ? 'owes you' : 'you owe'} ${Math.abs(balance).toFixed(2)}
+                                        {isOwed ? 'owes you' : 'you owe'} {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Math.abs(balance))}
                                     </span>
 
                                     <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                        {/* Edit / Add Buttons - Always Visible now */}
                                         {!friend.upi_id ? (
                                             <Button
                                                 size="sm"
@@ -193,7 +173,6 @@ export function BalanceList() {
                                                 style={{ padding: '0.25rem', height: '24px', width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                 onClick={() => openEditUpiModal(friend.id, friend.name, friend.upi_id)}
                                                 title="Edit UPI ID"
-                                                tooltip="Edit UPI ID"
                                             >
                                                 ✎
                                             </Button>
@@ -208,7 +187,6 @@ export function BalanceList() {
                                                 setShowScanner(true);
                                             }}
                                             title="Scan QR"
-                                            tooltip="Scan QR Code"
                                         >
                                             📷
                                         </Button>
@@ -236,11 +214,6 @@ export function BalanceList() {
                                                     name: friend.name
                                                 });
                                                 setShowPaymentQR(true);
-
-                                                // Also try to open immediately for mobile users
-                                                // window.location.href = upiLink; // Optional: maybe just let the modal handle it?
-                                                // Let's rely on the modal link for clarity on desktop, or auto-trigger?
-                                                // Auto-triggering might block the modal on some browsers. Let's stick to the modal.
                                             }}
                                             title={`Pay to ${friend.upi_id}`}
                                         >

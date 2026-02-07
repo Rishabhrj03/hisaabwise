@@ -17,6 +17,9 @@ export async function GET(
         }
 
         const { id } = await params;
+        const { searchParams } = new URL(req.url);
+        const month = searchParams.get('month'); // YYYY-MM or null
+
         await dbConnect();
 
         // 1. Verify Group Access
@@ -35,7 +38,26 @@ export async function GET(
         // 2. Fetch Expenses
         // Note: Using 'new' keyword to avoid potential mongoose query issues if model was compiled differently?
         // Standard Expense.find is fine.
-        const expenses = await Expense.find({ group_id: id });
+        // 2. Fetch Expenses
+        const query: any = { group_id: id };
+
+        if (month) {
+            const [year, monthIndex] = month.split('-').map(Number);
+            // Create UTC dates for start and end of month
+            // Note: Months in JS Date are 0-indexed (1=Feb?? No, 0=Jan)
+            // But input '2025-02' means February (Month 2).
+            // So monthIndex - 1 for JS Date constructor.
+
+            const startDate = new Date(year, monthIndex - 1, 1);
+            const endDate = new Date(year, monthIndex, 0, 23, 59, 59, 999); // Last day of month
+
+            query.date = {
+                $gte: startDate,
+                $lte: endDate
+            };
+        }
+
+        const expenses = await Expense.find(query);
 
         // 3. Prepare Member Map (ID -> Name)
         const memberMap: Record<string, string> = {};

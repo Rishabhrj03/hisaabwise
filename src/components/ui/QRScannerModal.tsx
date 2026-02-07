@@ -64,10 +64,15 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose,
             clearTimeout(timeoutId);
             if (scannerRef.current) {
                 // Determine if scanner is running is hard synchronously, so we just catch the specific error
-                scannerRef.current.stop().catch(err => {
+                // The library throws if we try to stop a non-running scanner
+                scannerRef.current.stop().then(() => {
+                    // Stopped successfully
+                }).catch(err => {
                     // Ignore "not running" errors as they are expected during cleanup of failed starts
-                    if (!err.toString().includes('not running')) {
-                        console.error("Error stopping scanner during cleanup", err);
+                    // The error message from html5-qrcode is usually "Cannot stop, scanner is not running or paused"
+                    const msg = err?.toString() || "";
+                    if (!msg.includes('not running') && !msg.includes('not started')) {
+                        console.warn("Gracefully handled scanner stop error:", msg);
                     }
                 });
             }
@@ -113,13 +118,14 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose,
                 <Button variant="secondary" onClick={() => {
                     if (scannerRef.current) {
                         scannerRef.current.stop().then(() => {
-                            scannerRef.current = null;
+                            // Scanner stopped
                             onClose();
-                        }).catch(() => {
+                        }).catch((err) => {
                             // If stop fails (not running), just close
-                            scannerRef.current = null;
+                            // console.log("Stop failed", err);
                             onClose();
                         });
+                        scannerRef.current = null;
                     } else {
                         onClose();
                     }
