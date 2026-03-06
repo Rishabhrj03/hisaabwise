@@ -300,15 +300,29 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
                 onClick={onDelete}
                 style={{
                     position: 'absolute',
-                    top: '4px',
-                    right: '4px',
-                    background: 'none',
-                    border: 'none',
-                    color: '#ff4d4d',
+                    top: '8px',
+                    right: '8px',
+                    background: 'hsla(var(--hue-danger), 70%, 50%, 0.1)',
+                    border: '1px solid hsla(var(--hue-danger), 70%, 50%, 0.2)',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'hsl(var(--color-expense))',
                     cursor: 'pointer',
-                    opacity: 0.5,
-                    fontSize: '1rem',
-                    zIndex: 10
+                    fontSize: '1.2rem',
+                    zIndex: 10,
+                    transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => {
+                    e.currentTarget.style.background = 'hsla(var(--hue-danger), 70%, 50%, 0.2)';
+                    e.currentTarget.style.transform = 'rotate(90deg)';
+                }}
+                onMouseLeave={e => {
+                    e.currentTarget.style.background = 'hsla(var(--hue-danger), 70%, 50%, 0.1)';
+                    e.currentTarget.style.transform = 'rotate(0deg)';
                 }}
                 title="Delete Goal"
                 className="opacity-0 group-hover:opacity-100 transition-opacity"
@@ -350,15 +364,29 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
             <div style={{ fontSize: '0.8rem', color: 'hsl(var(--color-text-muted))', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.25rem' }}>
                 <span>₹{goal.currentAmount} / </span>
                 {isEditingTarget ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={e => e.stopPropagation()}>
                         <input
                             type="number"
                             value={editTargetAmount}
                             onChange={e => setEditTargetAmount(e.target.value)}
-                            style={{ width: '50px', padding: '1px', border: '1px solid #555', borderRadius: '4px', fontSize: '0.8rem', background: 'transparent', color: 'inherit' }}
+                            style={{ width: '60px', padding: '4px', border: '1px solid hsl(var(--color-border))', borderRadius: '4px', fontSize: '0.8rem', background: 'hsl(var(--color-surface))', color: 'inherit', outline: 'none' }}
                             autoFocus
                         />
-                        <button onClick={handleUpdateTarget} style={{ background: 'var(--color-primary)', border: 'none', borderRadius: '4px', color: 'white', padding: '0 4px' }}>✓</button>
+                        <button
+                            onClick={handleUpdateTarget}
+                            style={{
+                                background: 'hsl(var(--color-primary))',
+                                border: 'none',
+                                borderRadius: '4px',
+                                color: 'white',
+                                padding: '4px 8px',
+                                fontSize: '0.7rem',
+                                cursor: 'pointer',
+                                fontWeight: 600
+                            }}
+                        >
+                            Save
+                        </button>
                     </div>
                 ) : (
                     <span onClick={(e) => { e.stopPropagation(); setIsEditingTarget(true); }} style={{ cursor: 'pointer', borderBottom: '1px dashed #666' }}>
@@ -369,20 +397,55 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
 
             {
                 addingFunds ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'hsla(var(--color-surface), 0.3)', padding: '0.5rem', borderRadius: '8px', border: '1px solid hsl(var(--color-border))' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'hsl(var(--color-text-muted))', textAlign: 'left' }}>Add Funds / Withdraw</div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <input
                                 type="number"
                                 value={amountToAdd}
                                 onChange={e => setAmountToAdd(e.target.value)}
                                 placeholder="+/- Amt"
-                                style={{ width: '100%', padding: '2px', borderRadius: '4px', border: '1px solid #555', fontSize: '0.8rem', background: 'transparent', color: 'inherit' }}
+                                style={{ flex: 1, padding: '6px', borderRadius: '4px', border: '1px solid hsl(var(--color-border))', fontSize: '0.85rem', background: 'hsl(var(--color-surface))', color: 'inherit', outline: 'none' }}
                                 autoFocus
                             />
-                            <button onClick={handleAddFunds} disabled={isUpdating} style={{ background: 'var(--color-primary)', border: 'none', borderRadius: '4px', color: 'white' }}>{isUpdating ? '.' : '✓'}</button>
-                            <button onClick={() => setAddingFunds(false)} style={{ background: 'transparent', border: 'none', color: '#999' }}>×</button>
                         </div>
-                        <span style={{ fontSize: '0.6rem', color: '#aaa' }}>Use negative (-) to withdraw</span>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={handleAddFunds}
+                                disabled={isUpdating}
+                                style={{
+                                    flex: 1,
+                                    background: 'hsl(var(--color-primary))',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    color: 'white',
+                                    padding: '6px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    opacity: isUpdating ? 0.7 : 1
+                                }}
+                            >
+                                {isUpdating ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                                onClick={() => setAddingFunds(false)}
+                                style={{
+                                    flex: 1,
+                                    background: 'hsla(var(--color-text-muted), 0.1)',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    color: 'hsl(var(--color-text-muted))',
+                                    padding: '6px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 500,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                        <span style={{ fontSize: '0.6rem', color: 'hsl(var(--color-text-muted))', opacity: 0.8 }}>Use negative (-) to withdraw</span>
                     </div>
                 ) : (
                     <button
