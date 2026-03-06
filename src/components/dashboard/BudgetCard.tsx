@@ -31,7 +31,7 @@ export function BudgetCard() {
             }
         };
         fetchBudgets();
-    }, []);
+    }, [expenses]);
 
     // Calculate current spending per category for CURRENT MONTH
     const currentSpending = expenses.reduce((acc, expense) => {
@@ -101,6 +101,7 @@ export function BudgetCard() {
             variant="glass"
             title="Monthly Budgets 📉"
             defaultOpen={true}
+            scrollable={true}
             action={
                 <button
                     onClick={() => setShowAdd(!showAdd)}
@@ -111,15 +112,20 @@ export function BudgetCard() {
             }
         >
 
-            {/* Total Summary */}
+            {/* Total Budget Progress */}
             {budgets.length > 0 && (
                 <div style={{
+                    position: 'sticky',
+                    top: '-0.5rem',
+                    zIndex: 20,
                     marginBottom: '1rem',
                     padding: '0.75rem 1rem',
-                    background: 'linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(260, 100%, 65%) 100%)',
+                    background: 'var(--sticky-budget-bg)',
                     borderRadius: 'var(--radius-md)',
-                    boxShadow: '0 4px 12px -3px rgba(124, 58, 237, 0.4)',
-                    color: 'white'
+                    boxShadow: 'var(--shadow-md)',
+                    color: 'var(--sticky-budget-text)',
+                    backdropFilter: 'blur(var(--sticky-blur))',
+                    border: '1px solid var(--sticky-budget-border)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                         <div>
@@ -263,7 +269,19 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
     const color = isOver ? 'var(--color-expense)' : percentage > 80 ? 'var(--hue-warning)' : 'var(--color-primary)';
 
     return (
-        <div style={{ marginBottom: '1rem' }}>
+        <Card
+            variant="glass"
+            style={{
+                marginBottom: '0.75rem',
+                padding: '1rem',
+                borderLeft: `4px solid ${isOver ? 'hsl(var(--color-expense))' : percentage > 80 ? 'hsl(var(--hue-warning))' : 'hsl(var(--color-primary))'}`,
+                transition: 'transform 0.2s',
+                cursor: 'pointer'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            onClick={() => !isEditing && setIsEditing(true)}
+        >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.95rem', alignItems: 'center' }}>
                 <span style={{ fontWeight: 600, color: 'hsl(var(--color-text-main))' }}>{budget.category}</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -271,7 +289,7 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
                         ₹{spent.toLocaleString()} <span style={{ opacity: 0.5 }}>/</span>
                     </span>
                     {isEditing ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
                             <input
                                 type="number"
                                 value={editAmount}
@@ -308,10 +326,7 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
                                 transition: 'background 0.2s',
                                 color: 'hsl(var(--color-text-main))'
                             }}
-                            onClick={() => setIsEditing(true)}
                             title="Click to edit limit"
-                            onMouseEnter={e => e.currentTarget.style.background = 'hsl(var(--color-surface-hover))'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                             ₹{budget.amount.toLocaleString()} ✏️
                         </span>
@@ -332,6 +347,6 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
                     transition: 'width 0.6s ease-out'
                 }} />
             </div>
-        </div>
+        </Card>
     );
 }

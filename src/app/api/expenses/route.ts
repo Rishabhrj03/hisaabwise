@@ -3,8 +3,10 @@ import dbConnect from '@/lib/db';
 import Expense from '@/models/Expense';
 import Friend from '@/models/Friend';
 import Group from '@/models/Group';
+import Activity from '@/models/Activity';
 import { getSessionUser } from '@/lib/auth';
 import { sendExpenseNotification } from '@/lib/notification';
+import { ensureBudgetExists } from '@/lib/budget';
 import mongoose from 'mongoose';
 
 export async function GET() {
@@ -67,6 +69,22 @@ export async function POST(req: Request) {
 
         // Trigger Notification Background Task (fire and forget to not block response)
         sendExpenseNotification(expense, session.userId).catch(console.error);
+
+        // Create Activity Log
+        Activity.create({
+            user: session.userId,
+            action: 'added',
+            type: 'expense',
+            targetName: expense.description,
+            targetId: expense._id,
+            amount: expense.amount,
+            group_id: expense.group_id
+        }).catch(err => console.error("Failed to create activity log:", err));
+
+        // Auto-add category to budget if missed
+        if (expense.type === 'expense') {
+            await ensureBudgetExists(session.userId, expense.category);
+        }
 
         return NextResponse.json(expense);
     } catch (error) {

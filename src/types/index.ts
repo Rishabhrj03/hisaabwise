@@ -68,3 +68,22 @@ export interface Category {
     icon?: string;
     is_default: boolean;
 }
+export interface Activity {
+    _id: string;
+    id: string;
+    user: {
+        _id: string;
+        name: string;
+        image?: string;
+    };
+    action: 'added' | 'updated' | 'deleted';
+    type: 'expense' | 'group' | 'friend';
+    targetName: string;
+    targetId: string;
+    amount?: number;
+    group?: {
+        _id: string;
+        name: string;
+    };
+    created_at: string;
+}

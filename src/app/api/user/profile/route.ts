@@ -11,7 +11,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { phone } = body;
+        const { name, phone, user_upi_id } = body;
 
         // Basic validation
         if (!phone || phone.length !== 10) {
@@ -21,10 +21,15 @@ export async function PATCH(req: Request) {
         await dbConnect();
 
         // Update user
+        const updateData: any = {};
+        if (name) updateData.name = name;
+        if (phone) updateData.phone = phone;
+        if (user_upi_id !== undefined) updateData.user_upi_id = user_upi_id;
+
         const updatedUser = await User.findByIdAndUpdate(
             session.userId,
-            { phone },
-            { new: true } // Return updated doc
+            updateData,
+            { new: true, runValidators: true }
         );
 
         if (!updatedUser) {
@@ -38,6 +43,7 @@ export async function PATCH(req: Request) {
                 name: updatedUser.name,
                 image: updatedUser.image,
                 phone: updatedUser.phone,
+                user_upi_id: updatedUser.user_upi_id,
                 isEmailVerified: updatedUser.isEmailVerified,
                 isPhoneVerified: updatedUser.isPhoneVerified
             },

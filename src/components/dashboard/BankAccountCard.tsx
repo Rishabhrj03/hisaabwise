@@ -107,6 +107,7 @@ export function BankAccountCard() {
                 variant="glass"
                 title="Accounts & Cards 💳"
                 defaultOpen={false}
+                scrollable={true}
                 action={
                     <button
                         onClick={() => setShowAdd(!showAdd)}
@@ -120,12 +121,17 @@ export function BankAccountCard() {
                 {/* Net Worth Summary - Gradient Card */}
                 {accounts.length > 0 && (
                     <div style={{
+                        position: 'sticky',
+                        top: '-0.5rem',
+                        zIndex: 20,
                         marginBottom: '1rem',
                         padding: '0.75rem 1rem',
-                        background: 'linear-gradient(135deg, hsl(210, 80%, 50%) 0%, hsl(230, 80%, 40%) 100%)', // Blue gradient
+                        background: 'var(--sticky-bank-bg)',
                         borderRadius: 'var(--radius-md)',
-                        boxShadow: '0 4px 12px -3px rgba(59, 130, 246, 0.4)',
-                        color: 'white'
+                        boxShadow: '0 4px 12px -3px hsla(var(--hue-primary), 80%, 50%, 0.3)',
+                        color: 'var(--sticky-bank-text)',
+                        backdropFilter: 'blur(var(--sticky-blur))',
+                        border: '1px solid var(--sticky-bank-border)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
@@ -378,7 +384,22 @@ function AccountItem({ account, onUpdate, onDelete }: { account: BankAccount, on
     const utilization = account.creditLimit ? (account.balance / account.creditLimit) * 100 : 0;
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+        <Card
+            variant="glass"
+            style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem',
+                borderLeft: `4px solid ${isCard ? 'hsl(var(--color-expense))' : 'hsl(var(--color-income))'}`,
+                transition: 'transform 0.2s',
+                cursor: 'pointer',
+                marginBottom: '0.5rem'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            onClick={() => !isEditing && setIsEditing(true)}
+        >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span style={{ fontSize: '1.5rem' }}>{getIcon(account.type)}</span>
                 <div>
@@ -406,7 +427,7 @@ function AccountItem({ account, onUpdate, onDelete }: { account: BankAccount, on
                     )}
                 </div>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    <span onClick={() => setIsEditing(true)} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>✏️</span>
+                    <span onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>✏️</span>
                     <button
                         type="button"
                         onClick={onDelete}
@@ -417,6 +438,6 @@ function AccountItem({ account, onUpdate, onDelete }: { account: BankAccount, on
                     </button>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }

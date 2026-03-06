@@ -9,6 +9,7 @@ export type User = {
     name: string;
     image?: string;
     phone?: string;
+    user_upi_id?: string;
     isEmailVerified?: boolean;
     isPhoneVerified?: boolean;
     phoneVerificationCode?: string;
@@ -20,7 +21,7 @@ type AuthContextType = {
     login: (email: string, password: string) => Promise<{ error?: string }>
     register: (email: string, password: string, name?: string, phone?: string, termsAccepted?: boolean) => Promise<{ error?: string }>
     logout: () => Promise<void>
-    updateProfile: (phone: string) => Promise<{ error?: string }>
+    updateProfile: (updateData: { name?: string; phone?: string; user_upi_id?: string }) => Promise<{ error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -109,21 +110,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    const updateProfile = async (phone: string) => {
+    const updateProfile = async (updateData: { name?: string; phone?: string; user_upi_id?: string }) => {
         try {
             const res = await fetch('/api/user/profile', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone }),
+                body: JSON.stringify(updateData),
             });
-            const data = await res.json();
+            const responseData = await res.json();
             if (!res.ok) {
-                return { error: data.error };
+                return { error: responseData.error };
             }
-            setUser(data.user);
+            setUser(responseData.user);
             router.refresh();
             return {};
         } catch (error) {
+            console.error("Profile update failed:", error);
             return { error: 'Something went wrong' };
         }
     }

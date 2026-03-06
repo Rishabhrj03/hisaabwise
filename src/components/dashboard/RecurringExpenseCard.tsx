@@ -117,6 +117,7 @@ export function RecurringExpenseCard() {
                 variant="glass"
                 title="Liabilities & Recurring 🗓️"
                 defaultOpen={false}
+                scrollable={true}
                 action={
                     <button
                         onClick={() => setShowAdd(!showAdd)}
@@ -130,16 +131,20 @@ export function RecurringExpenseCard() {
                 {/* Liabilities Summary - Gradient Card */}
                 {recurrings.length > 0 && (
                     <div style={{
+                        position: 'sticky',
+                        top: '-0.5rem',
+                        zIndex: 20,
                         marginBottom: '1rem',
                         padding: '0.75rem 1rem',
-                        background: 'linear-gradient(135deg, hsl(200, 20%, 30%) 0%, hsl(200, 20%, 20%) 100%)', // Slate/Gray gradient
+                        background: 'var(--sticky-liab-bg)',
                         borderRadius: 'var(--radius-md)',
-                        boxShadow: '0 4px 12px -3px rgba(0,0,0, 0.4)',
-                        color: 'white',
+                        boxShadow: 'var(--shadow-md)',
+                        color: 'var(--sticky-liab-text)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        border: '1px solid rgba(255,255,255,0.1)'
+                        border: '1px solid var(--sticky-liab-border)',
+                        backdropFilter: 'blur(var(--sticky-blur))'
                     }}>
                         <div>
                             <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Monthly To Pay</div>
@@ -210,10 +215,25 @@ export function RecurringExpenseCard() {
                             const isOverdue = daysLeft < 0;
 
                             return (
-                                <div key={rec._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: isUrgent ? '3px solid orange' : isOverdue ? '3px solid red' : 'none' }}>
+                                <Card
+                                    key={rec._id}
+                                    variant="glass"
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '1rem',
+                                        borderLeft: `4px solid ${isOverdue ? 'hsl(var(--color-expense))' : isUrgent ? 'hsl(var(--hue-warning))' : 'hsl(var(--color-primary))'}`,
+                                        transition: 'transform 0.2s',
+                                        cursor: 'pointer',
+                                        marginBottom: '0.5rem'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+                                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                >
                                     <div>
                                         <div style={{ fontWeight: 500 }}>{rec.name}</div>
-                                        <div style={{ fontSize: '0.7rem', color: isUrgent || isOverdue ? 'var(--color-expense)' : '#888' }}>
+                                        <div style={{ fontSize: '0.7rem', color: isUrgent || isOverdue ? 'hsl(var(--color-expense))' : 'hsl(var(--color-text-muted))' }}>
                                             {isOverdue ? `Overdue by ${Math.abs(daysLeft)} days` : `Due in ${daysLeft} days`} • {new Date(rec.nextDueDate).toLocaleDateString()}
                                         </div>
                                     </div>
@@ -235,7 +255,7 @@ export function RecurringExpenseCard() {
                                             &times;
                                         </button>
                                     </div>
-                                </div>
+                                </Card>
                             );
                         })}
                     </div>

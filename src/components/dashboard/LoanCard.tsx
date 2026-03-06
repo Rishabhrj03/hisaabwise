@@ -108,6 +108,7 @@ export function LoanCard() {
                 variant="glass"
                 title="Loans & Udhar 🤝"
                 defaultOpen={false}
+                scrollable={true}
                 action={
                     <button
                         onClick={() => setShowAdd(!showAdd)}
@@ -121,15 +122,20 @@ export function LoanCard() {
                 {/* Loan Summary - Gradient Card */}
                 {loans.length > 0 && (
                     <div style={{
+                        position: 'sticky',
+                        top: '-0.5rem',
+                        zIndex: 20,
                         marginBottom: '1rem',
                         padding: '0.75rem 1rem',
-                        background: 'linear-gradient(135deg, hsl(0, 70%, 60%) 0%, hsl(30, 80%, 55%) 100%)', // Red-Orange gradient
+                        background: 'var(--sticky-loan-bg)',
                         borderRadius: 'var(--radius-md)',
-                        boxShadow: '0 4px 12px -3px rgba(239, 68, 68, 0.4)',
-                        color: 'white',
+                        boxShadow: '0 4px 12px -3px hsla(var(--hue-danger), 70%, 50%, 0.3)',
+                        color: 'var(--sticky-loan-text)',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        backdropFilter: 'blur(var(--sticky-blur))',
+                        border: '1px solid var(--sticky-loan-border)'
                     }}>
                         <div>
                             <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>You Owe (Payable)</div>
@@ -257,11 +263,23 @@ function LoanItem({ loan, onUpdate, onDelete }: { loan: Loan, onUpdate: (l: Loan
     const progress = Math.min((loan.paidAmount / estimatedTotal) * 100, 100);
 
     return (
-        <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: loan.type === 'borrowed' ? '3px solid var(--color-expense)' : '3px solid var(--color-income)' }}>
+        <Card
+            variant="glass"
+            style={{
+                padding: '1rem',
+                borderLeft: `4px solid ${loan.type === 'borrowed' ? 'hsl(var(--color-expense))' : 'hsl(var(--color-income))'}`,
+                transition: 'transform 0.2s',
+                cursor: 'pointer',
+                marginBottom: '0.5rem'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            onClick={() => !paying && setPaying(true)}
+        >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                     <div style={{ fontWeight: 600 }}>{loan.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))' }}>
                         {loan.type === 'borrowed' ? 'Borrowed' : 'Lent'} • {loan.interestRate}% Int • {loan.tenureMonths}m
                     </div>
                 </div>
@@ -278,37 +296,38 @@ function LoanItem({ loan, onUpdate, onDelete }: { loan: Loan, onUpdate: (l: Loan
                             fontSize: '1rem',
                             lineHeight: '1',
                             padding: '0 0 4px 0',
-                            opacity: 0.6
+                            opacity: 0.6,
+                            zIndex: 10
                         }}
                     >
                         &times;
                     </button>
                     <div style={{ fontWeight: 700 }}>₹{loan.principalAmount}</div>
-                    {loan.repaymentType === 'emi' && <div style={{ fontSize: '0.7rem', color: 'orange' }}>EMI: ₹{loan.emiAmount}/mo</div>}
+                    {loan.repaymentType === 'emi' && <div style={{ fontSize: '0.7rem', color: 'hsl(var(--hue-warning))' }}>EMI: ₹{loan.emiAmount}/mo</div>}
                 </div>
             </div>
 
-            <div style={{ marginTop: '0.5rem', background: 'rgba(255,255,255,0.1)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: `${progress}%`, height: '100%', background: loan.type === 'borrowed' ? 'var(--color-expense)' : 'var(--color-income)', transition: 'width 0.5s' }} />
+            <div style={{ marginTop: '0.5rem', background: 'hsl(var(--color-surface-hover))', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: `${progress}%`, height: '100%', background: loan.type === 'borrowed' ? 'hsl(var(--color-expense))' : 'hsl(var(--color-income))', transition: 'width 0.5s' }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginTop: '2px', color: '#888' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginTop: '2px', color: 'hsl(var(--color-text-muted))' }}>
                 <span>Paid: ₹{loan.paidAmount}</span>
                 <span>Est Total: ₹{Math.round(estimatedTotal)}</span>
             </div>
 
             <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 {paying ? (
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <input type="number" placeholder="Amount" value={payAmount} onChange={e => setPayAmount(e.target.value)} style={{ width: '80px', padding: '2px 4px', borderRadius: '4px' }} />
-                        <button onClick={handlePay} style={{ background: 'var(--color-primary)', border: 'none', color: 'white', borderRadius: '4px', padding: '2px 8px' }}>Confirm</button>
-                        <button onClick={() => setPaying(false)} style={{ background: 'none', border: 'none', color: '#aaa' }}>x</button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
+                        <input type="number" placeholder="Amount" value={payAmount} onChange={e => setPayAmount(e.target.value)} style={{ width: '80px', padding: '2px 4px', borderRadius: '4px', background: 'transparent', color: 'inherit', border: '1px solid hsl(var(--color-border))' }} />
+                        <button onClick={handlePay} style={{ background: 'hsl(var(--color-primary))', border: 'none', color: 'white', borderRadius: '4px', padding: '2px 8px' }}>Confirm</button>
+                        <button onClick={() => setPaying(false)} style={{ background: 'none', border: 'none', color: 'hsl(var(--color-text-muted))' }}>x</button>
                     </div>
                 ) : (
-                    <button onClick={() => setPaying(true)} style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'inherit', cursor: 'pointer' }}>
+                    <button onClick={(e) => { e.stopPropagation(); setPaying(true); }} style={{ fontSize: '0.75rem', padding: '4px 12px', borderRadius: '44px', background: 'hsl(var(--color-surface-hover))', border: '1px solid hsl(var(--color-border))', color: 'inherit', cursor: 'pointer' }}>
                         + Record Payment
                     </button>
                 )}
             </div>
-        </div>
+        </Card>
     );
 }

@@ -7,9 +7,10 @@ interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> 
     title?: React.ReactNode;
     action?: React.ReactNode;
     defaultOpen?: boolean;
+    scrollable?: boolean;
 }
 
-export function Card({ children, className = '', variant = 'glass', title, action, defaultOpen = false, ...props }: CardProps) {
+export function Card({ children, className = '', variant = 'glass', title, action, defaultOpen = false, scrollable = false, ...props }: CardProps) {
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     const baseStyles = "p-6 rounded-2xl transition-all duration-300";
@@ -56,10 +57,17 @@ export function Card({ children, className = '', variant = 'glass', title, actio
             )}
 
             {title ? (
-                <div style={{ display: isOpen ? 'block' : 'none' }}>
+                <div
+                    className={scrollable ? 'scrollable-content' : ''}
+                    style={{ display: isOpen ? 'block' : 'none' }}
+                >
                     {children}
                 </div>
-            ) : children}
+            ) : (
+                <div className={scrollable ? 'scrollable-content' : ''}>
+                    {children}
+                </div>
+            )}
         </div>
     );
 }

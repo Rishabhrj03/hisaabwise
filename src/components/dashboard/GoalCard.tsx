@@ -99,6 +99,7 @@ export function GoalCard() {
                 variant="glass"
                 title="Savings Goals 🎯"
                 defaultOpen={false}
+                scrollable={true}
                 action={
                     <button
                         onClick={() => setShowAdd(!showAdd)}
@@ -111,15 +112,20 @@ export function GoalCard() {
                 {/* Total Savings Summary */}
                 {goals.length > 0 && (
                     <div style={{
+                        position: 'sticky',
+                        top: '-0.5rem',
+                        zIndex: 20,
                         marginBottom: '1rem',
                         padding: '0.75rem 1rem',
-                        background: 'linear-gradient(135deg, hsl(160, 60%, 45%) 0%, hsl(160, 60%, 30%) 100%)', // Green gradient for savings
+                        background: 'var(--sticky-goal-bg)',
                         borderRadius: 'var(--radius-md)',
-                        boxShadow: '0 4px 12px -3px rgba(16, 185, 129, 0.4)',
-                        color: 'white',
+                        boxShadow: '0 4px 12px -3px hsla(var(--hue-success), 70%, 50%, 0.3)',
+                        color: 'var(--sticky-goal-text)',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        backdropFilter: 'blur(var(--sticky-blur))',
+                        border: '1px solid var(--sticky-goal-border)'
                     }}>
                         <div>
                             <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Saved</div>
@@ -275,14 +281,18 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
     const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
 
     return (
-        <div style={{
-            padding: '1rem',
-            background: 'rgba(255,255,255,0.05)',
-            borderRadius: '12px',
-            border: `1px solid ${goal.color || '#4F46E5'}40`,
-            textAlign: 'center',
-            position: 'relative'
-        }}
+        <Card
+            variant="glass"
+            style={{
+                padding: '1rem',
+                borderLeft: `4px solid ${goal.color || '#4F46E5'}`,
+                textAlign: 'center',
+                position: 'relative',
+                transition: 'transform 0.2s',
+                cursor: 'pointer'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             className="group"
         >
             <button
@@ -297,7 +307,8 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
                     color: '#ff4d4d',
                     cursor: 'pointer',
                     opacity: 0.5,
-                    fontSize: '1rem'
+                    fontSize: '1rem',
+                    zIndex: 10
                 }}
                 title="Delete Goal"
                 className="opacity-0 group-hover:opacity-100 transition-opacity"
@@ -339,18 +350,18 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
             <div style={{ fontSize: '0.8rem', color: 'hsl(var(--color-text-muted))', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.25rem' }}>
                 <span>₹{goal.currentAmount} / </span>
                 {isEditingTarget ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }} onClick={e => e.stopPropagation()}>
                         <input
                             type="number"
                             value={editTargetAmount}
                             onChange={e => setEditTargetAmount(e.target.value)}
-                            style={{ width: '50px', padding: '1px', border: '1px solid #555', borderRadius: '4px', fontSize: '0.8rem' }}
+                            style={{ width: '50px', padding: '1px', border: '1px solid #555', borderRadius: '4px', fontSize: '0.8rem', background: 'transparent', color: 'inherit' }}
                             autoFocus
                         />
                         <button onClick={handleUpdateTarget} style={{ background: 'var(--color-primary)', border: 'none', borderRadius: '4px', color: 'white', padding: '0 4px' }}>✓</button>
                     </div>
                 ) : (
-                    <span onClick={() => setIsEditingTarget(true)} style={{ cursor: 'pointer', borderBottom: '1px dashed #666' }}>
+                    <span onClick={(e) => { e.stopPropagation(); setIsEditingTarget(true); }} style={{ cursor: 'pointer', borderBottom: '1px dashed #666' }}>
                         {goal.targetAmount} ✏️
                     </span>
                 )}
@@ -358,14 +369,14 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
 
             {
                 addingFunds ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: '0.25rem' }}>
                             <input
                                 type="number"
                                 value={amountToAdd}
                                 onChange={e => setAmountToAdd(e.target.value)}
                                 placeholder="+/- Amt"
-                                style={{ width: '100%', padding: '2px', borderRadius: '4px', border: '1px solid #555', fontSize: '0.8rem' }}
+                                style={{ width: '100%', padding: '2px', borderRadius: '4px', border: '1px solid #555', fontSize: '0.8rem', background: 'transparent', color: 'inherit' }}
                                 autoFocus
                             />
                             <button onClick={handleAddFunds} disabled={isUpdating} style={{ background: 'var(--color-primary)', border: 'none', borderRadius: '4px', color: 'white' }}>{isUpdating ? '.' : '✓'}</button>
@@ -375,7 +386,7 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
                     </div>
                 ) : (
                     <button
-                        onClick={() => setAddingFunds(true)}
+                        onClick={(e) => { e.stopPropagation(); setAddingFunds(true); }}
                         style={{
                             border: '1px solid hsl(var(--color-border))',
                             background: 'rgba(255,255,255,0.1)',
@@ -391,6 +402,6 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
                     </button>
                 )
             }
-        </div >
+        </Card>
     );
 }

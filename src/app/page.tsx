@@ -21,7 +21,10 @@ import { RecurringExpenseCard } from '@/components/dashboard/RecurringExpenseCar
 import { LoanCard } from '@/components/dashboard/LoanCard';
 import { CategoryManager } from '@/components/dashboard/CategoryManager';
 import { BalanceList } from '@/components/dashboard/BalanceList';
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
+import { ProfileModal } from '@/components/dashboard/ProfileModal';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { VoiceInput } from '@/components/dashboard/VoiceInput';
 import { useExpenses } from '@/context/ExpenseContext';
 
@@ -58,6 +61,7 @@ export default function Home() {
   const [showMobileActions, setShowMobileActions] = useState(false);
   const [showMobileExport, setShowMobileExport] = useState(false);
   const [showCalculators, setShowCalculators] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -176,7 +180,7 @@ export default function Home() {
 
   return (
     <div className="container flex-col" style={{ minHeight: '100vh', gap: '2rem' }}>
-      <Header />
+      <Header onProfileClick={() => setShowProfile(true)} />
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
@@ -406,9 +410,11 @@ export default function Home() {
           <BalanceList />
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.25rem', margin: 0, flex: 1, minWidth: '150px' }}>Recent Transactions</h2>
+        <Card
+          title="Recent Transactions"
+          defaultOpen={true}
+          scrollable={true}
+          action={
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <VoiceInput />
               <Button onClick={() => {
@@ -418,13 +424,20 @@ export default function Home() {
                 + New
               </Button>
             </div>
-          </div>
+          }
+        >
           <TransactionList
             expenses={filteredExpenses}
             onDelete={deleteExpense}
             onEdit={handleEdit}
             currency={currency}
           />
+        </Card>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div className="hide-on-mobile">
+            {/* You can add something else here if needed, or leave it for balance */}
+          </div>
         </div>
       </main>
 
@@ -466,6 +479,7 @@ export default function Home() {
         onShowBalances={() => setShowMobileBalances(true)}
         onShare={() => setShowShareModal(true)}
         onShowCalculators={() => setShowCalculators(true)}
+        onShowProfile={() => setShowProfile(true)}
       />
 
       <div className="mobile-nav-spacer"></div>
@@ -522,6 +536,14 @@ export default function Home() {
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
       />
+
+      <Modal
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+        title="My Profile"
+      >
+        <ProfileModal onClose={() => setShowProfile(false)} />
+      </Modal>
 
       <footer style={{
         padding: '3rem 0',

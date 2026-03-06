@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Expense from '@/models/Expense';
 import Group from '@/models/Group';
+import Activity from '@/models/Activity';
 import { getSessionUser } from '@/lib/auth';
+import { ensureBudgetExists } from '@/lib/budget';
 
 export async function DELETE(
     req: Request,
@@ -62,6 +64,18 @@ export async function DELETE(
         }
 
         console.log("Expense deleted successfully");
+
+        // Create Activity Log
+        Activity.create({
+            user: session.userId,
+            action: 'deleted',
+            type: 'expense',
+            targetName: expense.description,
+            targetId: expense._id,
+            amount: expense.amount,
+            group_id: expense.group_id
+        }).catch(err => console.error("Failed to create activity log:", err));
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error deleting expense:', error);
@@ -115,6 +129,22 @@ export async function PUT(
 
         if (!expense) {
             return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+        }
+
+        // Create Activity Log
+        Activity.create({
+            user: session.userId,
+            action: 'updated',
+            type: 'expense',
+            targetName: expense.description,
+            targetId: expense._id,
+            amount: expense.amount,
+            group_id: expense.group_id
+        }).catch(err => console.error("Failed to create activity log:", err));
+
+        // Auto-add category to budget if missed
+        if (expense.type === 'expense') {
+            await ensureBudgetExists(session.userId, expense.category);
         }
 
         return NextResponse.json(expense);

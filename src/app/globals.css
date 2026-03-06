@@ -30,9 +30,9 @@
   --color-expense: var(--hue-danger) 85% 60%;
 
   /* Glassmorphism Configuration */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
 
   /* Spacing & Radius */
   --radius-sm: 10px;
@@ -47,6 +47,34 @@
   --shadow-glow: 0 0 20px var(--color-primary-glow);
 
   --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+
+  /* Sticky Header Theme Variables - Light Mode */
+  --sticky-bg-alpha: 0.95;
+  --sticky-blur: 16px;
+
+  --sticky-budget-bg: hsla(var(--hue-primary), 85%, 45%, var(--sticky-bg-alpha));
+  --sticky-budget-text: #ffffff;
+  --sticky-budget-border: hsla(var(--hue-primary), 85%, 45%, 0.2);
+
+  --sticky-goal-bg: hsla(var(--hue-success), 70%, 40%, var(--sticky-bg-alpha));
+  --sticky-goal-text: #ffffff;
+  --sticky-goal-border: hsla(var(--hue-success), 70%, 50%, 0.2);
+
+  --sticky-bank-bg: hsla(var(--hue-primary), 85%, 45%, var(--sticky-bg-alpha));
+  --sticky-bank-text: #ffffff;
+  --sticky-bank-border: hsla(var(--hue-primary), 85%, 45%, 0.2);
+
+  --sticky-invest-bg: linear-gradient(135deg, hsl(280, 80%, 50%), hsl(320, 80%, 50%));
+  --sticky-invest-text: #ffffff;
+  --sticky-invest-border: rgba(255, 255, 255, 0.1);
+
+  --sticky-liab-bg: hsla(var(--color-surface), 0.9);
+  --sticky-liab-text: hsl(var(--color-text-main));
+  --sticky-liab-border: hsl(var(--color-border));
+
+  --sticky-loan-bg: hsla(var(--hue-danger), 80%, 50%, var(--sticky-bg-alpha));
+  --sticky-loan-text: #ffffff;
+  --sticky-loan-border: hsla(var(--hue-danger), 80%, 60%, 0.2);
 }
 
 [data-theme='dark'] {
@@ -70,6 +98,16 @@
   --glass-bg: rgba(18, 18, 26, 0.65);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+
+  /* Sticky Header Theme Variables - Dark Mode */
+  --sticky-bg-alpha: 0.85;
+
+  --sticky-budget-bg: hsla(var(--hue-primary), 80%, 60%, var(--sticky-bg-alpha));
+  --sticky-goal-bg: hsla(var(--hue-success), 65%, 45%, var(--sticky-bg-alpha));
+  --sticky-bank-bg: hsla(var(--hue-primary), 80%, 60%, var(--sticky-bg-alpha));
+  --sticky-invest-bg: linear-gradient(135deg, hsl(280, 80%, 55%), hsl(320, 80%, 55%));
+  --sticky-liab-bg: hsla(var(--color-surface), 0.85);
+  --sticky-loan-bg: hsla(var(--hue-danger), 80%, 55%, var(--sticky-bg-alpha));
 }
 
 * {
@@ -150,6 +188,56 @@ h3 {
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-md);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(var(--hue-primary), 20%, 50%, 0.2);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(var(--hue-primary), 50%, 50%, 0.4);
+}
+
+/* Scrollable Content Container */
+.scrollable-content {
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  /* Space for scrollbar */
+  position: relative;
+  scrollbar-gutter: stable;
+}
+
+/* Bottom fade effect for scrollable content */
+.scroll-fade-bottom {
+  position: relative;
+}
+
+.scroll-fade-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to top, var(--glass-bg), transparent);
+  pointer-events: none;
+  z-index: 5;
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 .glass-panel:hover {

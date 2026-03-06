@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 
 interface ModalProps {
@@ -11,6 +12,12 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, size = 'md', zIndex = 30000 }: ModalProps) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
     // Prevent scrolling when modal is open
     useEffect(() => {
         if (isOpen) {
@@ -23,7 +30,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', zIndex = 
         };
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     const getMaxWidth = () => {
         switch (size) {
@@ -36,7 +43,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', zIndex = 
         }
     };
 
-    return (
+    return createPortal(
         <div
             style={{
                 position: 'fixed',
@@ -44,18 +51,19 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', zIndex = 
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                backgroundColor: 'rgba(0, 0, 0, 0.75)', // Slightly darker for better contrast
                 zIndex: zIndex,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '1rem',
+                backdropFilter: 'blur(4px)', // Soften background
                 animation: 'fadeIn 0.2s ease-out'
             }}
             onClick={onClose}
         >
             <div
-                className="hide-scrollbar" // Helper class if defined, or just style
+                className="hide-scrollbar"
                 style={{
                     background: 'hsl(var(--color-surface))',
                     border: '1px solid hsl(var(--color-border))',
@@ -65,9 +73,10 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', zIndex = 
                     maxHeight: '90vh',
                     display: 'flex',
                     flexDirection: 'column',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.3)', // Stronger shadow
                     animation: 'slideUp 0.3s ease-out',
-                    transition: 'max-width 0.3s ease'
+                    transition: 'max-width 0.3s ease',
+                    position: 'relative' // Ensure proper stacking
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -102,6 +111,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', zIndex = 
                     {children}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

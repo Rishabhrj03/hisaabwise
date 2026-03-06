@@ -120,6 +120,7 @@ export function InvestmentCard() {
                 variant="glass"
                 title="Investments 📈"
                 defaultOpen={false}
+                scrollable={true}
                 action={
                     <button
                         onClick={() => setShowAdd(!showAdd)}
@@ -133,15 +134,21 @@ export function InvestmentCard() {
                 {/* Total Portfolio Summary - Gradient Card */}
                 {investments.length > 0 && (
                     <div style={{
+                        position: 'sticky',
+                        top: '-0.5rem',
+                        zIndex: 20,
                         marginBottom: '1rem',
                         padding: '0.75rem 1rem',
-                        background: 'linear-gradient(135deg, hsl(280, 80%, 60%) 0%, hsl(320, 80%, 60%) 100%)', // Purple-Pink gradient
+                        background: 'var(--sticky-invest-bg)',
                         borderRadius: 'var(--radius-md)',
                         boxShadow: '0 4px 12px -3px rgba(192, 38, 211, 0.4)',
-                        color: 'white',
+                        color: 'var(--sticky-invest-text)',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        backdropFilter: 'blur(var(--sticky-blur))',
+                        border: '1px solid var(--sticky-invest-border)',
+                        opacity: 0.95
                     }}>
                         <div>
                             <div style={{ fontSize: '0.75rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Portfolio</div>
@@ -294,19 +301,34 @@ function InvestmentItem({ investment, onUpdate, onDelete }: { investment: Invest
     }
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+        <Card
+            variant="glass"
+            style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem',
+                borderLeft: '4px solid hsl(var(--color-primary))',
+                transition: 'transform 0.2s',
+                cursor: 'pointer',
+                marginBottom: '0.25rem'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            onClick={() => !isEditing && setIsEditing(true)}
+        >
             <div>
-                <div style={{ fontWeight: 500 }}>{investment.name} <span style={{ fontSize: '0.7rem', color: '#888' }}>({investment.type})</span></div>
+                <div style={{ fontWeight: 500 }}>{investment.name} <span style={{ fontSize: '0.7rem', color: 'hsl(var(--color-text-muted))' }}>({investment.type})</span></div>
                 {investment.autoIncreaseAmount && investment.autoIncreaseAmount > 0 ? (
                     <div style={{ fontSize: '0.7rem', color: 'hsl(var(--color-primary))' }}>
                         +₹{investment.autoIncreaseAmount} / {(investment.autoIncreaseFrequency || 'monthly').charAt(0).toUpperCase() + (investment.autoIncreaseFrequency || 'monthly').slice(1)}
                     </div>
                 ) : null}
-                {investment.startDate && <div style={{ fontSize: '0.7rem', color: '#666' }}>Started: {new Date(investment.startDate).toLocaleDateString()}</div>}
+                {investment.startDate && <div style={{ fontSize: '0.7rem', color: 'hsl(var(--color-text-muted))' }}>Started: {new Date(investment.startDate).toLocaleDateString()}</div>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{ fontWeight: 600 }}>₹{investment.currentAmount}</div>
-                <span onClick={() => setIsEditing(true)} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>✏️</span>
+                <span onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>✏️</span>
                 <button
                     type="button"
                     onClick={onDelete}
@@ -316,6 +338,6 @@ function InvestmentItem({ investment, onUpdate, onDelete }: { investment: Invest
                     &times;
                 </button>
             </div>
-        </div>
+        </Card>
     );
 }

@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/context/ThemeContext';
 import { Moon, Sun } from 'lucide-react';
 
-export function Header() {
+interface HeaderProps {
+    onProfileClick?: () => void;
+}
+
+export function Header({ onProfileClick }: HeaderProps) {
     const { logout, user } = useAuth();
     const { theme, toggleTheme } = useTheme();
 
@@ -60,18 +64,22 @@ export function Header() {
                     </span>
                 </Button>
 
-                <div style={{
-                    minWidth: '40px', // Prevent shrinking
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: 'hsl(var(--color-surface))',
-                    border: '1px solid hsl(var(--color-border))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    boxShadow: 'var(--shadow-sm)'
-                }}>
+                <div
+                    onClick={onProfileClick}
+                    style={{
+                        minWidth: '40px', // Prevent shrinking
+                        height: '40px',
+                        borderRadius: '50%',
+                        background: 'hsl(var(--color-surface))',
+                        border: '1px solid hsl(var(--color-border))',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        boxShadow: 'var(--shadow-sm)',
+                        cursor: onProfileClick ? 'pointer' : 'default'
+                    }}
+                >
                     {user?.image ? (
                         <img src={user.image} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
