@@ -207,7 +207,7 @@ export function GoalCard() {
                 {goals.length === 0 ? (
                     <p style={{ color: 'hsl(var(--color-text-muted))' }}>No active goals.</p>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
                         {goals.map(goal => (
                             <GoalItem
                                 key={goal._id}
@@ -289,7 +289,11 @@ function GoalItem({ goal, onUpdate, onDelete }: { goal: Goal, onUpdate: (g: Goal
                 textAlign: 'center',
                 position: 'relative',
                 transition: 'transform 0.2s',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+                overflow: 'hidden'
             }}
             onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
