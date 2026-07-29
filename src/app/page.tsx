@@ -14,6 +14,12 @@ import { FriendManager } from '@/components/dashboard/FriendManager';
 import { GroupManager } from '@/components/dashboard/GroupManager';
 import { DebtChart } from '@/components/dashboard/DebtChart';
 import { BalanceList } from '@/components/dashboard/BalanceList';
+import { BudgetCard } from '@/components/dashboard/BudgetCard';
+import { GoalCard } from '@/components/dashboard/GoalCard';
+import { BankAccountCard } from '@/components/dashboard/BankAccountCard';
+import { InvestmentCard } from '@/components/dashboard/InvestmentCard';
+import { RecurringExpenseCard } from '@/components/dashboard/RecurringExpenseCard';
+import { LoanCard } from '@/components/dashboard/LoanCard';
 import { Button } from '@/components/ui/Button';
 import { VoiceInput } from '@/components/dashboard/VoiceInput';
 import { useExpenses } from '@/context/ExpenseContext';
@@ -21,6 +27,7 @@ import { useExpenses } from '@/context/ExpenseContext';
 import { Expense } from '@/types';
 
 import { Modal } from '@/components/ui/Modal';
+
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -185,7 +192,18 @@ export default function Home() {
           </div>
         )}
 
+        {/* Wealth & Financial Management Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <BudgetCard />
+          <GoalCard />
+          <BankAccountCard />
+          <InvestmentCard />
+          <RecurringExpenseCard />
+          <LoanCard />
+        </div>
+
         <BalanceList />
+
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '1.25rem' }}>Transactions</h2>
