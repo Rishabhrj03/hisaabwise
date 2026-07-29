@@ -1,6 +1,9 @@
 import { Expense } from '@/types';
-import { ExpenseRowWithSplits } from '@/services/interfaces/IExpenseService';
-import { CreateExpensePayload, CreateSplitPayload } from '@/services/interfaces/IExpenseService';
+import {
+  ExpenseRecordWithSplits,
+  CreateExpensePayload,
+  CreateSplitPayload,
+} from '@/services/interfaces/IExpenseService';
 
 /**
  * expenseMapper — Pure functions for translating between DB rows and domain types.
@@ -14,10 +17,10 @@ import { CreateExpensePayload, CreateSplitPayload } from '@/services/interfaces/
 /**
  * Maps a raw Supabase expense row (with nested splits) to the domain Expense type.
  *
- * @param row   - The raw DB row from Supabase, including expense_splits.
+ * @param row    - The raw DB record, including expense_splits.
  * @param userId - The authenticated user's ID (used to resolve 'me' vs. friend).
  */
-export function mapRowToExpense(row: ExpenseRowWithSplits, userId: string): Expense {
+export function mapRowToExpense(row: ExpenseRecordWithSplits, userId: string): Expense {
   const splitDetails =
     row.expense_splits.length > 0 || row.payer_id
       ? {

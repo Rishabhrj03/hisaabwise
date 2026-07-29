@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Group, GroupInput } from '@/types';
 import { groupService } from '@/services';
 import { useAuth } from '@/context/AuthContext';
-import { GroupRowWithMembers } from '@/services/interfaces/IGroupService';
+import { GroupRecordWithMembers } from '@/services/interfaces/IGroupService';
 
 interface GroupContextType {
   groups: Group[];
@@ -16,7 +16,7 @@ interface GroupContextType {
 const GroupContext = createContext<GroupContextType | undefined>(undefined);
 
 /** Maps a raw DB group row (with nested members) to the domain Group type. */
-function mapRowToGroup(row: GroupRowWithMembers): Group {
+function mapRowToGroup(row: GroupRecordWithMembers): Group {
   return {
     id: row.id,
     name: row.name,

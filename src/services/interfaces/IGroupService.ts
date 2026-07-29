@@ -1,30 +1,44 @@
-import { Database } from '@/types/supabase';
-
-/** Raw DB row type for a group record. */
-export type GroupRow = Database['public']['Tables']['groups']['Row'];
-
-/** Raw DB row type for a group_members record. */
-export type GroupMemberRow = Database['public']['Tables']['group_members']['Row'];
-
-/** A raw group row with its nested member list (from a join query). */
-export type GroupRowWithMembers = GroupRow & {
-  group_members: Pick<GroupMemberRow, 'member_id'>[];
-};
-
-/** Payload to insert a new group record. */
-export type CreateGroupPayload = Database['public']['Tables']['groups']['Insert'];
-
-/** Payload to insert group membership records. */
-export type CreateGroupMemberPayload = Database['public']['Tables']['group_members']['Insert'];
-
 /**
  * IGroupService — Adapter interface for all group data operations.
  *
- * Swap the backend by implementing this interface and updating src/services/index.ts.
+ * These types are deliberately database-agnostic.
+ * To switch databases: implement this interface and update src/services/index.ts.
  */
+
+export interface GroupRecord {
+  id: string;
+  created_by: string;
+  name: string;
+  created_at: string;
+}
+
+export interface GroupMemberRecord {
+  group_id: string;
+  member_id: string;
+}
+
+/** A group record with its nested member list (from a join/lookup query). */
+export interface GroupRecordWithMembers extends GroupRecord {
+  group_members: Pick<GroupMemberRecord, 'member_id'>[];
+}
+
+/** Payload to insert a new group record. */
+export interface CreateGroupPayload {
+  id: string;
+  created_by: string;
+  name: string;
+  created_at: string;
+}
+
+/** Payload to insert group membership records. */
+export interface CreateGroupMemberPayload {
+  group_id: string;
+  member_id: string;
+}
+
 export interface IGroupService {
   /** Fetch all groups (with their member lists) created by a user. */
-  fetchGroups(userId: string): Promise<GroupRowWithMembers[]>;
+  fetchGroups(userId: string): Promise<GroupRecordWithMembers[]>;
 
   /** Insert a new group record. */
   createGroup(payload: CreateGroupPayload): Promise<void>;
@@ -35,3 +49,4 @@ export interface IGroupService {
   /** Permanently delete a group by id. */
   deleteGroup(id: string): Promise<void>;
 }
+

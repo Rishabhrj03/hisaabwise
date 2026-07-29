@@ -1,32 +1,23 @@
-import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
-
 /**
- * IAuthService — Adapter interface for all authentication operations.
+ * IAuthService — Adapter interface for supplemental auth operations.
  *
- * Swap the database/auth provider by creating a new class that implements
- * this interface and updating src/services/index.ts. No other file changes needed.
+ * NOTE: Session management (getSession, onAuthStateChange) is now handled
+ * natively by NextAuth.js hooks (useSession). This interface covers only
+ * the operations NextAuth doesn't provide out of the box.
+ *
+ * To switch providers: implement this interface and update src/services/index.ts.
  */
 export interface IAuthService {
-  /** Get the current active session (one-shot). */
-  getSession(): Promise<Session | null>;
+  /**
+   * Update the authenticated user's profile metadata (e.g. phone number).
+   * Best-effort — implementations should not throw on non-critical failures.
+   */
+  updateUserMetadata(userId: string, data: Record<string, unknown>): Promise<void>;
 
   /**
-   * Subscribe to auth state changes.
-   * Returns an unsubscribe function to clean up the listener.
+   * Execute a named server-side action or stored procedure.
+   * Used for business logic like linking a phone number to pending invitations.
    */
-  onAuthStateChange(
-    callback: (event: AuthChangeEvent, session: Session | null) => void
-  ): () => void;
-
-  /** Update the authenticated user's metadata (e.g. phone). */
-  updateUserMetadata(data: Record<string, unknown>): Promise<void>;
-
-  /**
-   * Call a named database remote procedure (RPC).
-   * Used for server-side business logic like phone-number user mapping.
-   */
-  callRpc(fnName: string, params: Record<string, unknown>): Promise<void>;
-
-  /** Sign out the current user. */
-  signOut(): Promise<void>;
+  callServerAction(actionName: string, params: Record<string, unknown>): Promise<void>;
 }
+

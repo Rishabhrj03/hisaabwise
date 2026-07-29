@@ -1,18 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { authService } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 
 /**
- * PhoneNumberPrompt — Prompts new users to enter a phone number so they can
- * be linked to friend invitations.
+ * PhoneNumberPrompt — Prompts new users to add their phone number.
  *
- * Renders nothing if the user already has a phone number on their account,
- * or if the prompt has been dismissed this session.
+ * Renders nothing if the user already has a phone stored or dismissed the prompt.
+ * Uses our own /api/user/phone endpoint instead of any DB SDK directly.
  */
 export function PhoneNumberPrompt() {
   const { user } = useAuth();
@@ -25,30 +23,30 @@ export function PhoneNumberPrompt() {
     return false;
   });
 
-  const hasPhone = user?.phone || user?.user_metadata?.phone;
-
-  if (!user || hasPhone || isSavedLocally) return null;
+  if (!user || isSavedLocally) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Update auth user metadata (best-effort — non-fatal if it fails).
-      await authService.updateUserMetadata({ phone });
+      const res = await fetch('/api/user/phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, phone }),
+      });
 
-      // Run the server-side RPC to link the phone number to any pending friend invitations.
-      await authService.callRpc('manual_map_user_by_phone', { target_phone: phone });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(`Failed to save phone: ${data.error ?? 'Unknown error'}`);
+        return;
+      }
 
       window.localStorage.setItem('expense_tracker_phone_saved', 'true');
       setIsSavedLocally(true);
-      window.location.reload();
-    } catch (error: unknown) {
-      const err = error as { message?: string };
-      console.error('[PhoneNumberPrompt] Error updating phone:', error);
-      alert(
-        `Failed to save phone number.\n\n${err.message ?? String(error)}\n\nHint: Did you run 'supabase_schema_map_phone.sql'?`
-      );
+    } catch (err) {
+      console.error('[PhoneNumberPrompt] Error:', err);
+      alert('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -70,7 +68,7 @@ export function PhoneNumberPrompt() {
       <Card variant="default" style={{ maxWidth: '400px', width: '100%' }}>
         <h3 style={{ marginBottom: '1rem' }}>Complete Your Profile</h3>
         <p style={{ marginBottom: '1.5rem', color: 'hsl(var(--color-text-muted))' }}>
-          Please add your phone number to sync invites from friends.
+          Add your phone number to sync invites from friends.
         </p>
         <form onSubmit={handleSubmit}>
           <Input
@@ -82,7 +80,7 @@ export function PhoneNumberPrompt() {
             style={{ marginBottom: '1rem' }}
           />
           <Button type="submit" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Saving...' : 'Save Phone Number'}
+            {loading ? 'Saving…' : 'Save Phone Number'}
           </Button>
         </form>
       </Card>
