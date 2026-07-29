@@ -57,9 +57,10 @@ export class MongoExpenseService implements IExpenseService {
 
   async updateExpense(id: string, payload: Partial<CreateExpensePayload>): Promise<void> {
     const db = await this.db();
-    const { id: _id, ...rest } = payload as CreateExpensePayload;
+    const { id: _payloadId, ...rest } = payload as CreateExpensePayload;
     await db.collection<AnyDoc>('expenses').updateOne({ _id: id }, { $set: rest });
   }
+
 
   private docToRecord(doc: AnyDoc): ExpenseRecordWithSplits {
     const { _id, expense_splits, ...rest } = doc;
