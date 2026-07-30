@@ -13,16 +13,17 @@ export function MonthSelector({ currentDate, onPrevMonth, onNextMonth }: MonthSe
     };
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-            <Button variant="ghost" size="sm" onClick={onPrevMonth}>
+        <div className="month-selector-container">
+            <Button variant="ghost" size="sm" onClick={onPrevMonth} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>
                 ← Prev
             </Button>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, minWidth: '160px', textAlign: 'center' }}>
+            <h2 className="month-selector-title">
                 {formatMonth(currentDate)}
             </h2>
-            <Button variant="ghost" size="sm" onClick={onNextMonth}>
+            <Button variant="ghost" size="sm" onClick={onNextMonth} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>
                 Next →
             </Button>
         </div>
     );
 }
+

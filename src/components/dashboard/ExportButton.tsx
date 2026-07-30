@@ -69,7 +69,7 @@ export function ExportButton({ expenses, currentMonthName }: ExportButtonProps) 
 
     return (
         <Button variant="secondary" onClick={handleExport} size="sm">
-            Export to Excel
+            Export
         </Button>
     );
 }

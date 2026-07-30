@@ -1,33 +1,121 @@
 import React from 'react';
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
     children: React.ReactNode;
     className?: string;
-    variant?: 'default' | 'glass';
+    variant?: 'default' | 'glass' | 'elevated' | 'gradient';
+    title?: React.ReactNode;
+    action?: React.ReactNode;
+    defaultOpen?: boolean;
+    hover?: boolean;
 }
 
-export function Card({ children, className = '', variant = 'glass', ...props }: CardProps) {
-    const baseStyles = "p-6 rounded-2xl transition-all duration-300";
-    const variants = {
-        default: "bg-[hsl(var(--color-surface))] shadow-lg border border-[hsl(var(--color-border))]",
-        glass: "glass-panel"
-    };
+export function Card({
+    children,
+    className = '',
+    variant = 'default',
+    title,
+    action,
+    defaultOpen = true,
+    hover = false,
+    ...props
+}: CardProps) {
+    const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
-    // Note: We are using a mix of utility classes that map to our global CSS variables.
-    // Since we aren't using Tailwind, we'll inline some styles or use the global classes defined.
-    // However, for simplicity in this demo, I will assume the globals.css classes like 'glass-panel' work.
+    const variantStyles: React.CSSProperties = {
+        default: {
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
+            boxShadow: 'var(--shadow-sm)',
+        } as React.CSSProperties,
+        glass: {
+            background: 'var(--glass-bg)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid var(--glass-border)',
+            boxShadow: 'var(--glass-shadow)',
+        } as React.CSSProperties,
+        elevated: {
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-default)',
+            boxShadow: 'var(--shadow-md)',
+        } as React.CSSProperties,
+        gradient: {
+            background: 'linear-gradient(135deg, var(--brand-from), var(--brand-to))',
+            border: 'none',
+            boxShadow: 'var(--shadow-brand)',
+            color: 'white',
+        } as React.CSSProperties,
+    }[variant];
 
     return (
         <div
-            className={`${baseStyles} ${variants[variant]} ${className}`}
+            className={`${hover ? 'card-hover' : ''} ${className}`}
             style={{
                 padding: '1.5rem',
-                borderRadius: 'var(--radius-lg)',
-                ...props.style
+                borderRadius: 'var(--r-lg)',
+                transition: 'all 0.25s ease',
+                ...variantStyles,
+                ...props.style,
             }}
             {...props}
         >
-            {children}
+            {(title || action) && (
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: isOpen ? '1.25rem' : 0,
+                }}>
+                    {title && (
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.625rem',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.9375rem',
+                                fontWeight: 600,
+                                fontFamily: 'var(--font-sans)',
+                                padding: 0,
+                                letterSpacing: '-0.01em',
+                            }}
+                        >
+                            {/* Chevron icon */}
+                            <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '22px',
+                                height: '22px',
+                                borderRadius: '6px',
+                                background: 'var(--border-subtle)',
+                                transition: 'transform 0.2s ease, background 0.2s ease',
+                                transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                                color: 'var(--text-secondary)',
+                            }}>
+                                <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </span>
+                            {title}
+                        </button>
+                    )}
+                    {action && (
+                        <div style={{ flexShrink: 0 }}>{action}</div>
+                    )}
+                </div>
+            )}
+
+            {isOpen && (
+                <div className="animate-fade-in">
+                    {children}
+                </div>
+            )}
         </div>
     );
 }
