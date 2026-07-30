@@ -111,14 +111,14 @@ export default function Home() {
 
   /* ── Section Meta ── */
   const sectionMeta: Record<SectionId, { title: string; subtitle?: string }> = {
-    dashboard:    { title: 'Dashboard',         subtitle: `${currentMonthName} overview` },
-    budgets:      { title: 'Monthly Budgets',   subtitle: 'Set and track spending limits' },
-    goals:        { title: 'Savings Goals',     subtitle: 'Monitor your saving milestones' },
-    accounts:     { title: 'Accounts & Cards',  subtitle: 'Manage your bank accounts and cards' },
-    investments:  { title: 'Investments',       subtitle: 'Track your portfolio and holdings' },
-    loans:        { title: 'Loans & Udhar',     subtitle: 'Manage borrowed and lent money' },
-    recurring:    { title: 'Recurring',         subtitle: 'Automatic and scheduled payments' },
-    transactions: { title: 'Transactions',      subtitle: `${filteredExpenses.length} transactions this month` },
+    dashboard: { title: 'Dashboard', subtitle: `${currentMonthName} overview` },
+    budgets: { title: 'Monthly Budgets', subtitle: 'Set and track spending limits' },
+    goals: { title: 'Savings Goals', subtitle: 'Monitor your saving milestones' },
+    accounts: { title: 'Accounts & Cards', subtitle: 'Manage your bank accounts and cards' },
+    investments: { title: 'Investments', subtitle: 'Track your portfolio and holdings' },
+    loans: { title: 'Loans & Udhar', subtitle: 'Manage borrowed and lent money' },
+    recurring: { title: 'Recurring', subtitle: 'Automatic and scheduled payments' },
+    transactions: { title: 'Transactions', subtitle: `${filteredExpenses.length} transactions this month` },
   };
 
   const meta = sectionMeta[activeSection];
@@ -296,29 +296,13 @@ export default function Home() {
               </div>
             )}
 
-            {/* Recent Transactions */}
-            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                  Recent Transactions
-                </h2>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {filteredExpenses.length} transaction{filteredExpenses.length !== 1 ? 's' : ''} this month
-                </p>
-              </div>
-              <button
-                className="toolbar-btn"
-                onClick={() => setActiveSection('transactions')}
-              >
-                View all →
-              </button>
-            </div>
             <TransactionList
-              expenses={filteredExpenses.slice(0, 5)}
+              expenses={filteredExpenses.slice(0, 15)}
               onDelete={deleteExpense}
               onEdit={handleEdit}
               currency={currency}
             />
+
 
             {/* Balance list */}
             <div style={{ marginTop: '2rem' }}>
