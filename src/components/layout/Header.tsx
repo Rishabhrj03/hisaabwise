@@ -144,17 +144,42 @@ export function Header({ sidebarOpen, setSidebarOpen, activeSection, setActiveSe
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {/* Wallet H Logo Icon */}
             <div style={{
-              width: '38px', height: '38px', borderRadius: '10px',
-              background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+              width: '42px', height: '42px', borderRadius: '12px',
+              background: 'linear-gradient(135deg, #2e1065, #4c1d95)',
+              border: '1px solid rgba(192, 132, 252, 0.3)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(168, 85, 247, 0.4)', flexShrink: 0,
+              boxShadow: '0 4px 16px rgba(168, 85, 247, 0.35)', flexShrink: 0,
+              padding: '2px',
             }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <rect x="2" y="6" width="20" height="14" rx="3.5" stroke="white" strokeWidth="2" />
-                <path d="M16 11h4v3h-4a1.5 1.5 0 010-3z" fill="white" />
-                <path d="M7 10v6M11 10v6M7 13h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Top Coin with $ */}
+                <circle cx="12" cy="7.5" r="4" fill="#c084fc" stroke="#3b0764" strokeWidth="0.8"/>
+                <text x="12" y="9.5" fill="#3b0764" fontSize="5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
+                  $
+                </text>
+                
+                {/* Brain / Analytics badge */}
+                <path d="M18.5 7.5C18.5 6.2 19.5 5 21 5C22.5 5 23.5 6.2 23.5 7.5C23.5 8.2 23 9 22 9.5C23 10 23.5 10.8 23.5 11.5C23.5 12.8 22.5 14 21 14" stroke="#e879f9" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+
+                {/* Wallet Main Body */}
+                <rect x="4" y="10" width="22" height="17" rx="4.5" fill="url(#hisaab_grad_hdr)" stroke="#a855f7" strokeWidth="1.2"/>
+
+                {/* Wallet Clasp / Button on Right */}
+                <path d="M20 16H25C26.1 16 27 16.9 28 18V20C28 21.1 27.1 22 26 22H20V16Z" fill="#a855f7" stroke="#7e22ce" strokeWidth="1"/>
+                <circle cx="24" cy="19" r="1.2" fill="#ffffff"/>
+
+                {/* Letter 'H' on front body */}
+                <path d="M10 15.5V22.5M15 15.5V22.5M10 19H15" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round"/>
+
+                <defs>
+                  <linearGradient id="hisaab_grad_hdr" x1="4" y1="10" x2="26" y2="27" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#a855f7"/>
+                    <stop offset="1" stopColor="#7e22ce"/>
+                  </linearGradient>
+                </defs>
               </svg>
             </div>
+
             <div>
               <div style={{
                 fontSize: '1rem',
