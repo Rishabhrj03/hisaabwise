@@ -137,14 +137,16 @@ export default function Home() {
       <main className="main-content">
 
         {/* ── Page Header Bar ── */}
-        <div style={{
+        {/* ── Page Header Bar ── */}
+        <div className="dashboard-header-bar" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '2rem',
+          marginBottom: '1.25rem',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '0.75rem',
         }}>
+
           {/* Left: Hamburger + Title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
             <button

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import type { SectionId } from '@/app/page';
 
 interface HeaderProps {
@@ -103,6 +104,7 @@ const navItems: { id: SectionId; label: string; icon: React.ReactNode }[] = [
 
 export function Header({ sidebarOpen, setSidebarOpen, activeSection, setActiveSection }: HeaderProps) {
   const { signOut, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const initial = user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? 'U';
   const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'User';
 
@@ -199,10 +201,10 @@ export function Header({ sidebarOpen, setSidebarOpen, activeSection, setActiveSe
           ))}
         </nav>
 
-        {/* User profile card */}
+        {/* User profile & Theme Toggle card */}
         <div style={{ padding: '0.875rem 0.625rem', borderTop: '1px solid var(--border-subtle)' }}>
           <div style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem',
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
             padding: '0.75rem', borderRadius: 'var(--r-md)',
             background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)',
           }}>
@@ -222,6 +224,42 @@ export function Header({ sidebarOpen, setSidebarOpen, activeSection, setActiveSe
                 {user?.email}
               </div>
             </div>
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                padding: '0.25rem', borderRadius: 'var(--r-sm)',
+                transition: 'color 0.15s ease', flexShrink: 0,
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--brand-from)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
+            >
+              {theme === 'dark' ? (
+                /* Sun Icon for switching to light mode */
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              ) : (
+                /* Moon Icon for switching to dark mode */
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Sign Out Button */}
             <button
               onClick={async () => { await signOut(); }}
               title="Sign Out"
@@ -245,3 +283,4 @@ export function Header({ sidebarOpen, setSidebarOpen, activeSection, setActiveSe
     </>
   );
 }
+

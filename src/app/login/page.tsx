@@ -3,16 +3,18 @@
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/context/ThemeContext';
 
 type Mode = 'login' | 'register';
 
 /**
- * LoginPage — Split-pane premium design.
- * Left: Gradient branding panel with feature list.
- * Right: Glass card with auth form + tab switcher.
+ * LoginPage — Responsive split-pane design.
+ * Desktop: Left branding panel + Right glass card.
+ * Mobile: Clean centered card with mobile SpendWise branding header.
  */
 export default function LoginPage() {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [mode, setMode] = useState<Mode>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -89,25 +91,11 @@ export default function LoginPage() {
   ];
 
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      background: 'var(--bg-base)',
-      fontFamily: 'var(--font-sans)',
-    }}>
+    <div className="login-wrapper">
 
-      {/* ── Left Branding Panel ── */}
-      <div style={{
-        flex: '0 0 42%',
-        background: 'linear-gradient(145deg, #0f0c29, #302b63, #24243e)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '3rem 3.5rem',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Decorative blobs */}
+      {/* ── Left Branding Panel (Desktop Only) ── */}
+      <div className="login-branding">
+        {/* Decorative background blobs */}
         <div style={{
           position: 'absolute', top: '-60px', right: '-60px',
           width: '280px', height: '280px',
@@ -200,34 +188,89 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right Auth Panel ── */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        background: 'var(--bg-base)',
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '420px',
-          background: 'var(--bg-surface)',
-          borderRadius: '20px',
-          border: '1px solid var(--border-default)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-          padding: '2.5rem',
-          animation: 'fadeUp 0.4s ease-out both',
-        }}>
-          <style>{`
-            @keyframes fadeUp {
-              from { opacity: 0; transform: translateY(20px); }
-              to   { opacity: 1; transform: translateY(0); }
-            }
-          `}</style>
+      <div className="login-form-container">
+
+        {/* Theme Switcher Toggle (Top Right) */}
+        <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem' }}>
+          <button
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            style={{
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-default)',
+              borderRadius: '10px',
+              padding: '0.5rem 0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              color: 'var(--text-secondary)',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              fontFamily: 'var(--font-sans)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {theme === 'dark' ? (
+              <>
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+                <span>Light</span>
+              </>
+            ) : (
+              <>
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+                <span>Dark</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Header Logo (Visible on Mobile) */}
+        <div className="login-mobile-header">
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, var(--brand-from), var(--brand-to))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'var(--shadow-brand)',
+            flexShrink: 0,
+          }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+              SpendWise
+            </div>
+            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              Finance Tracker
+            </div>
+          </div>
+        </div>
+
+        {/* Auth Card Container */}
+        <div className="login-card">
 
           {/* Heading */}
           <h1 style={{
-            fontSize: '1.4rem',
+            fontSize: '1.35rem',
             fontWeight: 800,
             color: 'var(--text-primary)',
             letterSpacing: '-0.03em',
@@ -235,7 +278,7 @@ export default function LoginPage() {
           }}>
             {mode === 'login' ? 'Welcome back 👋' : 'Create your account'}
           </h1>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.75rem' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
             {mode === 'login' ? 'Sign in to your SpendWise account' : 'Start tracking your finances today'}
           </p>
 
@@ -245,7 +288,7 @@ export default function LoginPage() {
             background: 'var(--bg-elevated)',
             borderRadius: '10px',
             padding: '4px',
-            marginBottom: '1.75rem',
+            marginBottom: '1.5rem',
             border: '1px solid var(--border-subtle)',
           }}>
             {(['login', 'register'] as Mode[]).map((m) => (

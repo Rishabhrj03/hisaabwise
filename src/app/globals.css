@@ -5,7 +5,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-:root {
+:root, [data-theme="dark"] {
   /* ── Color Palette ── */
   --bg-base:      #0A0B18;
   --bg-surface:   #111827;
@@ -58,7 +58,7 @@
   --shadow-lg:  0 10px 40px rgba(0,0,0,0.5);
   --shadow-brand: 0 0 20px rgba(99,102,241,0.3);
 
-  /* Legacy compat vars (used by existing components) */
+  /* Legacy compat vars */
   --color-background: 230 20% 7%;
   --color-surface:    220 18% 13%;
   --color-text-main:  210 20% 95%;
@@ -76,6 +76,47 @@
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
+
+[data-theme="light"] {
+  /* ── Light Color Palette ── */
+  --bg-base:      #f8fafc;
+  --bg-surface:   #ffffff;
+  --bg-elevated:  #f1f5f9;
+  --bg-hover:     #e2e8f0;
+
+  /* Sidebar */
+  --sidebar-bg:   #ffffff;
+
+  /* Text */
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #64748b;
+  --text-inverse:   #ffffff;
+
+  /* Borders */
+  --border-subtle:  rgba(0,0,0,0.06);
+  --border-default: rgba(0,0,0,0.10);
+  --border-accent:  rgba(99,102,241,0.4);
+
+  /* Glassmorphism */
+  --glass-bg:       rgba(255, 255, 255, 0.85);
+  --glass-border:   rgba(0, 0, 0, 0.08);
+  --glass-shadow:   0 8px 32px rgba(0,0,0,0.06);
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg:  0 10px 40px rgba(0,0,0,0.12);
+  --shadow-brand: 0 4px 20px rgba(99,102,241,0.25);
+
+  /* Legacy compat vars */
+  --color-background: 210 40% 98%;
+  --color-surface:    0 0% 100%;
+  --color-text-main:  222 47% 11%;
+  --color-text-muted: 215 16% 47%;
+  --color-border:     214 32% 91%;
+}
+
 
 /* ── Reset ── */
 *, *::before, *::after {
@@ -292,6 +333,31 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--border-accent);
 }
 
+/* ── Summary Cards Grid ── */
+.summary-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+/* ── Month Selector ── */
+.month-selector-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.month-selector-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  min-width: 140px;
+  text-align: center;
+  color: var(--text-primary);
+}
+
 /* ── Select override ── */
 select {
   appearance: none;
@@ -301,6 +367,7 @@ select {
   background-position: right 0.75rem center;
   padding-right: 2rem !important;
 }
+
 
 /* ── Stat card ── */
 .stat-card {
@@ -404,6 +471,122 @@ select {
     padding: 1rem;
     padding-bottom: 2rem;
   }
+
+  /* Summary cards responsive layout */
+  .summary-cards-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .stat-card-balance {
+    grid-column: span 2;
+  }
+  .stat-card {
+    padding: 1.1rem 1.15rem;
+  }
+  .stat-card-value {
+    font-size: 1.6rem;
+  }
+
+  /* Toolbar horizontal scroll on mobile */
+  .toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.25rem !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .toolbar::-webkit-scrollbar {
+    display: none;
+  }
+  .toolbar-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* Month selector mobile typography */
+  .month-selector-title {
+    font-size: 0.95rem;
+    min-width: 110px;
+  }
 }
+
+
+/* ── Login Page Responsive Layout ── */
+.login-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background: var(--bg-base);
+  font-family: var(--font-sans);
+}
+
+.login-branding {
+  flex: 0 0 42%;
+  background: linear-gradient(145deg, #0f0c29, #302b63, #24243e);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-form-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: var(--bg-base);
+  position: relative;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-surface);
+  border-radius: 20px;
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+  padding: 2.25rem 2rem;
+  animation: fadeUp 0.4s ease-out both;
+}
+
+.login-mobile-header {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .login-wrapper {
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .login-branding {
+    display: none !important;
+  }
+
+  .login-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .login-form-container {
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+  }
+
+  .login-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 16px;
+  }
+}
+
 
 

@@ -24,14 +24,10 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency
     const isPositive = netChange >= 0;
 
     return (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr',
-            gap: '1.25rem',
-            marginBottom: '2rem',
-        }}>
+        <div className="summary-cards-container">
             {/* ── Balance Card ── */}
-            <div className="stat-card gradient-balance card-hover animate-fade-in" style={{ gridColumn: 'span 1', animationDelay: '0ms' }}>
+            <div className="stat-card gradient-balance card-hover animate-fade-in stat-card-balance" style={{ animationDelay: '0ms' }}>
+
                 {/* Decorative orb */}
                 <div style={{
                     position: 'absolute',
