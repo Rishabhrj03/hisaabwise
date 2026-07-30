@@ -142,26 +142,36 @@ export function Header({ sidebarOpen, setSidebarOpen, activeSection, setActiveSe
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {/* Wallet H Logo Icon */}
             <div style={{
-              width: '36px', height: '36px', borderRadius: '10px',
-              background: 'linear-gradient(135deg, var(--brand-from), var(--brand-to))',
+              width: '38px', height: '38px', borderRadius: '10px',
+              background: 'linear-gradient(135deg, #a855f7, #ec4899)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: 'var(--shadow-brand)', flexShrink: 0,
+              boxShadow: '0 4px 16px rgba(168, 85, 247, 0.4)', flexShrink: 0,
             }}>
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                  stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="6" width="20" height="14" rx="3.5" stroke="white" strokeWidth="2" />
+                <path d="M16 11h4v3h-4a1.5 1.5 0 010-3z" fill="white" />
+                <path d="M7 10v6M11 10v6M7 13h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                SpendWise
+              <div style={{
+                fontSize: '1rem',
+                fontWeight: 900,
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #c084fc, #f472b6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                HISAABWISE
               </div>
-              <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                Finance Tracker
+              <div style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                Track Expense, Analyze Easily.
               </div>
             </div>
           </div>
+
           {/* X close — mobile only */}
           <button
             className="sidebar-close-btn"

@@ -169,23 +169,26 @@ export default function Home() {
               </svg>
             </button>
             <div>
-              <div style={{
-                fontSize: '0.625rem',
-                fontWeight: 800,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: 'var(--brand-from)',
-                marginBottom: '0.1rem',
-              }}>
-                {activeSection === 'dashboard' ? 'Overview' : activeSection === 'transactions' ? 'Activity' : 'Budget'}
-              </div>
               <h1 style={{
-                fontSize: '1.5rem', fontWeight: 900,
-                letterSpacing: '-0.03em', color: 'var(--text-primary)',
-                lineHeight: 1.1,
+                fontSize: '1.35rem',
+                fontWeight: 900,
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #c084fc, #f472b6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                lineHeight: 1.15,
+                margin: 0,
               }}>
-                {meta.title}
+                HISAABWISE
               </h1>
+              <div style={{
+                fontSize: '0.65rem',
+                fontWeight: 500,
+                color: 'var(--text-muted)',
+                marginTop: '0.1rem',
+              }}>
+                Track Expense, Analyze Easily.
+              </div>
             </div>
           </div>
 
@@ -198,6 +201,7 @@ export default function Home() {
                 onNextMonth={handleNextMonth}
               />
               <Button
+                className="desktop-only-btn"
                 onClick={() => { setEditingExpense(null); setShowAddForm(true); }}
                 tooltip="Add a new transaction"
                 style={{
@@ -215,6 +219,7 @@ export default function Home() {
             </div>
           )}
         </div>
+
 
         {/* ══════════════════════════════════════
             SECTION VIEWS — rendered by activeSection
@@ -402,8 +407,9 @@ export default function Home() {
           borderTop: '1px solid var(--border-subtle)',
           textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.72rem',
         }}>
-          <p>© {new Date().getFullYear()} SpendWise — Smart Finance Tracker</p>
+          <p>© {new Date().getFullYear()} HISAABWISE — Track Expense, Analyze Easily.</p>
         </footer>
+
       </main>
 
       {/* ─── Mobile Floating Action Button (Ref. Image Style) ─── */}

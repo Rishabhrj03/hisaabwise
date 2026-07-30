@@ -9,9 +9,10 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { PhoneNumberPrompt } from '@/components/PhoneNumberPrompt';
 
 export const metadata: Metadata = {
-  title: 'SpendWise — Smart Finance Tracker',
-  description: 'A premium personal finance tracking application. Manage expenses, budgets, savings goals, and investments in one beautiful dashboard.',
+  title: 'HISAABWISE — Track Expense, Analyze Easily.',
+  description: 'A premium personal finance tracking application. Manage expenses, budgets, savings goals, and investments easily.',
 };
+
 
 export default function RootLayout({
   children,

@@ -87,7 +87,7 @@ export function ImportButton() {
         size="sm"
         onClick={() => fileInputRef.current?.click()}
       >
-        Import Statement
+        Import
       </Button>
     </>
   );

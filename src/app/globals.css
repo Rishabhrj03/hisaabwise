@@ -466,8 +466,14 @@ select {
     display: flex !important;
   }
 
+  /* Hide top redundant Add Transaction button on mobile screens */
+  .desktop-only-btn {
+    display: none !important;
+  }
+
   /* Show backdrop when sidebar is open */
   .mobile-backdrop {
+
     display: block !important;
     z-index: 95 !important;
   }
@@ -487,9 +493,11 @@ select {
     gap: 0.75rem;
     margin-bottom: 1.25rem;
   }
+  /* Hide purple balance card on mobile */
   .stat-card-balance {
-    grid-column: span 2;
+    display: none !important;
   }
+
   .stat-card {
     padding: 1.1rem 1.15rem;
   }

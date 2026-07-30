@@ -116,23 +116,31 @@ export default function LoginPage() {
               width: '44px',
               height: '44px',
               borderRadius: '12px',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              background: 'linear-gradient(135deg, #a855f7, #ec4899)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 24px rgba(99,102,241,0.5)',
+              boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
             }}>
-              <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                  stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="6" width="20" height="14" rx="3.5" stroke="white" strokeWidth="2" />
+                <path d="M16 11h4v3h-4a1.5 1.5 0 010-3z" fill="white" />
+                <path d="M7 10v6M11 10v6M7 13h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white', letterSpacing: '-0.03em' }}>
-                SpendWise
+              <div style={{
+                fontSize: '1.35rem',
+                fontWeight: 900,
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #c084fc, #f472b6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                HISAABWISE
               </div>
-              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>
-                SMART FINANCE TRACKER
+              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
+                Track Expense, Analyze Easily.
               </div>
             </div>
           </div>
@@ -243,24 +251,32 @@ export default function LoginPage() {
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, var(--brand-from), var(--brand-to))',
+            background: 'linear-gradient(135deg, #a855f7, #ec4899)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: 'var(--shadow-brand)',
+            boxShadow: '0 4px 16px rgba(168, 85, 247, 0.4)',
             flexShrink: 0,
           }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="6" width="20" height="14" rx="3.5" stroke="white" strokeWidth="2" />
+              <path d="M16 11h4v3h-4a1.5 1.5 0 010-3z" fill="white" />
+              <path d="M7 10v6M11 10v6M7 13h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              SpendWise
+            <div style={{
+              fontSize: '1.1rem',
+              fontWeight: 900,
+              letterSpacing: '-0.02em',
+              background: 'linear-gradient(135deg, #c084fc, #f472b6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              HISAABWISE
             </div>
-            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              Finance Tracker
+            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+              Track Expense, Analyze Easily.
             </div>
           </div>
         </div>
@@ -279,8 +295,9 @@ export default function LoginPage() {
             {mode === 'login' ? 'Welcome back 👋' : 'Create your account'}
           </h1>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            {mode === 'login' ? 'Sign in to your SpendWise account' : 'Start tracking your finances today'}
+            {mode === 'login' ? 'Sign in to your HISAABWISE account' : 'Start tracking your finances today'}
           </p>
+
 
           {/* Tab Switcher */}
           <div style={{
