@@ -291,9 +291,10 @@ export function TransactionList({ expenses, onDelete, onEdit, currency = 'USD' }
                                                     <div style={{
                                                         fontWeight: 900,
                                                         fontSize: '1rem',
-                                                        color: isIncome ? '#a3e635' : '#ffffff',
+                                                        color: isIncome ? 'var(--income-color)' : 'var(--expense-color)',
                                                         letterSpacing: '-0.02em',
                                                     }}>
+
                                                         {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
                                                     </div>
                                                     <div style={{
