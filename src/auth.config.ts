@@ -9,9 +9,11 @@ import type { NextAuthConfig } from 'next-auth';
  *   - auth.ts → Full server config (Credentials provider + MongoDB adapter)
  */
 export const authConfig: NextAuthConfig = {
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || '7b914fa9add1e70bd1dc7a19dee3392b5f1f7106db67e7b64dd970988724c4a3',
   pages: {
     signIn: '/login',
   },
+
   providers: [],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
