@@ -6,14 +6,15 @@ import { MongoClient } from 'mongodb';
  * Uses a global cached promise in development to survive Next.js hot-reloads
  * without creating new connections on every module re-evaluation.
  *
- * In production a fresh promise is created (no global caching needed).
+ * Safely handles missing MONGODB_URI during build evaluation.
  */
 
-const uri = process.env.MONGODB_URI!;
+const FALLBACK_URI = 'mongodb://127.0.0.1:27017/expense-tracker';
+const uri = process.env.MONGODB_URI || FALLBACK_URI;
 
-if (!uri) {
+if (!process.env.MONGODB_URI) {
   console.warn(
-    '[MongoDB] MONGODB_URI is not set. Please add it to .env.local and restart the dev server.'
+    '[MongoDB] MONGODB_URI is not set. Using fallback URI for evaluation. Please add MONGODB_URI to .env.local'
   );
 }
 
@@ -26,13 +27,16 @@ if (process.env.NODE_ENV === 'development') {
   };
 
   if (!globalWithMongo._mongoClientPromise) {
-    const client = new MongoClient(uri || 'mongodb://localhost:27017/expense-tracker');
+    const client = new MongoClient(uri);
     globalWithMongo._mongoClientPromise = client.connect();
   }
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   const client = new MongoClient(uri);
-  clientPromise = client.connect();
+  clientPromise = client.connect().catch((err) => {
+    console.error('[MongoDB] Connection error:', err.message);
+    return client;
+  });
 }
 
 export default clientPromise;
