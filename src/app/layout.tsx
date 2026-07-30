@@ -8,8 +8,8 @@ import { ExpenseProvider } from '@/context/ExpenseContext';
 import { PhoneNumberPrompt } from '@/components/PhoneNumberPrompt';
 
 export const metadata: Metadata = {
-  title: 'Expense Tracker',
-  description: 'A premium expense tracking application',
+  title: 'SpendWise — Smart Finance Tracker',
+  description: 'A premium personal finance tracking application. Manage expenses, budgets, savings goals, and investments in one beautiful dashboard.',
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body>
         {/* SessionProvider enables useSession() throughout the app */}
         <SessionProvider>
           <AuthProvider>
