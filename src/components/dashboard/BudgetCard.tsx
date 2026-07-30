@@ -37,11 +37,9 @@ export function BudgetCard() {
         const expenseDate = new Date(expense.date);
         const now = new Date();
 
-        // Only count current month expenses for monthly budgets
         if (expense.type === 'expense' &&
             expenseDate.getMonth() === now.getMonth() &&
             expenseDate.getFullYear() === now.getFullYear()) {
-
             acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
         }
         return acc;
@@ -64,7 +62,6 @@ export function BudgetCard() {
             });
             if (res.ok) {
                 const newBudget = await res.json();
-                // Update local state (if exists, replace, else add)
                 setBudgets(prev => {
                     const exists = prev.findIndex(b => b.category === newBudget.category);
                     if (exists >= 0) {
@@ -87,64 +84,157 @@ export function BudgetCard() {
 
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
     const totalSpent = budgets.reduce((sum, b) => sum + (currentSpending[b.category] || 0), 0);
-    const totalProgress = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
+    const totalProgress = totalBudget > 0 ? Math.min(Math.round((totalSpent / totalBudget) * 100), 100) : 0;
+    const totalLeft = Math.max(0, totalBudget - totalSpent);
 
     return (
         <Card
             variant="glass"
-            title="Monthly Budgets 📉"
+            title="Monthly Budget"
             defaultOpen={true}
             action={
                 <button
                     onClick={() => setShowAdd(!showAdd)}
-                    style={{ background: 'none', border: 'none', color: 'hsl(var(--color-primary))', cursor: 'pointer', fontSize: '1.5rem' }}
+                    style={{
+                        background: 'linear-gradient(135deg, var(--brand-from), var(--brand-to))',
+                        border: 'none',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 700,
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
                 >
                     +
                 </button>
             }
         >
+            {/* ── Ref. Image Style Hero Budget Container ── */}
+            <div style={{
+                background: 'linear-gradient(145deg, #1e1b4b, #312e81)',
+                borderRadius: '16px',
+                padding: '1.5rem 1.25rem',
+                marginBottom: '1.5rem',
+                textAlign: 'center',
+                boxShadow: 'var(--shadow-brand)',
+                position: 'relative',
+                overflow: 'hidden',
+            }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+                    {totalProgress}%
+                </div>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', color: '#a5b4fc', textTransform: 'uppercase', marginTop: '0.25rem' }}>
+                    USED THIS MONTH
+                </div>
 
-            {/* Total Summary */}
-            {budgets.length > 0 && (
-                <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600 }}>
-                        <span>Total Budget</span>
-                        <span>₹{totalSpent} / ₹{totalBudget}</span>
+                {/* Glowing Progress Bar */}
+                <div style={{
+                    height: '8px',
+                    background: 'rgba(255,255,255,0.15)',
+                    borderRadius: '999px',
+                    overflow: 'hidden',
+                    margin: '1.25rem 0 1.25rem',
+                    position: 'relative',
+                }}>
+                    <div style={{
+                        width: `${totalProgress}%`,
+                        height: '100%',
+                        background: totalSpent > totalBudget
+                            ? 'linear-gradient(90deg, #f43f5e, #be123c)'
+                            : 'linear-gradient(90deg, #a3e635, #84cc16)',
+                        borderRadius: '999px',
+                        boxShadow: '0 0 12px rgba(163,230,53,0.6)',
+                        transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }} />
+                </div>
+
+                {/* Breakdown Row: SPENT | BUDGET | LEFT */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                    paddingTop: '0.75rem',
+                    borderTop: '1px solid rgba(255,255,255,0.12)',
+                }}>
+                    <div>
+                        <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em' }}>
+                            SPENT
+                        </div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#fda4af', marginTop: '0.1rem' }}>
+                            ₹{totalSpent}
+                        </div>
                     </div>
-                    <div style={{ height: '10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', overflow: 'hidden' }}>
-                        <div style={{
-                            width: `${totalProgress}%`,
-                            height: '100%',
-                            background: totalSpent > totalBudget ? 'var(--color-expense)' : 'var(--color-primary)',
-                            transition: 'width 0.5s ease'
-                        }} />
+                    <div>
+                        <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em' }}>
+                            BUDGET
+                        </div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ffffff', marginTop: '0.1rem' }}>
+                            ₹{totalBudget}
+                        </div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em' }}>
+                            LEFT
+                        </div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#bef264', marginTop: '0.1rem' }}>
+                            ₹{totalLeft}
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
 
+            {/* Add Budget Form */}
             {showAdd && (
-                <form onSubmit={handleAddBudget} style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                <form onSubmit={handleAddBudget} style={{ marginBottom: '1.25rem', display: 'flex', gap: '0.5rem' }}>
                     <input
                         placeholder="Category (e.g. Food)"
                         value={newCategory}
                         onChange={e => setNewCategory(e.target.value)}
-                        style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '50%' }}
+                        style={{
+                            padding: '0.6rem', borderRadius: '8px',
+                            border: '1px solid var(--border-default)',
+                            background: 'var(--bg-elevated)', color: 'var(--text-primary)',
+                            fontSize: '0.8rem', width: '50%', outline: 'none',
+                        }}
                     />
                     <input
-                        placeholder="Limit"
+                        placeholder="Limit (₹)"
                         type="number"
                         value={newLimit}
                         onChange={e => setNewLimit(e.target.value)}
-                        style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '30%' }}
+                        style={{
+                            padding: '0.6rem', borderRadius: '8px',
+                            border: '1px solid var(--border-default)',
+                            background: 'var(--bg-elevated)', color: 'var(--text-primary)',
+                            fontSize: '0.8rem', width: '30%', outline: 'none',
+                        }}
                     />
-                    <button type="submit" style={{ flex: 1, borderRadius: '8px', background: 'hsl(var(--color-primary))', color: 'white', border: 'none' }}>✓</button>
+                    <button
+                        type="submit"
+                        style={{
+                            flex: 1, borderRadius: '8px',
+                            background: 'linear-gradient(135deg, var(--brand-from), var(--brand-to))',
+                            color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer',
+                        }}
+                    >
+                        ✓
+                    </button>
                 </form>
             )}
 
+            {/* Category Rows */}
             {budgets.length === 0 ? (
-                <p style={{ color: 'hsl(var(--color-text-muted))' }}>No budgets set.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No budgets set yet. Click + to add your first budget limit.</p>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                        Categories
+                    </div>
                     {budgets.map(budget => (
                         <BudgetRow
                             key={budget._id}
@@ -166,7 +256,7 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
     const handleSave = async () => {
         try {
             const res = await fetch('/api/budgets', {
-                method: 'POST', // POST handles upsert in our API
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ category: budget.category, amount: Number(editAmount) })
             });
@@ -180,29 +270,36 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
 
     const percentage = Math.min((spent / budget.amount) * 100, 100);
     const isOver = spent > budget.amount;
-    const color = isOver ? 'var(--color-expense)' : percentage > 80 ? 'var(--hue-warning)' : 'var(--color-primary)';
+    const remaining = Math.max(0, budget.amount - spent);
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                <span style={{ fontWeight: 500 }}>{budget.category}</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>₹{spent} / </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', fontSize: '0.85rem' }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.03em', fontSize: '0.78rem' }}>
+                    {budget.category}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>₹{spent} /</span>
                     {isEditing ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <input
                                 type="number"
                                 value={editAmount}
                                 onChange={e => setEditAmount(e.target.value)}
-                                style={{ width: '60px', padding: '2px', border: '1px solid #555', borderRadius: '4px' }}
+                                style={{
+                                    width: '60px', padding: '2px 4px',
+                                    border: '1px solid var(--border-accent)',
+                                    borderRadius: '4px', background: 'var(--bg-elevated)',
+                                    color: 'var(--text-primary)', fontSize: '0.75rem',
+                                }}
                                 autoFocus
                             />
-                            <button onClick={handleSave} style={{ background: 'var(--color-primary)', border: 'none', borderRadius: '4px', color: 'white', fontSize: '0.7rem', padding: '2px 4px' }}>✓</button>
-                            <button onClick={() => setIsEditing(false)} style={{ background: 'transparent', border: 'none', color: '#999', fontSize: '0.7rem' }}>×</button>
+                            <button onClick={handleSave} style={{ background: 'var(--brand-from)', border: 'none', borderRadius: '4px', color: 'white', fontSize: '0.7rem', padding: '2px 6px', cursor: 'pointer' }}>✓</button>
+                            <button onClick={() => setIsEditing(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer' }}>×</button>
                         </div>
                     ) : (
                         <span
-                            style={{ cursor: 'pointer', borderBottom: '1px dashed hsl(var(--color-text-muted))' }}
+                            style={{ cursor: 'pointer', fontWeight: 700, color: 'var(--text-primary)' }}
                             onClick={() => setIsEditing(true)}
                             title="Click to edit limit"
                         >
@@ -211,13 +308,26 @@ function BudgetRow({ budget, spent, onUpdate }: { budget: Budget, spent: number,
                     )}
                 </span>
             </div>
-            <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+
+            {/* Neon Progress Line */}
+            <div style={{ height: '6px', background: 'var(--bg-elevated)', borderRadius: '999px', overflow: 'hidden', marginBottom: '0.2rem' }}>
                 <div style={{
                     width: `${percentage}%`,
                     height: '100%',
-                    background: isOver ? 'hsl(var(--color-expense))' : percentage > 80 ? `hsl(${color} 70% 50%)` : `hsl(${color})`,
-                    transition: 'width 0.5s ease'
+                    background: isOver
+                        ? 'linear-gradient(90deg, #f43f5e, #be123c)'
+                        : 'linear-gradient(90deg, var(--brand-from), var(--brand-to))',
+                    borderRadius: '999px',
+                    transition: 'width 0.5s ease',
                 }} />
+            </div>
+
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textAlign: 'right' }}>
+                {isOver ? (
+                    <span style={{ color: 'var(--expense-color)', fontWeight: 600 }}>Over limit by ₹{spent - budget.amount}</span>
+                ) : (
+                    <span>₹{remaining} remaining</span>
+                )}
             </div>
         </div>
     );

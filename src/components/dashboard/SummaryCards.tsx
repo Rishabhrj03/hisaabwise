@@ -16,132 +16,141 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense, currency
         }).format(amount);
     };
 
+    const savings = Math.max(0, totalIncome - totalExpense);
     const savingsRate = totalIncome > 0
         ? Math.max(0, Math.min(100, Math.round(((totalIncome - totalExpense) / totalIncome) * 100)))
         : 0;
 
-    const netChange = totalIncome - totalExpense;
-    const isPositive = netChange >= 0;
+    const currentMonth = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
 
     return (
         <div className="summary-cards-container">
-            {/* ── Balance Card ── */}
+            {/* ── Minimalist Hero Balance Card ── */}
             <div className="stat-card gradient-balance card-hover animate-fade-in stat-card-balance" style={{ animationDelay: '0ms' }}>
-
-                {/* Decorative orb */}
-                <div style={{
-                    position: 'absolute',
-                    top: '-20px',
-                    right: '-20px',
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.1)',
-                    zIndex: 0,
-                }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                        <div className="stat-card-label">Total Balance</div>
-                        <div style={{
-                            background: 'rgba(255,255,255,0.2)',
-                            borderRadius: '8px',
-                            padding: '0.375rem',
-                            display: 'flex',
+                    {/* Header Row */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <span style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            letterSpacing: '0.08em',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            textTransform: 'uppercase',
                         }}>
-                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-                            </svg>
-                        </div>
+                            {currentMonth}
+                        </span>
                     </div>
-                    <div className="stat-card-value animate-count-up">
+
+
+                    {/* Main Balance Display */}
+                    <div style={{
+                        fontSize: '2.4rem',
+                        fontWeight: 900,
+                        letterSpacing: '-0.04em',
+                        lineHeight: 1.1,
+                        marginBottom: '1rem',
+                        color: '#ffffff',
+                    }} className="animate-count-up">
                         {formatCurrency(totalBalance)}
                     </div>
-                    <div className="stat-card-sub" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.75rem' }}>
-                        <span style={{
-                            background: isPositive ? 'rgba(16,185,129,0.25)' : 'rgba(244,63,94,0.25)',
-                            color: isPositive ? '#6ee7b7' : '#fda4af',
-                            padding: '0.15rem 0.5rem',
-                            borderRadius: '999px',
-                            fontSize: '0.7rem',
-                            fontWeight: 600,
-                        }}>
-                            {isPositive ? '▲' : '▼'} {formatCurrency(Math.abs(netChange))}
-                        </span>
-                        <span>net this month</span>
+
+                    {/* Minimal Breakdown Bar (Income | Expenses | Saved) */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        paddingTop: '0.75rem',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.18)',
+                        flexWrap: 'wrap',
+                    }}>
+                        {/* Income */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <div style={{ width: '3px', height: '12px', borderRadius: '2px', background: '#34d399' }} />
+                            <div>
+                                <div style={{ fontSize: '0.58rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>
+                                    INCOME
+                                </div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#6ee7b7' }}>
+                                    +{formatCurrency(totalIncome)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Expense */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <div style={{ width: '3px', height: '12px', borderRadius: '2px', background: '#f87171' }} />
+                            <div>
+                                <div style={{ fontSize: '0.58rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>
+                                    EXPENSES
+                                </div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fca5a5' }}>
+                                    -{formatCurrency(totalExpense)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Saved */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <div style={{ width: '3px', height: '12px', borderRadius: '2px', background: '#facc15' }} />
+                            <div>
+                                <div style={{ fontSize: '0.58rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>
+                                    SAVED
+                                </div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fef08a' }}>
+                                    {formatCurrency(savings)}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* ── Income Card ── */}
+            {/* ── Income Mini Card ── */}
             <div className="stat-card gradient-income card-hover animate-fade-in" style={{ animationDelay: '80ms' }}>
-                <div style={{
-                    position: 'absolute',
-                    top: '-20px',
-                    right: '-20px',
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.1)',
-                    zIndex: 0,
-                }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                        <div className="stat-card-label">Total Income</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <div className="stat-card-label" style={{ color: 'rgba(255,255,255,0.85)', margin: 0 }}>Total Income</div>
                         <div style={{
                             background: 'rgba(255,255,255,0.2)',
-                            borderRadius: '8px',
-                            padding: '0.375rem',
-                            display: 'flex',
+                            borderRadius: '999px',
+                            padding: '0.15rem 0.5rem',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            color: '#ffffff',
                         }}>
-                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                                <polyline points="17 6 23 6 23 12" />
-                            </svg>
+                            ↑ {savingsRate}%
                         </div>
                     </div>
-                    <div className="stat-card-value animate-count-up">
+                    <div className="stat-card-value animate-count-up" style={{ fontSize: '1.65rem', fontWeight: 800 }}>
                         {formatCurrency(totalIncome)}
                     </div>
-                    <div className="stat-card-sub" style={{ marginTop: '0.75rem' }}>
-                        Savings rate: <strong style={{ color: 'white' }}>{savingsRate}%</strong>
+                    <div className="stat-card-sub" style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.8)' }}>
+                        Monthly inflow
                     </div>
                 </div>
             </div>
 
-            {/* ── Expense Card ── */}
+            {/* ── Expense Mini Card ── */}
             <div className="stat-card gradient-expense card-hover animate-fade-in" style={{ animationDelay: '160ms' }}>
-                <div style={{
-                    position: 'absolute',
-                    top: '-20px',
-                    right: '-20px',
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.1)',
-                    zIndex: 0,
-                }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                        <div className="stat-card-label">Total Expenses</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <div className="stat-card-label" style={{ color: 'rgba(255,255,255,0.85)', margin: 0 }}>Total Expenses</div>
                         <div style={{
                             background: 'rgba(255,255,255,0.2)',
-                            borderRadius: '8px',
-                            padding: '0.375rem',
-                            display: 'flex',
+                            borderRadius: '999px',
+                            padding: '0.15rem 0.5rem',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            color: '#ffffff',
                         }}>
-                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
-                                <polyline points="17 18 23 18 23 12" />
-                            </svg>
+                            {totalIncome > 0 ? `${Math.min(100, Math.round((totalExpense / totalIncome) * 100))}%` : '0%'}
                         </div>
                     </div>
-                    <div className="stat-card-value animate-count-up">
+                    <div className="stat-card-value animate-count-up" style={{ fontSize: '1.65rem', fontWeight: 800 }}>
                         {formatCurrency(totalExpense)}
                     </div>
-                    <div className="stat-card-sub" style={{ marginTop: '0.75rem' }}>
-                        {totalIncome > 0
-                            ? `${Math.min(100, Math.round((totalExpense / totalIncome) * 100))}% of income`
-                            : 'No income tracked'}
+                    <div className="stat-card-sub" style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.8)' }}>
+                        Monthly outflow
                     </div>
                 </div>
             </div>

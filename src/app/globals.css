@@ -442,7 +442,14 @@ select {
     transform: translateX(-100%);
     width: 85%;
     max-width: 300px;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 100 !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
   }
   /* Open state driven by React state */
   .sidebar.open {
@@ -462,7 +469,9 @@ select {
   /* Show backdrop when sidebar is open */
   .mobile-backdrop {
     display: block !important;
+    z-index: 95 !important;
   }
+
 
   /* Main content: full width, no sidebar indent */
   .main-content {
@@ -511,6 +520,88 @@ select {
     min-width: 110px;
   }
 }
+
+/* ── Mobile Bottom Navigation & FAB ── */
+.mobile-bottom-nav { display: none !important; }
+.mobile-fab-btn { display: none !important; }
+
+@media (max-width: 768px) {
+  /* Bottom Navigation Bar (Ref. Image Style) */
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3.75rem;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    z-index: 80;
+    padding: 0 0.5rem;
+    align-items: center;
+    justify-content: space-around;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-family: var(--font-sans);
+    transition: color 0.15s ease, transform 0.15s ease;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--r-md);
+  }
+
+  .mobile-bottom-nav-item.active {
+    color: #a3e635; /* Neon lime active accent from reference image */
+  }
+  .mobile-bottom-nav-item.active svg {
+    stroke: #a3e635;
+    filter: drop-shadow(0 0 6px rgba(163, 230, 53, 0.4));
+  }
+
+  /* Floating Action Button (+ FAB) */
+  .mobile-fab-btn {
+    display: flex !important;
+    position: fixed;
+    bottom: 4.75rem;
+    right: 1.25rem;
+    z-index: 90;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a3e635, #84cc16);
+    border: none;
+    box-shadow: 0 6px 20px rgba(163, 230, 53, 0.45);
+    color: #0d0f1e;
+    font-size: 1.75rem;
+    font-weight: 800;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  }
+  .mobile-fab-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* Extra padding at bottom of main content so bottom nav doesn't cover content */
+  .main-content {
+    padding-bottom: 5.5rem !important;
+  }
+}
+
 
 
 /* ── Login Page Responsive Layout ── */

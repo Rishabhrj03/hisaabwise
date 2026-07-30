@@ -147,7 +147,7 @@ export default function Home() {
           gap: '0.75rem',
         }}>
 
-          {/* Left: Hamburger + Title */}
+          {/* Left: Hamburger + Title (Ref. Image Typography) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
             <button
               className="hamburger-btn"
@@ -169,18 +169,23 @@ export default function Home() {
               </svg>
             </button>
             <div>
-              <h1 style={{
-                fontSize: '1.5rem', fontWeight: 800,
-                letterSpacing: '-0.03em', color: 'var(--text-primary)',
+              <div style={{
+                fontSize: '0.625rem',
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--brand-from)',
                 marginBottom: '0.1rem',
+              }}>
+                {activeSection === 'dashboard' ? 'Overview' : activeSection === 'transactions' ? 'Activity' : 'Budget'}
+              </div>
+              <h1 style={{
+                fontSize: '1.5rem', fontWeight: 900,
+                letterSpacing: '-0.03em', color: 'var(--text-primary)',
+                lineHeight: 1.1,
               }}>
                 {meta.title}
               </h1>
-              {meta.subtitle && (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                  {meta.subtitle}
-                </p>
-              )}
             </div>
           </div>
 
@@ -401,6 +406,15 @@ export default function Home() {
         </footer>
       </main>
 
+      {/* ─── Mobile Floating Action Button (Ref. Image Style) ─── */}
+      <button
+        className="mobile-fab-btn"
+        onClick={() => { setEditingExpense(null); setShowAddForm(true); }}
+        title="Add Transaction"
+      >
+        +
+      </button>
+
       {/* ─── Modals ─── */}
       <Modal
         isOpen={showAddForm}
@@ -420,3 +434,4 @@ export default function Home() {
     </div>
   );
 }
+
