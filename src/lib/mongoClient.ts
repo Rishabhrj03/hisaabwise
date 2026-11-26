@@ -9,7 +9,7 @@ import { MongoClient } from 'mongodb';
  * Safely handles missing MONGODB_URI during build evaluation.
  */
 
-const FALLBACK_URI = 'mongodb://127.0.0.1:27017/expense-tracker';
+const FALLBACK_URI = 'mongodb://127.0.0.1:27017/hisaabwise';
 const uri = process.env.MONGODB_URI || FALLBACK_URI;
 
 if (!process.env.MONGODB_URI) {

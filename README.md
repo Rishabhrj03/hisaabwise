@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hisaabwise (HISAABWISE)
 
-## Getting Started
+> Track Expenses, Split Bills & Analyze Finances Easily.
 
-First, run the development server:
+A full-stack personal finance and group expense tracking application built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **NextAuth v5**, and **MongoDB**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌟 Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Personal Expense & Income Tracking**: Categorized spending with real-time analytics, charts, and budget insights.
+- **Group & Splitwise-style Bill Splitting**: Split expenses among friends and groups with automated balance calculations and settlement tracking.
+- **WhatsApp Share & Invites**: Direct WhatsApp integration for bill invites and payment settlement reminders.
+- **PDF & Excel Data Export**: Generate downloadable financial reports and spreadsheets.
+- **Responsive Dark/Light UI**: Tailored themes with fluid responsiveness across mobile, tablet, and desktop.
+- **PWA Ready**: Progressive Web App capabilities for mobile app-like experience.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework**: Next.js 16 (App Router)
+- **Frontend**: React 19, TypeScript, Chart.js, Recharts
+- **Backend / API**: Next.js Server Actions & Route Handlers
+- **Database**: MongoDB (via native `mongodb` driver & `@auth/mongodb-adapter`)
+- **Authentication**: NextAuth.js v5 with credentials & session management
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Getting Started
 
-## Deploy on Vercel
+### Prerequisites
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Node.js 18+ or 20+
+- MongoDB instance (local or Atlas)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Rishabhrj03/hisaabwise.git
+   cd hisaabwise
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**:
+   Copy `.env.example` to `.env.local` and configure your credentials:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Ensure `MONGODB_URI` and `AUTH_SECRET` are set.
+
+4. **Run the Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) with your browser.
+
+---
+
+## 📦 Scripts
+
+- `npm run dev` - Launch development server with Turbopack / Next.js
+- `npm run build` - Create optimized production bundle
+- `npm run start` - Run production server
+- `npm run lint` - Run ESLint code checks

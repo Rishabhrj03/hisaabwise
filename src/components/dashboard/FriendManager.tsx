@@ -24,7 +24,7 @@ export function FriendManager() {
         // Clean phone number (remove spaces, etc)
         const cleanPhone = friend.phone.replace(/\D/g, '');
         const appUrl = window.location.origin;
-        const text = encodeURIComponent(`Hey ${friend.name}, join me on Expense Tracker to split bills! ${appUrl}`);
+        const text = encodeURIComponent(`Hey ${friend.name}, join me on Hisaabwise to split bills! ${appUrl}`);
         const waLink = `https://wa.me/${cleanPhone}?text=${text}`;
 
         window.open(waLink, '_blank');
